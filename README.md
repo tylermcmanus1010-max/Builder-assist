@@ -23,6 +23,12 @@ Per artifact:
 Results are `PASS`, `WARN` (cosmetic problems), or `FAIL` (blank page or
 uncaught JS error).
 
+## Verified surfaces
+
+Seven published artifacts, last checked 2026-08-26: Builder Assist LLC (two
+copies), Job Book, Takeoffs, Estimator (two copies), and the Builder Assist
+landing page. Six clean; the landing page carries the CSP note below.
+
 ## Usage
 
 ```sh
@@ -30,6 +36,13 @@ OUT_DIR=./reports node tools/verify-artifacts.mjs path/to/artifact.html [...]
 ```
 
 Writes `report.json` plus a screenshot per artifact into `OUT_DIR`.
+
+Rendering is not the same as working, so the calculator surfaces get a second
+pass that doubles their numeric inputs and asserts the headline totals move:
+
+```sh
+node tools/check-recompute.mjs path/to/artifact.html
+```
 
 To get the HTML, read each artifact with the Artifact tool (`action: "read"`);
 large pages are saved to a local file whose path the tool returns.
@@ -40,6 +53,12 @@ Artifact HTML ships wrapped in the claude.ai frame runtime - an injected
 `<script>` block and a `<base href="/_f/...">` that rewrites relative URLs.
 The harness strips both before loading, so reported failures belong to the page
 itself and not to the wrapper.
+
+External hosts are checked against the source rather than inferred from request
+failures. A sandbox without browser egress fails even the allowed hosts, and a
+sandbox with egress lets a blocked host pass silently -- neither tells you what
+a real viewer sees. Navigation links (`<a href>`) are recorded but never
+flagged: CSP blocks subresources, not navigations.
 
 Playwright is resolved from the local install, falling back to the global npm
 root, and Chromium is taken from `CHROME_PATH` (default `/opt/pw-browsers/chromium`).

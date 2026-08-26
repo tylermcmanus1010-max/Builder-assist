@@ -41,6 +41,48 @@ function unwrap(html) {
   };
 }
 
+// Published artifacts run under a CSP that blocks every external host except
+// Google Fonts. A reference to anything else is broken for real viewers even
+// when the host is alive and reachable from a dev machine, so this is checked
+// statically against the source rather than inferred from request failures --
+// a sandbox without network egress fails the allowed hosts too, and a sandbox
+// with egress would let a blocked host silently pass.
+const CSP_ALLOWED_HOSTS = new Set(['fonts.googleapis.com', 'fonts.gstatic.com']);
+
+function findExternalRefs(html) {
+  const refs = new Map();
+  const add = (url, kind) => {
+    let host;
+    try { host = new URL(url).hostname; } catch { return; }
+    const key = host + '|' + kind;
+    if (!refs.has(key))
+      refs.set(key, { host, kind, allowed: CSP_ALLOWED_HOSTS.has(host), examples: [] });
+    const e = refs.get(key);
+    if (e.examples.length < 3) e.examples.push(url.slice(0, 160));
+  };
+
+  // Subresources: fetched by the page, so CSP applies.
+  const SUBRESOURCE_TAGS = 'link|script|img|iframe|source|video|audio|embed|object|track|input';
+  const tagRe = new RegExp(
+    `<(?:${SUBRESOURCE_TAGS})\\b[^>]*?\\b(?:src|href|data|poster)\\s*=\\s*["'](https?:\\/\\/[^"']+)["']`,
+    'gi'
+  );
+  for (const m of html.matchAll(tagRe)) add(m[1], 'subresource');
+  for (const m of html.matchAll(/url\(\s*["']?(https?:\/\/[^"')]+)["']?\s*\)/gi))
+    add(m[1], 'subresource');
+  for (const m of html.matchAll(/(?:fetch|importScripts)\s*\(\s*["'](https?:\/\/[^"']+)["']/gi))
+    add(m[1], 'subresource');
+
+  // Navigation targets: <a>/<area> hrefs open a new page rather than loading
+  // into this one, so CSP does not block them. Recorded, never a defect.
+  for (const m of html.matchAll(
+    /<(?:a|area)\b[^>]*?\bhref\s*=\s*["'](https?:\/\/[^"']+)["']/gi
+  ))
+    add(m[1], 'navigation');
+
+  return [...refs.values()];
+}
+
 // Capabilities the page expects the shell to provide. Stripped along with the
 // runtime, so a page that calls these is not broken -- it is untestable offline
 // and gets flagged rather than failed.
@@ -55,6 +97,18 @@ async function verify(page, file, outDir) {
   const raw = await readFile(file, 'utf8');
   const { html, frameRuntimeRemoved, bytesRemoved } = unwrap(raw);
   const capabilities = detectCapabilities(html);
+  const externalRefs = findExternalRefs(html);
+  const cspBlocked = externalRefs.filter((r) => r.kind === 'subresource' && !r.allowed);
+  // <img onerror="this.remove()"> and friends mean a blocked image degrades to
+  // whatever the CSS draws underneath instead of leaving a broken-image box.
+  const imgTags = html.match(/<img\b[^>]*>/gi) || [];
+  const externalImgs = imgTags.filter((t) => /src\s*=\s*["']https?:\/\//i.test(t));
+  const guardedImgs = externalImgs.filter((t) => /\bonerror\s*=/i.test(t));
+  const fallback = {
+    externalImages: externalImgs.length,
+    withOnErrorFallback: guardedImgs.length,
+    unguarded: externalImgs.length - guardedImgs.length,
+  };
 
   const consoleErrors = [];
   const pageErrors = [];
@@ -150,24 +204,49 @@ async function verify(page, file, outDir) {
 
   // A page that loads but paints nothing is not operational.
   const blank = metrics.scrollHeight < 400 || metrics.textLength < 200;
+  // Same reasoning as request failures: a console error that is only the
+  // sandbox failing to reach an allowed host is not the page's defect.
+  const sandboxNoise = consoleErrors.filter((e) => /ERR_(CONNECTION|NAME|NETWORK|PROXY)/.test(e));
+
+  // Requests to CSP-allowed hosts fail here only because this sandbox gives the
+  // browser no egress; they are fine in production. Classify before judging.
+  const realFailures = failedRequests.filter((f) => {
+    try { return !CSP_ALLOWED_HOSTS.has(new URL(f.url).hostname); } catch { return true; }
+  });
+  const realConsole = consoleErrors.length - sandboxNoise.length;
+  const brokenRoutes = routeResults.filter((r) => !r.ok);
 
   const problems = [];
   if (blank) problems.push('renders blank or near-empty');
   if (pageErrors.length) problems.push(`${pageErrors.length} uncaught JS error(s)`);
-  if (consoleErrors.length) problems.push(`${consoleErrors.length} console error(s)`);
+  if (realConsole > 0) problems.push(`${realConsole} console error(s)`);
   if (metrics.brokenImages) problems.push(`${metrics.brokenImages} broken image(s)`);
   if (metrics.deadAnchors.length)
     problems.push(`${metrics.deadAnchors.length} dead in-page link(s)`);
-  const brokenRoutes = routeResults.filter((r) => !r.ok);
   if (brokenRoutes.length)
     problems.push(`${brokenRoutes.length}/${routeResults.length} route(s) broken`);
-  if (failedRequests.length) problems.push(`${failedRequests.length} failed request(s)`);
+  if (cspBlocked.length)
+    problems.push(
+      `${cspBlocked.length} CSP-blocked host(s): ${cspBlocked.map((r) => r.host).join(', ')}` +
+        (fallback.externalImages
+          ? ` (${fallback.withOnErrorFallback}/${fallback.externalImages} image(s) degrade gracefully)`
+          : '')
+    );
+  if (realFailures.length) problems.push(`${realFailures.length} failed request(s)`);
 
   return {
     file: basename(file),
-    status: problems.length === 0 ? 'PASS' : blank || pageErrors.length ? 'FAIL' : 'WARN',
+    status:
+      problems.length === 0
+        ? 'PASS'
+        : blank || pageErrors.length
+          ? 'FAIL'
+          : 'WARN',
     problems,
     capabilities,
+    externalRefs,
+    cspBlocked,
+    fallback,
     frameRuntimeRemoved,
     bytesRemoved,
     loadMs,
