@@ -180,6 +180,14 @@ details.more li{margin-bottom:5px}
   aside.panel{border-left:0; border-top:2px solid var(--navy)}
   .hud.br{display:none}
 }
+/* Narrow phones: the top-left stage HUD and the top-right toolbar share one
+   strip and collide around 390px, so drop the toolbar to the bottom-right,
+   clear of the bottom-left legend. */
+@media (max-width:560px){
+  .vp-tools{top:auto; bottom:12px; right:12px; flex-wrap:wrap; justify-content:flex-end; max-width:55%}
+  .hud.bl{max-width:42%}
+  .hud.tl .nm{font-size:15px}
+}
 </style>
 </head>
 <body>
