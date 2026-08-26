@@ -88,8 +88,9 @@ function findExternalRefs(html) {
 // and gets flagged rather than failed.
 function detectCapabilities(html) {
   const hits = new Set();
-  for (const m of html.matchAll(/window\.claude\.(\w+)/g)) hits.add(m[1]);
-  for (const m of html.matchAll(/claude\.use\(['"](\w+)['"]\)/g)) hits.add(m[1]);
+  for (const m of html.matchAll(/window\.claude\??\.(?!use\b)(\w+)/g)) hits.add(m[1]);
+  // Both claude.use('x') and the defensive claude?.use?.('x').
+  for (const m of html.matchAll(/claude\??\.use\??\.?\(\s*['"](\w+)['"]\s*\)/g)) hits.add(m[1]);
   return [...hits];
 }
 
@@ -202,6 +203,159 @@ async function verify(page, file, outDir) {
     fullPage: false,
   });
 
+  // Dead-control sweep. An element-level scan cannot see delegated handlers,
+  // so first check window/document/body: if a click is handled there, a
+  // handler-less button may still work and per-element judgment is unreliable.
+  const controls = await (async () => {
+    const client = await page.context().newCDPSession(page);
+    const evalObj = async (expr) => {
+      const { result } = await client.send('Runtime.evaluate', { expression: expr });
+      return result.objectId;
+    };
+    const listeners = async (objectId, types) => {
+      if (!objectId) return [];
+      try {
+        const { listeners } = await client.send('DOMDebugger.getEventListeners', { objectId });
+        return listeners.filter((l) => types.includes(l.type));
+      } catch { return []; }
+    };
+    const delegated =
+      (await listeners(await evalObj('window'), ['click'])).length +
+      (await listeners(await evalObj('document'), ['click'])).length +
+      (await listeners(await evalObj('document.body'), ['click'])).length;
+
+    // Candidates: visible buttons and selects not obviously wired (no inline
+    // handler, not a form submitter, not inside <a>/<label>/<summary>).
+    const nControls = await page.evaluate(() => {
+      const vis = (el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      };
+      window.__va_ctl = [...document.querySelectorAll('button, select')].filter(
+        (el) =>
+          vis(el) &&
+          !el.disabled &&
+          !el.closest('a,label,summary,form') &&
+          !(el.tagName === 'BUTTON' && el.type === 'submit') &&
+          !el.onclick && !el.onchange && !el.oninput &&
+          !el.hasAttribute('onclick') && !el.hasAttribute('onchange')
+      );
+      return window.__va_ctl.length;
+    });
+    const forms = await page.evaluate(() => {
+      window.__va_form = [...document.querySelectorAll('form')];
+      return window.__va_form.map((f) => ({
+        action: f.getAttribute('action') || '',
+        inline: !!(f.onsubmit || f.hasAttribute('onsubmit')),
+      }));
+    });
+
+    const dead = [];
+    const cache = new Map();
+    for (let i = 0; i < Math.min(nControls, 200); i++) {
+      // The element and up to 6 ancestors: a handler anywhere on that chain
+      // catches the bubbled event.
+      let wired = false;
+      for (let d = 0; d <= 6 && !wired; d++) {
+        const expr = `window.__va_ctl[${i}]${'.parentElement'.repeat(d)}`;
+        const path = await page.evaluate(
+          (e) => { try { const el = eval(e); return el ? (el.__va_id ??= Math.random()) : null; } catch { return null; } },
+          expr
+        );
+        if (path === null) break;
+        if (cache.has(path)) { wired = cache.get(path); if (wired) break; continue; }
+        const has =
+          (await listeners(await evalObj(expr), ['click', 'change', 'input', 'pointerdown', 'mousedown'])).length > 0;
+        cache.set(path, has);
+        if (has) wired = true;
+      }
+      if (!wired) {
+        const label = await page.evaluate(
+          (i) => {
+            const el = window.__va_ctl[i];
+            return `<${el.tagName.toLowerCase()}> "${(el.innerText || el.value || el.className || '').trim().slice(0, 60)}"`;
+          },
+          i
+        );
+        dead.push(label);
+      }
+    }
+
+    // A form is dead if nothing handles submit: no action, no inline handler,
+    // no addEventListener('submit') on the form itself or document.
+    const deadForms = [];
+    for (let i = 0; i < forms.length; i++) {
+      if (forms[i].action || forms[i].inline) continue;
+      const own = (await listeners(await evalObj(`window.__va_form[${i}]`), ['submit'])).length;
+      const doc = (await listeners(await evalObj('document'), ['submit'])).length;
+      if (!own && !doc) deadForms.push(`form[${i}] (no action, no submit handler)`);
+    }
+    await client.detach().catch(() => {});
+    return { delegatedClickHandlers: delegated, candidatesChecked: Math.min(nControls, 200), dead, deadForms };
+  })().catch((e) => ({ error: 'control sweep failed: ' + e.message }));
+
+  // Mobile pass: 390px wide. The page body must never scroll horizontally.
+  const mobile = await (async () => {
+    const ctx2 = await page.context().browser().newContext({
+      viewport: { width: 390, height: 844 },
+      userAgent:
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+      isMobile: true,
+      hasTouch: true,
+      deviceScaleFactor: 2,
+    });
+    const p2 = await ctx2.newPage();
+    try {
+      await p2.goto('file://' + tmp, { waitUntil: 'load', timeout: 45000 });
+      await p2.waitForTimeout(1500);
+      const measure = () =>
+        p2.evaluate(() => {
+          const doc = document.documentElement;
+          const overflowX = doc.scrollWidth - doc.clientWidth;
+          const wide = [];
+          if (overflowX > 2) {
+            for (const el of document.querySelectorAll('body *')) {
+              const rect = el.getBoundingClientRect();
+              if (rect.width > doc.clientWidth + 2 && wide.length < 8) {
+                const id = el.id ? '#' + el.id : '';
+                const cls = el.className && typeof el.className === 'string'
+                  ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.') : '';
+                wide.push(`${el.tagName.toLowerCase()}${id}${cls} (${Math.round(rect.width)}px)`);
+              }
+            }
+          }
+          return { overflowX, wide, scrollHeight: doc.scrollHeight };
+        });
+      const r = await measure();
+      // Overflow can hide on a route the entry screen never shows (this is how
+      // the estimator screen's 178px overflow was missed at first) -- walk the
+      // same hash routes at this width too.
+      r.routes = [];
+      for (const route of metrics.routes) {
+        try {
+          await p2.evaluate((h) => { window.location.hash = h.slice(1); }, route);
+          await p2.waitForTimeout(600);
+          const m = await measure();
+          if (m.overflowX > 2)
+            r.routes.push({ route, overflowX: m.overflowX, wide: m.wide });
+        } catch {}
+      }
+      try {
+        await p2.evaluate(() => { window.location.hash = ''; });
+        await p2.waitForTimeout(400);
+      } catch {}
+      await p2.screenshot({
+        path: join(outDir, basename(file).replace(/\.html$/, '.390.png')),
+        fullPage: false,
+      });
+      return r;
+    } catch (e) {
+      return { error: e.message };
+    } finally {
+      await ctx2.close();
+    }
+  })();
+
   // A page that loads but paints nothing is not operational.
   const blank = metrics.scrollHeight < 400 || metrics.textLength < 200;
   // Same reasoning as request failures: a console error that is only the
@@ -233,6 +387,21 @@ async function verify(page, file, outDir) {
           : '')
     );
   if (realFailures.length) problems.push(`${realFailures.length} failed request(s)`);
+  if (mobile && !mobile.error && mobile.overflowX > 2)
+    problems.push(`horizontal overflow at 390px (${mobile.overflowX}px)`);
+  if (mobile && mobile.routes && mobile.routes.length)
+    problems.push(
+      `horizontal overflow at 390px on route(s): ` +
+        mobile.routes.map((r) => `${r.route} (${r.overflowX}px)`).join(', ')
+    );
+  if (controls && controls.dead && controls.dead.length) {
+    // With ambient click delegation, an element-level "no handler" is not
+    // proof of deadness -- report it as informational, not a problem.
+    if (controls.delegatedClickHandlers === 0)
+      problems.push(`${controls.dead.length} control(s) with no reachable handler`);
+  }
+  if (controls && controls.deadForms && controls.deadForms.length)
+    problems.push(`${controls.deadForms.length} form(s) with no submit handling`);
 
   return {
     file: basename(file),
@@ -251,6 +420,8 @@ async function verify(page, file, outDir) {
     bytesRemoved,
     loadMs,
     routes: routeResults,
+    controls,
+    mobile,
     metrics,
     consoleErrors: consoleErrors.slice(0, 10),
     pageErrors: pageErrors.slice(0, 10),

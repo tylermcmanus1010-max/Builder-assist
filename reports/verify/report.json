@@ -1,0 +1,1144 @@
+[
+  {
+    "file": "artifact-0eb9704f-1787413907-ae0c.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 2640,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 0,
+      "candidatesChecked": 18,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 12291,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Builder Assist Estimator",
+      "scrollHeight": 9133,
+      "textLength": 14211,
+      "elements": 2237,
+      "buttons": 20,
+      "visibleButtons": 18,
+      "inputs": 400,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 5,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  },
+  {
+    "file": "artifact-15bc1794-1787459948-c92e.html",
+    "status": "WARN",
+    "problems": [
+      "horizontal overflow at 390px on route(s): #/build-estimate (178px)"
+    ],
+    "capabilities": [],
+    "externalRefs": [],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 2699,
+    "routes": [
+      {
+        "route": "#/",
+        "ok": true,
+        "textLength": 6942
+      },
+      {
+        "route": "#/build-estimate",
+        "ok": true,
+        "textLength": 1176
+      },
+      {
+        "route": "#/walkthrough",
+        "ok": true,
+        "textLength": 1338
+      },
+      {
+        "route": "#/get-pricing",
+        "ok": true,
+        "textLength": 766
+      },
+      {
+        "route": "#/admin-signin",
+        "ok": true,
+        "textLength": 639
+      }
+    ],
+    "controls": {
+      "delegatedClickHandlers": 7,
+      "candidatesChecked": 1,
+      "dead": [
+        "<button> \"DISMISS\""
+      ],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 13184,
+      "routes": [
+        {
+          "route": "#/build-estimate",
+          "overflowX": 178,
+          "wide": [
+            "div.est-hero-copy (548px)",
+            "span.est-kicker (455px)",
+            "h1 (548px)",
+            "p (467px)",
+            "div.est-hero-steps (548px)",
+            "form.est-form-card (548px)",
+            "div.est-presets (502px)",
+            "div.est-fields (502px)"
+          ]
+        }
+      ]
+    },
+    "metrics": {
+      "title": "Builder Assist LLC",
+      "scrollHeight": 8893,
+      "textLength": 6942,
+      "elements": 454,
+      "buttons": 2,
+      "visibleButtons": 2,
+      "inputs": 2,
+      "images": 4,
+      "brokenImages": 0,
+      "anchors": 21,
+      "deadAnchors": [],
+      "routes": [
+        "#/",
+        "#/build-estimate",
+        "#/walkthrough",
+        "#/get-pricing",
+        "#/admin-signin"
+      ]
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  },
+  {
+    "file": "artifact-1ea8b530-1787383329-1818.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [
+      {
+        "host": "fonts.googleapis.com",
+        "kind": "subresource",
+        "allowed": true,
+        "examples": [
+          "https://fonts.googleapis.com",
+          "https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&display=swap"
+        ]
+      },
+      {
+        "host": "fonts.gstatic.com",
+        "kind": "subresource",
+        "allowed": true,
+        "examples": [
+          "https://fonts.gstatic.com"
+        ]
+      },
+      {
+        "host": "claude.ai",
+        "kind": "navigation",
+        "allowed": false,
+        "examples": [
+          "https://claude.ai/code/artifact/586d3b6e-81f2-4b30-b943-4032026239a6",
+          "https://claude.ai/code/artifact/cd95a001-64b6-4fb3-b15d-1ff4df5e5dc2"
+        ]
+      }
+    ],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 15090,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 0,
+      "candidatesChecked": 0,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 9199,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Designer Pricing Playbook",
+      "scrollHeight": 5505,
+      "textLength": 9194,
+      "elements": 270,
+      "buttons": 0,
+      "visibleButtons": 0,
+      "inputs": 0,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 2,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_CONNECTION_RESET"
+    ],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&display=swap",
+        "reason": "net::ERR_CONNECTION_RESET"
+      }
+    ]
+  },
+  {
+    "file": "artifact-326972e7-1787421031-6fd0.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 2626,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 0,
+      "candidatesChecked": 18,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 11943,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Builder Assist Estimator",
+      "scrollHeight": 8917,
+      "textLength": 13704,
+      "elements": 2229,
+      "buttons": 20,
+      "visibleButtons": 18,
+      "inputs": 400,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 5,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  },
+  {
+    "file": "artifact-43d57b17-1787520193-3bbf.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [
+      {
+        "host": "www.fcc.gov",
+        "kind": "navigation",
+        "allowed": false,
+        "examples": [
+          "https://www.fcc.gov/document/fcc-finds-ringless-voicemails-are-subject-robocalling-rules",
+          "https://www.fcc.gov/document/fcc-finds-ringless-voicemails-are-subject-robocalling-rules"
+        ]
+      },
+      {
+        "host": "www.ftc.gov",
+        "kind": "navigation",
+        "allowed": false,
+        "examples": [
+          "https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business"
+        ]
+      }
+    ],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 2607,
+    "routes": [
+      {
+        "route": "#/portal",
+        "ok": true,
+        "textLength": 6330
+      },
+      {
+        "route": "#/review?path=sell_stay",
+        "ok": true,
+        "textLength": 6330
+      },
+      {
+        "route": "#/review?path=cash",
+        "ok": true,
+        "textLength": 6330
+      },
+      {
+        "route": "#/review?path=brokerage",
+        "ok": true,
+        "textLength": 6330
+      },
+      {
+        "route": "#/review",
+        "ok": true,
+        "textLength": 6330
+      }
+    ],
+    "controls": {
+      "delegatedClickHandlers": 1,
+      "candidatesChecked": 0,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 9786,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Valentino Command Center",
+      "scrollHeight": 6797,
+      "textLength": 6330,
+      "elements": 309,
+      "buttons": 2,
+      "visibleButtons": 2,
+      "inputs": 0,
+      "images": 1,
+      "brokenImages": 0,
+      "anchors": 24,
+      "deadAnchors": [],
+      "routes": [
+        "#/portal",
+        "#/review?path=sell_stay",
+        "#/review?path=cash",
+        "#/review?path=brokerage",
+        "#/review"
+      ]
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  },
+  {
+    "file": "artifact-4f63b254-1787520254-4b2c.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [
+      "downloads"
+    ],
+    "externalRefs": [],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 2650,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 2,
+      "candidatesChecked": 0,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 1086,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Valentino Source Code",
+      "scrollHeight": 900,
+      "textLength": 780,
+      "elements": 999,
+      "buttons": 179,
+      "visibleButtons": 179,
+      "inputs": 1,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 0,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  },
+  {
+    "file": "artifact-5616f80b-1787385956-bd59.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 2538,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 0,
+      "candidatesChecked": 0,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 1757,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Free Plan Set Section",
+      "scrollHeight": 900,
+      "textLength": 1159,
+      "elements": 74,
+      "buttons": 1,
+      "visibleButtons": 1,
+      "inputs": 7,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 0,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  },
+  {
+    "file": "artifact-5847f6ec-1787721153-58b8.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [
+      {
+        "host": "fonts.googleapis.com",
+        "kind": "subresource",
+        "allowed": true,
+        "examples": [
+          "https://fonts.googleapis.com",
+          "https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=sw"
+        ]
+      },
+      {
+        "host": "fonts.gstatic.com",
+        "kind": "subresource",
+        "allowed": true,
+        "examples": [
+          "https://fonts.gstatic.com"
+        ]
+      },
+      {
+        "host": "valentino-international.valentino-in-8162.chatgpt.site",
+        "kind": "navigation",
+        "allowed": false,
+        "examples": [
+          "https://valentino-international.valentino-in-8162.chatgpt.site"
+        ]
+      }
+    ],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 15042,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 0,
+      "candidatesChecked": 1,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 6869,
+      "routes": []
+    },
+    "metrics": {
+      "title": "RVM Launch Checklist",
+      "scrollHeight": 4266,
+      "textLength": 5864,
+      "elements": 330,
+      "buttons": 1,
+      "visibleButtons": 1,
+      "inputs": 17,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 1,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_CONNECTION_RESET"
+    ],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap",
+        "reason": "net::ERR_CONNECTION_RESET"
+      }
+    ]
+  },
+  {
+    "file": "artifact-586d3b6e-1787382128-181d.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [
+      {
+        "host": "fonts.googleapis.com",
+        "kind": "subresource",
+        "allowed": true,
+        "examples": [
+          "https://fonts.googleapis.com",
+          "https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&display=swap"
+        ]
+      },
+      {
+        "host": "fonts.gstatic.com",
+        "kind": "subresource",
+        "allowed": true,
+        "examples": [
+          "https://fonts.gstatic.com"
+        ]
+      },
+      {
+        "host": "claude.ai",
+        "kind": "navigation",
+        "allowed": false,
+        "examples": [
+          "https://claude.ai/code/artifact/cd95a001-64b6-4fb3-b15d-1ff4df5e5dc2",
+          "https://claude.ai/code/artifact/cd95a001-64b6-4fb3-b15d-1ff4df5e5dc2"
+        ]
+      }
+    ],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 15063,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 0,
+      "candidatesChecked": 0,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 6812,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Takeoff for Plan Designers",
+      "scrollHeight": 4060,
+      "textLength": 5766,
+      "elements": 221,
+      "buttons": 0,
+      "visibleButtons": 0,
+      "inputs": 10,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 2,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_CONNECTION_RESET"
+    ],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&display=swap",
+        "reason": "net::ERR_CONNECTION_RESET"
+      }
+    ]
+  },
+  {
+    "file": "artifact-7ccd37c9-1787449126-36de.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 2572,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 0,
+      "candidatesChecked": 0,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 12645,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Builder Assist Takeoffs",
+      "scrollHeight": 7518,
+      "textLength": 10100,
+      "elements": 466,
+      "buttons": 1,
+      "visibleButtons": 1,
+      "inputs": 8,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 16,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  },
+  {
+    "file": "artifact-89d6cc50-1787527178-3332.html",
+    "status": "WARN",
+    "problems": [
+      "horizontal overflow at 390px on route(s): #/build-estimate (178px)"
+    ],
+    "capabilities": [],
+    "externalRefs": [],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 2727,
+    "routes": [
+      {
+        "route": "#/",
+        "ok": true,
+        "textLength": 6942
+      },
+      {
+        "route": "#/build-estimate",
+        "ok": true,
+        "textLength": 1225
+      },
+      {
+        "route": "#/walkthrough",
+        "ok": true,
+        "textLength": 1338
+      },
+      {
+        "route": "#/get-pricing",
+        "ok": true,
+        "textLength": 766
+      },
+      {
+        "route": "#/admin-signin",
+        "ok": true,
+        "textLength": 639
+      }
+    ],
+    "controls": {
+      "delegatedClickHandlers": 10,
+      "candidatesChecked": 1,
+      "dead": [
+        "<button> \"DISMISS\""
+      ],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 13184,
+      "routes": [
+        {
+          "route": "#/build-estimate",
+          "overflowX": 178,
+          "wide": [
+            "div.est-hero-copy (548px)",
+            "span.est-kicker (455px)",
+            "h1 (548px)",
+            "p (467px)",
+            "div.est-hero-steps (548px)",
+            "form.est-form-card (548px)",
+            "div.est-presets (502px)",
+            "div.est-fields (502px)"
+          ]
+        }
+      ]
+    },
+    "metrics": {
+      "title": "Builder Assist LLC",
+      "scrollHeight": 8893,
+      "textLength": 6942,
+      "elements": 455,
+      "buttons": 2,
+      "visibleButtons": 2,
+      "inputs": 2,
+      "images": 4,
+      "brokenImages": 0,
+      "anchors": 21,
+      "deadAnchors": [],
+      "routes": [
+        "#/",
+        "#/build-estimate",
+        "#/walkthrough",
+        "#/get-pricing",
+        "#/admin-signin"
+      ]
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  },
+  {
+    "file": "artifact-8e09d6bd-1787414976-5572.html",
+    "status": "WARN",
+    "problems": [
+      "1 CSP-blocked host(s): builder-assist-llc.valentino-in-8162.chatgpt.site (3/3 image(s) degrade gracefully)",
+      "3 failed request(s)"
+    ],
+    "capabilities": [],
+    "externalRefs": [
+      {
+        "host": "builder-assist-llc.valentino-in-8162.chatgpt.site",
+        "kind": "subresource",
+        "allowed": false,
+        "examples": [
+          "https://builder-assist-llc.valentino-in-8162.chatgpt.site/phoenix-fence-v2.webp",
+          "https://builder-assist-llc.valentino-in-8162.chatgpt.site/phoenix-fence-ad-mesh-v2.webp",
+          "https://builder-assist-llc.valentino-in-8162.chatgpt.site/scottsdale-floor-v2.webp"
+        ]
+      }
+    ],
+    "cspBlocked": [
+      {
+        "host": "builder-assist-llc.valentino-in-8162.chatgpt.site",
+        "kind": "subresource",
+        "allowed": false,
+        "examples": [
+          "https://builder-assist-llc.valentino-in-8162.chatgpt.site/phoenix-fence-v2.webp",
+          "https://builder-assist-llc.valentino-in-8162.chatgpt.site/phoenix-fence-ad-mesh-v2.webp",
+          "https://builder-assist-llc.valentino-in-8162.chatgpt.site/scottsdale-floor-v2.webp"
+        ]
+      }
+    ],
+    "fallback": {
+      "externalImages": 3,
+      "withOnErrorFallback": 3,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 15120,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 0,
+      "candidatesChecked": 1,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 7893,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Builder Assist",
+      "scrollHeight": 4493,
+      "textLength": 4301,
+      "elements": 2464,
+      "buttons": 22,
+      "visibleButtons": 1,
+      "inputs": 400,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 20,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_CONNECTION_RESET",
+      "Failed to load resource: net::ERR_CONNECTION_RESET",
+      "Failed to load resource: net::ERR_CONNECTION_RESET"
+    ],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://builder-assist-llc.valentino-in-8162.chatgpt.site/phoenix-fence-v2.webp",
+        "reason": "net::ERR_CONNECTION_RESET"
+      },
+      {
+        "url": "https://builder-assist-llc.valentino-in-8162.chatgpt.site/phoenix-fence-ad-mesh-v2.webp",
+        "reason": "net::ERR_CONNECTION_RESET"
+      },
+      {
+        "url": "https://builder-assist-llc.valentino-in-8162.chatgpt.site/scottsdale-floor-v2.webp",
+        "reason": "net::ERR_CONNECTION_RESET"
+      }
+    ]
+  },
+  {
+    "file": "artifact-9faddf08-1787520447-8cb3.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [
+      {
+        "host": "fonts.googleapis.com",
+        "kind": "subresource",
+        "allowed": true,
+        "examples": [
+          "https://fonts.googleapis.com",
+          "https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,"
+        ]
+      },
+      {
+        "host": "fonts.gstatic.com",
+        "kind": "subresource",
+        "allowed": true,
+        "examples": [
+          "https://fonts.gstatic.com"
+        ]
+      },
+      {
+        "host": "claude.ai",
+        "kind": "navigation",
+        "allowed": false,
+        "examples": [
+          "https://claude.ai/code/artifact/89d6cc50-b2ac-4633-9a0c-7f4b1e6d0f1e"
+        ]
+      }
+    ],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 14991,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 0,
+      "candidatesChecked": 0,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 17358,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Builder Assist Job Book",
+      "scrollHeight": 8897,
+      "textLength": 16741,
+      "elements": 414,
+      "buttons": 0,
+      "visibleButtons": 0,
+      "inputs": 0,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 1,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_CONNECTION_RESET"
+    ],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap",
+        "reason": "net::ERR_CONNECTION_RESET"
+      }
+    ]
+  },
+  {
+    "file": "artifact-cd95a001-1787380504-edb9.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [
+      {
+        "host": "fonts.googleapis.com",
+        "kind": "subresource",
+        "allowed": true,
+        "examples": [
+          "https://fonts.googleapis.com",
+          "https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&display=swap"
+        ]
+      },
+      {
+        "host": "fonts.gstatic.com",
+        "kind": "subresource",
+        "allowed": true,
+        "examples": [
+          "https://fonts.gstatic.com"
+        ]
+      }
+    ],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 15062,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 0,
+      "candidatesChecked": 3,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 13333,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Van Horn Takeoff Sheet",
+      "scrollHeight": 8380,
+      "textLength": 14034,
+      "elements": 1828,
+      "buttons": 3,
+      "visibleButtons": 3,
+      "inputs": 286,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 0,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_CONNECTION_RESET"
+    ],
+    "pageErrors": [],
+    "failedRequests": [
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&display=swap",
+        "reason": "net::ERR_CONNECTION_RESET"
+      }
+    ]
+  },
+  {
+    "file": "artifact-dbc96c49-1787519152-83e6.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [
+      {
+        "host": "claude.ai",
+        "kind": "navigation",
+        "allowed": false,
+        "examples": [
+          "https://claude.ai/code/artifact/43d57b17-a670-4904-8a14-7a70035411a9",
+          "https://claude.ai/code/artifact/4f63b254-de94-4f84-8266-360d9a580559"
+        ]
+      }
+    ],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 2527,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 0,
+      "candidatesChecked": 0,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 8633,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Valentino Build Log",
+      "scrollHeight": 4867,
+      "textLength": 9650,
+      "elements": 223,
+      "buttons": 0,
+      "visibleButtons": 0,
+      "inputs": 0,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 2,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  },
+  {
+    "file": "artifact-e2a0bfe1-1787527245-a84e.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [
+      {
+        "host": "claude.ai",
+        "kind": "navigation",
+        "allowed": false,
+        "examples": [
+          "https://claude.ai/code/artifact/43d57b17-a670-4904-8a14-7a70035411a9"
+        ]
+      }
+    ],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": true,
+    "bytesRemoved": 12056,
+    "loadMs": 2612,
+    "routes": [
+      {
+        "route": "#/portal",
+        "ok": true,
+        "textLength": 6371
+      },
+      {
+        "route": "#/review?path=sell_stay",
+        "ok": true,
+        "textLength": 6371
+      },
+      {
+        "route": "#/review?path=cash",
+        "ok": true,
+        "textLength": 6371
+      },
+      {
+        "route": "#/review?path=brokerage",
+        "ok": true,
+        "textLength": 6371
+      },
+      {
+        "route": "#/review",
+        "ok": true,
+        "textLength": 6371
+      }
+    ],
+    "controls": {
+      "delegatedClickHandlers": 1,
+      "candidatesChecked": 0,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 9666,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Valentino International",
+      "scrollHeight": 6767,
+      "textLength": 6371,
+      "elements": 309,
+      "buttons": 0,
+      "visibleButtons": 0,
+      "inputs": 0,
+      "images": 1,
+      "brokenImages": 0,
+      "anchors": 25,
+      "deadAnchors": [],
+      "routes": [
+        "#/portal",
+        "#/review?path=sell_stay",
+        "#/review?path=cash",
+        "#/review?path=brokerage",
+        "#/review"
+      ]
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  }
+]

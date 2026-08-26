@@ -1,0 +1,924 @@
+<title>Employee Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --ink:#071a36; --navy:#081f43; --blue:#0b4fd3; --blue-bright:#1674ff;
+    --cyan:#68d4ff; --ice:#f2f7ff; --line:#d9e5f7; --muted:#5e6f89;
+    --bg:#f2f7ff; --panel:#ffffff; --text:#071a36; --head:#081f43;
+    --ok:#0e7d3e; --ok-bg:#e6f6ec; --warn:#8a5b00; --warn-bg:#fff3d6;
+    --bad:#b3261e; --bad-bg:#fdecea; --soft:#7a4bd6; --soft-bg:#f1eafd;
+    --demo:#8a5b00; --demo-bg:#fff3d6;
+    --btn-text:#ffffff; --shadow:0 1px 3px rgba(7,26,54,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#050e1d; --panel:#0a1b33; --text:#eaf2ff; --head:#eaf2ff;
+      --line:#1c3357; --muted:#8fa3c0; --ice:#0d2242;
+      --ok:#5fd48f; --ok-bg:#0b2b1a; --warn:#ffd479; --warn-bg:#33270a;
+      --bad:#ff8d85; --bad-bg:#3a100e; --soft:#c1a4ff; --soft-bg:#221540;
+      --demo:#ffd479; --demo-bg:#33270a;
+      --shadow:0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#050e1d; --panel:#0a1b33; --text:#eaf2ff; --head:#eaf2ff;
+    --line:#1c3357; --muted:#8fa3c0; --ice:#0d2242;
+    --ok:#5fd48f; --ok-bg:#0b2b1a; --warn:#ffd479; --warn-bg:#33270a;
+    --bad:#ff8d85; --bad-bg:#3a100e; --soft:#c1a4ff; --soft-bg:#221540;
+    --demo:#ffd479; --demo-bg:#33270a;
+    --shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.45}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px 60px}
+  header.site{background:var(--navy);color:#fff;padding:18px 0}
+  header.site .wrap{padding-bottom:0}
+  .brandrow{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+  .brand{font-weight:900;letter-spacing:.16em;text-transform:uppercase;font-size:17px;color:#fff}
+  .brand span{color:var(--cyan)}
+  .eyebrow{color:var(--cyan);font-weight:800;text-transform:uppercase;letter-spacing:.16em;font-size:11px;margin:0 0 6px}
+  .tabs{display:flex;gap:0;margin-top:16px}
+  .tabs button{appearance:none;border:1px solid rgba(255,255,255,.25);border-bottom:none;background:transparent;color:#cfe0ff;
+    font-weight:800;text-transform:uppercase;letter-spacing:.14em;font-size:12px;padding:11px 22px;cursor:pointer;border-radius:0}
+  .tabs button.active{background:var(--bg);color:var(--blue-bright);border-color:var(--bg)}
+  h1,h2,h3{color:var(--head);margin:0 0 10px;letter-spacing:.02em}
+  h2{font-size:20px;text-transform:uppercase;letter-spacing:.08em;font-weight:900}
+  h3{font-size:14px;text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+  .demo-banner{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;
+    background:var(--demo-bg);color:var(--demo);border:1px dashed var(--demo);padding:10px 14px;margin:18px 0;
+    font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.1em}
+  .demo-banner .note{font-weight:normal;text-transform:none;letter-spacing:0;font-size:13px}
+  .card{background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);padding:18px;margin:0 0 18px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:860px){.grid2{grid-template-columns:1fr}}
+  label.fld{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0 0 4px}
+  select,input[type=datetime-local],input[type=number],input[type=text]{
+    width:100%;padding:9px 10px;border:1px solid var(--line);background:var(--panel);color:var(--text);
+    font-family:inherit;font-size:14px;border-radius:0}
+  .btn{appearance:none;border:none;border-radius:0;cursor:pointer;font-family:inherit;
+    font-weight:900;text-transform:uppercase;letter-spacing:.14em;font-size:12px;padding:12px 20px;
+    background:var(--blue);color:var(--btn-text)}
+  .btn:hover{background:var(--blue-bright)}
+  .btn.secondary{background:transparent;color:var(--blue-bright);border:1px solid var(--blue-bright)}
+  .btn.danger{background:var(--bad);color:#fff}
+  .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+  .btn.small{padding:6px 10px;font-size:10px;letter-spacing:.1em}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .clockbig{font-size:44px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.02em;color:var(--head)}
+  .statuschip{display:inline-block;padding:4px 10px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.12em}
+  .chip-on{background:var(--ok-bg);color:var(--ok)}
+  .chip-break{background:var(--warn-bg);color:var(--warn)}
+  .chip-off{background:var(--ice);color:var(--muted)}
+  .chip-stale{background:var(--bad-bg);color:var(--bad)}
+  .flag{display:inline-block;padding:2px 8px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin:1px 2px 1px 0;white-space:nowrap}
+  .flag.hard{background:var(--bad-bg);color:var(--bad)}
+  .flag.soft{background:var(--soft-bg);color:var(--soft)}
+  .flag.warn{background:var(--warn-bg);color:var(--warn)}
+  .flag.demo{background:var(--demo-bg);color:var(--demo)}
+  .flag.ok{background:var(--ok-bg);color:var(--ok)}
+  .tablewrap{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+  th{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);text-align:left;
+    border-bottom:2px solid var(--line);padding:8px 10px;white-space:nowrap}
+  td{border-bottom:1px solid var(--line);padding:8px 10px;font-size:13px;vertical-align:top}
+  td.num,th.num{text-align:right}
+  tr.totalrow td{font-weight:900;border-top:2px solid var(--line);background:var(--ice)}
+  .muted{color:var(--muted)}
+  .small{font-size:12px}
+  .roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+  .roster .emp{border:1px solid var(--line);padding:12px;background:var(--panel)}
+  .roster .emp .nm{font-weight:900;letter-spacing:.04em}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:baseline}
+  .dot.on{background:var(--ok)} .dot.break{background:var(--warn)} .dot.off{background:var(--muted)} .dot.stale{background:var(--bad)}
+  .weeknav{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .weeknav .range{font-weight:900;letter-spacing:.04em}
+  .alert{padding:12px 14px;margin:0 0 14px;font-size:13px;border:1px solid}
+  .alert.bad{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+  .alert.warn{background:var(--warn-bg);color:var(--warn);border-color:var(--warn)}
+  .audit{background:var(--ice);border:1px dashed var(--line);padding:8px 10px;font-size:12px;margin-top:6px}
+  .audit del{color:var(--bad)}
+  .audit ins{color:var(--ok);text-decoration:none;font-weight:700}
+  dialog{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:0;max-width:560px;width:92%}
+  dialog::backdrop{background:rgba(7,26,54,.55)}
+  dialog .dlg-head{background:var(--navy);color:#fff;padding:12px 18px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;font-size:12px}
+  dialog .dlg-body{padding:18px}
+  .formrow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  @media(max-width:560px){.formrow{grid-template-columns:1fr}}
+  .footer-note{color:var(--muted);font-size:12px;margin-top:26px}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;
+    padding:10px 18px;font-size:13px;font-weight:700;letter-spacing:.04em;opacity:0;transition:opacity .25s;pointer-events:none;z-index:50}
+  .toast.show{opacity:1}
+  .kv{display:flex;gap:26px;flex-wrap:wrap;margin:10px 0 0}
+  .kv .k{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+  .kv .v{font-size:22px;font-weight:900;font-variant-numeric:tabular-nums}
+</style>
+
+<header class="site"><div class="wrap">
+  <div class="brandrow">
+    <div class="brand">Builder <span>Assist</span> · Employee Hub</div>
+    <div class="small" style="color:#cfe0ff">Time clock &amp; hours monitoring</div>
+  </div>
+  <div class="tabs">
+    <button id="tab-emp" class="active" type="button">Employee</button>
+    <button id="tab-pm" type="button">Project Manager</button>
+  </div>
+</div></header>
+
+<div class="wrap">
+  <div class="demo-banner">
+    <span>&#9888; Seeded demo data &mdash; every employee, job and time entry below was generated for this demo. Not real payroll records.</span>
+    <span style="display:flex;gap:8px;align-items:center">
+      <button class="btn small ghost" id="btn-reset" type="button">Reset demo data</button>
+    </span>
+  </div>
+  <div id="storage-warning"></div>
+
+  <!-- ============ EMPLOYEE VIEW ============ -->
+  <section id="view-emp">
+    <div class="grid2">
+      <div class="card">
+        <p class="eyebrow" style="color:var(--blue-bright)">Time clock</p>
+        <div class="formrow">
+          <div>
+            <label class="fld" for="sel-emp">Acting as (demo &mdash; no login)</label>
+            <select id="sel-emp"></select>
+          </div>
+          <div>
+            <label class="fld" for="sel-job">Job / project</label>
+            <select id="sel-job"></select>
+          </div>
+        </div>
+        <div id="clock-status"></div>
+        <div class="clockbig" id="clock-elapsed">0:00:00</div>
+        <div class="small muted" id="clock-sub"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+          <button class="btn" id="btn-in" type="button">Clock in</button>
+          <button class="btn secondary" id="btn-break" type="button">Start break</button>
+          <button class="btn danger" id="btn-out" type="button">Clock out</button>
+        </div>
+        <div id="emp-error" style="margin-top:12px"></div>
+      </div>
+      <div class="card">
+        <p class="eyebrow" style="color:var(--blue-bright)">My week</p>
+        <div class="kv">
+          <div><div class="k">Today</div><div class="v" id="me-today">0.00 h</div></div>
+          <div><div class="k">This week</div><div class="v" id="me-week">0.00 h</div></div>
+        </div>
+        <div id="me-flags" style="margin-top:10px"></div>
+        <p class="small muted" style="margin-top:12px">Unpaid breaks are subtracted. Hours shown to 2 decimals; full precision is kept in storage and in the CSV export.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Today&rsquo;s entries</h3>
+      <div class="tablewrap" id="me-today-table"></div>
+    </div>
+    <div class="card">
+      <h3>This week</h3>
+      <div class="tablewrap" id="me-week-table"></div>
+    </div>
+  </section>
+
+  <!-- ============ PM VIEW ============ -->
+  <section id="view-pm" hidden>
+    <div class="card">
+      <h3>Roster &mdash; right now</h3>
+      <div class="roster" id="pm-roster"></div>
+    </div>
+
+    <div class="card">
+      <div class="weeknav">
+        <button class="btn small ghost" id="wk-prev" type="button">&larr; Prev week</button>
+        <span class="range" id="wk-range"></span>
+        <button class="btn small ghost" id="wk-next" type="button">Next week &rarr;</button>
+        <span style="flex:1"></span>
+        <button class="btn small" id="btn-csv" type="button">Export week CSV</button>
+      </div>
+      <div id="pm-stale-alert"></div>
+      <h3>Hours per employee per job</h3>
+      <div class="tablewrap" id="pm-matrix"></div>
+      <p class="small muted" style="margin-top:8px">
+        Overtime flags: <span class="flag hard">OT &gt;40 h/week</span> weekly rule &middot;
+        <span class="flag soft">&gt;8 h/day</span> daily rule (softer flag).
+        Thresholds as implemented here (40 h/week, 8 h/day); no specific jurisdiction&rsquo;s law is asserted &mdash; confirm rules with payroll.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Labor hours per job (selected week)</h3>
+      <div class="tablewrap" id="pm-jobs"></div>
+    </div>
+
+    <div class="card">
+      <h3>Timesheet entries (selected week)</h3>
+      <div class="tablewrap" id="pm-entries"></div>
+    </div>
+  </section>
+
+  <p class="footer-note">Employee Hub demo &mdash; data lives only in this browser (localStorage). No login, no server, no payroll integration. A production deployment replaces the storage module with a real backend; see the README in <code>web/employee-hub/</code>.</p>
+</div>
+
+<dialog id="dlg-edit">
+  <div class="dlg-head">Edit entry &mdash; audit trail kept</div>
+  <div class="dlg-body">
+    <div class="formrow">
+      <div><label class="fld" for="ed-in">Clock in</label><input type="datetime-local" id="ed-in" step="60"></div>
+      <div><label class="fld" for="ed-out">Clock out</label><input type="datetime-local" id="ed-out" step="60"></div>
+    </div>
+    <div class="formrow">
+      <div><label class="fld" for="ed-break">Unpaid break (minutes)</label><input type="number" id="ed-break" min="0" step="1"></div>
+      <div><label class="fld" for="ed-by">Edited by</label><input type="text" id="ed-by" value="Project Manager (demo)"></div>
+    </div>
+    <div id="ed-error"></div>
+    <div id="ed-audit"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn" id="ed-save" type="button">Save edit</button>
+      <button class="btn ghost" id="ed-cancel" type="button">Cancel</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="dlg-csv">
+  <div class="dlg-head">Week CSV</div>
+  <div class="dlg-body">
+    <p class="small muted">Download started. If your viewer blocks downloads (embedded artifact viewers do), copy the CSV below.</p>
+    <textarea id="csv-text" style="width:100%;height:220px;font-family:monospace;font-size:11px;border:1px solid var(--line);background:var(--ice);color:var(--text)"></textarea>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <button class="btn small" id="csv-copy" type="button">Copy to clipboard</button>
+      <button class="btn small ghost" id="csv-close" type="button">Close</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   Employee Hub — time clock + hours monitoring (seeded demo).
+   All timestamps are epoch milliseconds; everything else is derived.
+   ===================================================================== */
+
+var HOUR = 3600000, DAY = 86400000;
+var STALE_MS = 16 * HOUR;            // open shift older than this is flagged, not counted
+var WEEKLY_OT_MS = 40 * HOUR;        // weekly rule (hard flag)
+var DAILY_LONG_MS = 8 * HOUR;        // daily rule (soft flag)
+var SCHEMA = 'bah.employeehub.v1';
+
+/* ---------------- storage module ----------------
+   Interface a real backend would implement:
+     listEmployees() -> [{id,name,role}]
+     listJobs()      -> [{id,name,seeded}]
+     listEntries()   -> [entry]           (entry: see README)
+     saveEntry(e)    -> entry             (insert)
+     updateEntry(id, patch) -> entry|null (shallow merge)
+     resetDemo()     -> void              (wipe + reseed)
+   Backed by localStorage here, with an in-memory fallback when
+   localStorage throws (private windows, embedded contexts). */
+var Store = (function () {
+  var mem = {};                 // fallback
+  var storageOK = true;
+  function lsGet(k) {
+    try { var v = localStorage.getItem(k); return v == null ? null : JSON.parse(v); }
+    catch (e) { storageOK = false; return (k in mem) ? mem[k] : null; }
+  }
+  function lsSet(k, v) {
+    mem[k] = v;
+    try { localStorage.setItem(k, JSON.stringify(v)); }
+    catch (e) { storageOK = false; }
+  }
+  var K = { emp: SCHEMA + '.employees', job: SCHEMA + '.jobs', ent: SCHEMA + '.entries' };
+  function listEmployees() { return lsGet(K.emp) || []; }
+  function listJobs() { return lsGet(K.job) || []; }
+  function listEntries() { return lsGet(K.ent) || []; }
+  function saveEntry(e) { var a = listEntries(); a.push(e); lsSet(K.ent, a); return e; }
+  function updateEntry(id, patch) {
+    var a = listEntries();
+    for (var i = 0; i < a.length; i++) {
+      if (a[i].id === id) {
+        for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) a[i][k] = patch[k];
+        lsSet(K.ent, a); return a[i];
+      }
+    }
+    return null;
+  }
+  function seed(force) {
+    if (!force && listEmployees().length && listEntries().length) return;
+    var s = buildSeed();
+    lsSet(K.emp, s.employees); lsSet(K.job, s.jobs); lsSet(K.ent, s.entries);
+  }
+  function resetDemo() { seed(true); }
+  return { listEmployees: listEmployees, listJobs: listJobs, listEntries: listEntries,
+           saveEntry: saveEntry, updateEntry: updateEntry, seed: seed, resetDemo: resetDemo,
+           ok: function () { return storageOK; } };
+})();
+
+/* ---------------- time helpers ---------------- */
+function mondayOf(t) {
+  var d = new Date(t); d.setHours(0, 0, 0, 0);
+  var dow = (d.getDay() + 6) % 7;           // Mon=0
+  return d.getTime() - dow * DAY;
+}
+function dayStart(t) { var d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); }
+function breakMs(e, now) {
+  var s = 0;
+  for (var i = 0; i < (e.breaks || []).length; i++) {
+    var b = e.breaks[i];
+    s += Math.max(0, (b.end == null ? now : b.end) - b.start);
+  }
+  return s;
+}
+function workedMs(e, now) {
+  var end = e.clockOut == null ? now : e.clockOut;
+  return Math.max(0, end - e.clockIn - breakMs(e, now)); // clamp: never negative, midnight-safe
+}
+function isStale(e, now) { return e.clockOut == null && (now - e.clockIn) > STALE_MS; }
+function onBreak(e) {
+  var bs = e.breaks || [];
+  return bs.length > 0 && bs[bs.length - 1].end == null;
+}
+function fmtH(ms) { return (ms / HOUR).toFixed(2); }
+function fmtHMS(ms) {
+  ms = Math.max(0, ms);
+  var s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
+  return h + ':' + String(m).padStart(2, '0') + ':' + String(ss).padStart(2, '0');
+}
+function fmtT(t) {
+  return t == null ? '—' : new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+function fmtD(t) {
+  return new Date(t).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+}
+function fmtDT(t) { return t == null ? '—' : fmtD(t) + ' ' + fmtT(t); }
+function toLocalInput(t) {
+  if (t == null) return '';
+  var d = new Date(t - new Date(t).getTimezoneOffset() * 60000);
+  return d.toISOString().slice(0, 16);
+}
+function fromLocalInput(v) { return v ? new Date(v).getTime() : null; }
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+/* ---------------- seed data (all demo) ---------------- */
+var idSeq = 0;
+function nid(p) { return p + '_' + Date.now().toString(36) + '_' + (idSeq++); }
+function buildSeed() {
+  idSeq = 0;
+  var employees = [
+    { id: 'emp_mike', name: 'Mike Torres',    role: 'Foreman' },
+    { id: 'emp_dana', name: 'Dana Whitfield', role: 'Carpenter' },
+    { id: 'emp_luis', name: 'Luis Ortega',    role: 'Laborer' },
+    { id: 'emp_sam',  name: 'Sam Pruitt',     role: 'Electrician' }
+  ];
+  // Job 1 is the real project name from the site's takeoff data; the rest are invented demo jobs.
+  var jobs = [
+    { id: 'job_vanhorn', name: 'Van Horn Residence - DeWitt, MI', seeded: true },
+    { id: 'job_maple',   name: 'Maple Street Remodel (demo)',     seeded: true },
+    { id: 'job_shop',    name: 'Shop / Warehouse (demo)',         seeded: true }
+  ];
+  var now = Date.now();
+  var wk0 = mondayOf(now);         // this week's Monday 00:00
+  var wk1 = wk0 - 7 * DAY;         // last week's Monday
+  var entries = [];
+  function mk(empId, jobId, weekStart, dayIdx, inH, outH, brkMin, status) {
+    var cin = weekStart + dayIdx * DAY + Math.round(inH * HOUR);
+    var cout = weekStart + dayIdx * DAY + Math.round(outH * HOUR); // outH may be >24 => crosses midnight
+    var brks = [];
+    if (brkMin > 0) {
+      var mid = cin + Math.round((cout - cin) / 2);
+      brks = [{ start: mid, end: mid + brkMin * 60000 }];
+    }
+    var e = { id: nid('ent'), empId: empId, jobId: jobId, clockIn: cin, clockOut: cout,
+              breaks: brks, status: status || 'pending', edits: [], seeded: true };
+    entries.push(e); return e;
+  }
+  // --- last week (complete) ---
+  // Mike: 6 days x 9.5h paid (6:30-16:30, 30 min break) = 57h -> weekly OT + daily flags
+  for (var d = 0; d < 6; d++) mk('emp_mike', d < 4 ? 'job_vanhorn' : 'job_maple', wk1, d, 6.5, 16.5, 30, d < 3 ? 'approved' : 'pending');
+  // Dana: 5 days x 8.0h (7:00-15:30, 30 min break) = 40.00h -> boundary, no OT (rule is >40)
+  for (d = 0; d < 5; d++) mk('emp_dana', 'job_vanhorn', wk1, d, 7, 15.5, 30, d < 3 ? 'approved' : 'pending');
+  // Luis: Mon-Wed 8h on shop, Thu night pour 21:00->01:30 (+1 day, 4.5h, midnight-crossing), Fri 10.5h (daily flag)
+  for (d = 0; d < 3; d++) mk('emp_luis', 'job_shop', wk1, d, 7, 15.5, 30, 'approved');
+  mk('emp_luis', 'job_vanhorn', wk1, 3, 21, 25.5, 0, 'pending');       // 21:00 Thu -> 01:30 Fri
+  mk('emp_luis', 'job_vanhorn', wk1, 4, 6, 17, 30, 'pending');         // 10.5h paid
+  // Sam: Mon-Thu 8h
+  for (d = 0; d < 4; d++) mk('emp_sam', 'job_maple', wk1, d, 7, 15.5, 30, 'approved');
+  // one pre-seeded edit so the audit trail is visible out of the box (Sam, Sat 4h -> 36h wk, no OT;
+  // Dana stays at exactly 40.00 to show the weekly rule is strictly >40)
+  var edited = mk('emp_sam', 'job_maple', wk1, 5, 8, 12, 0, 'approved');
+  edited.edits.push({
+    at: wk1 + 6 * DAY + 9 * HOUR, by: 'Project Manager (demo)',
+    changes: { clockOut: { from: wk1 + 5 * DAY + 11.5 * HOUR, to: edited.clockOut } },
+    note: 'Forgot to clock out; corrected from site log.'
+  });
+  // --- this week (partial: full days before today) ---
+  var todayIdx = Math.floor((dayStart(now) - wk0) / DAY);
+  for (d = 0; d < Math.min(todayIdx, 5); d++) {
+    mk('emp_mike', 'job_vanhorn', wk0, d, 6.5, 16.5, 30, 'pending');
+    mk('emp_dana', 'job_vanhorn', wk0, d, 7, 15.5, 30, 'pending');
+    mk('emp_luis', 'job_maple',   wk0, d, 7, 15.5, 30, 'pending');
+  }
+  // Mike is on the clock right now (started ~3h12m ago, took a 30-min break that ended)
+  var cin = now - Math.round(3.2 * HOUR);
+  entries.push({ id: nid('ent'), empId: 'emp_mike', jobId: 'job_vanhorn', clockIn: cin, clockOut: null,
+    breaks: [{ start: cin + HOUR, end: cin + HOUR + 30 * 60000 }], status: 'open', edits: [], seeded: true });
+  // Sam left a shift open ~26h ago -> stale, must be flagged, not silently counted
+  entries.push({ id: nid('ent'), empId: 'emp_sam', jobId: 'job_shop', clockIn: now - 26 * HOUR, clockOut: null,
+    breaks: [], status: 'open', edits: [], seeded: true });
+  return { employees: employees, jobs: jobs, entries: entries };
+}
+
+/* ---------------- app state ---------------- */
+var state = { view: 'emp', me: null, weekOffset: 0 };
+
+function employees() { return Store.listEmployees(); }
+function jobs() { return Store.listJobs(); }
+function entries() { return Store.listEntries(); }
+function empById(id) { var a = employees(); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
+function jobById(id) { var a = jobs(); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
+function openEntryFor(empId) {
+  var a = entries();
+  for (var i = 0; i < a.length; i++) if (a[i].empId === empId && a[i].clockOut == null) return a[i];
+  return null;
+}
+function weekRange(offset) {
+  var start = mondayOf(Date.now()) + offset * 7 * DAY;
+  return { start: start, end: start + 7 * DAY };
+}
+function entriesInWeek(offset) {
+  var r = weekRange(offset);
+  return entries().filter(function (e) { return e.clockIn >= r.start && e.clockIn < r.end; });
+}
+/* countable = closed entries + fresh open entries (live). Stale open shifts are
+   excluded from totals and surfaced as flags instead. Rejected entries excluded. */
+function countable(e, now) { return e.status !== 'rejected' && !isStale(e, now); }
+
+/* ---------------- toast / errors ---------------- */
+var toastTimer = null;
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
+}
+function empError(msg) {
+  document.getElementById('emp-error').innerHTML = msg ? '<div class="alert bad">' + esc(msg) + '</div>' : '';
+}
+
+/* ---------------- employee view ---------------- */
+function renderEmpSelectors() {
+  var selE = document.getElementById('sel-emp'), selJ = document.getElementById('sel-job');
+  selE.innerHTML = employees().map(function (e) {
+    return '<option value="' + e.id + '"' + (e.id === state.me ? ' selected' : '') + '>' + esc(e.name) + ' — ' + esc(e.role) + '</option>';
+  }).join('');
+  selJ.innerHTML = jobs().map(function (j) {
+    return '<option value="' + j.id + '">' + esc(j.name) + '</option>';
+  }).join('');
+}
+function renderEmployee() {
+  var now = Date.now();
+  var me = state.me, open = openEntryFor(me);
+  var stale = open && isStale(open, now);
+  var statusEl = document.getElementById('clock-status');
+  var sub = document.getElementById('clock-sub');
+  var btnIn = document.getElementById('btn-in'), btnBreak = document.getElementById('btn-break'), btnOut = document.getElementById('btn-out');
+  var selJ = document.getElementById('sel-job');
+
+  if (!open) {
+    statusEl.innerHTML = '<span class="statuschip chip-off">Off the clock</span>';
+    sub.textContent = 'Pick a job and clock in.';
+    btnIn.disabled = false; btnBreak.disabled = true; btnOut.disabled = true;
+    btnBreak.textContent = 'Start break';
+    selJ.disabled = false;
+  } else if (stale) {
+    statusEl.innerHTML = '<span class="statuschip chip-stale">Shift left open ' + fmtH(now - open.clockIn) + ' h ago — flagged</span>';
+    sub.innerHTML = 'Open since <b>' + esc(fmtDT(open.clockIn)) + '</b> on ' + esc(jobById(open.jobId).name) +
+      '. This shift is <b>excluded from totals</b> until a PM closes or corrects it.';
+    btnIn.disabled = true; btnBreak.disabled = true; btnOut.disabled = false;
+    selJ.disabled = true;
+  } else {
+    var br = onBreak(open);
+    statusEl.innerHTML = br
+      ? '<span class="statuschip chip-break">On unpaid break</span>'
+      : '<span class="statuschip chip-on">On the clock</span>';
+    sub.innerHTML = 'Since <b>' + esc(fmtT(open.clockIn)) + '</b> on ' + esc(jobById(open.jobId).name) +
+      (breakMs(open, now) > 0 ? ' · break so far ' + fmtH(breakMs(open, now)) + ' h' : '');
+    btnIn.disabled = true; btnOut.disabled = false; btnBreak.disabled = false;
+    btnBreak.textContent = br ? 'End break' : 'Start break';
+    selJ.disabled = true; selJ.value = open.jobId;
+  }
+  tickElapsed();
+  renderMyTables();
+}
+function tickElapsed() {
+  var now = Date.now();
+  var open = openEntryFor(state.me);
+  var el = document.getElementById('clock-elapsed');
+  if (!open) { el.textContent = '0:00:00'; return; }
+  el.textContent = fmtHMS(workedMs(open, now));
+}
+function renderMyTables() {
+  var now = Date.now();
+  var me = state.me;
+  var t0 = dayStart(now);
+  var wk = weekRange(0);
+  var mine = entries().filter(function (e) { return e.empId === me; });
+  var today = mine.filter(function (e) { return e.clockIn >= t0 && e.clockIn < t0 + DAY; });
+  var week = mine.filter(function (e) { return e.clockIn >= wk.start && e.clockIn < wk.end; });
+
+  var todayMs = 0, weekMs = 0;
+  today.forEach(function (e) { if (countable(e, now)) todayMs += workedMs(e, now); });
+  week.forEach(function (e) { if (countable(e, now)) weekMs += workedMs(e, now); });
+  document.getElementById('me-today').textContent = fmtH(todayMs) + ' h';
+  document.getElementById('me-week').textContent = fmtH(weekMs) + ' h';
+
+  var flags = [];
+  if (todayMs > DAILY_LONG_MS) flags.push('<span class="flag soft">&gt;8 h today (daily rule)</span>');
+  if (weekMs > WEEKLY_OT_MS) flags.push('<span class="flag hard">OT &gt;40 h this week (weekly rule)</span>');
+  var staleMine = mine.filter(function (e) { return isStale(e, now); });
+  if (staleMine.length) flags.push('<span class="flag warn">' + staleMine.length + ' shift(s) left open &mdash; not counted, see PM</span>');
+  document.getElementById('me-flags').innerHTML = flags.join(' ') || '<span class="small muted">No overtime flags.</span>';
+
+  document.getElementById('me-today-table').innerHTML = entryTable(today, now, false);
+  document.getElementById('me-week-table').innerHTML = entryTable(week, now, false);
+}
+function entryTable(list, now, pm) {
+  if (!list.length) return '<p class="small muted">No entries.</p>';
+  list = list.slice().sort(function (a, b) { return a.clockIn - b.clockIn; });
+  var rows = list.map(function (e) {
+    var stale = isStale(e, now);
+    var w = workedMs(e, now);
+    var flags = [];
+    if (e.seeded) flags.push('<span class="flag demo">demo</span>');
+    if (stale) flags.push('<span class="flag hard">left open &mdash; flagged, not counted</span>');
+    else if (e.clockOut != null && dayStart(e.clockOut) !== dayStart(e.clockIn)) flags.push('<span class="flag warn">crosses midnight</span>');
+    if (!stale && w > DAILY_LONG_MS) flags.push('<span class="flag soft">&gt;8 h/day</span>');
+    if (e.edits && e.edits.length) flags.push('<span class="flag warn">edited</span>');
+    var st = e.clockOut == null ? (stale ? 'stale' : 'open') : e.status;
+    var stChip = { approved: 'ok', rejected: 'hard', pending: 'warn', open: 'ok', stale: 'hard' }[st] || 'warn';
+    return '<tr>' +
+      '<td>' + esc(fmtD(e.clockIn)) + '</td>' +
+      '<td>' + esc(jobById(e.jobId) ? jobById(e.jobId).name : e.jobId) + '</td>' +
+      '<td>' + esc(fmtT(e.clockIn)) + '</td>' +
+      '<td>' + esc(fmtT(e.clockOut)) + (e.clockOut != null && dayStart(e.clockOut) !== dayStart(e.clockIn) ? ' <span class="small muted">(+1d)</span>' : '') + '</td>' +
+      '<td class="num">' + fmtH(breakMs(e, now)) + '</td>' +
+      '<td class="num"><b>' + (stale ? '—' : fmtH(w)) + '</b></td>' +
+      '<td><span class="flag ' + stChip + '">' + st + '</span> ' + flags.join(' ') + '</td>' +
+      '</tr>';
+  }).join('');
+  var total = 0; list.forEach(function (e) { if (countable(e, now)) total += workedMs(e, now); });
+  return '<table><thead><tr><th>Date</th><th>Job</th><th>In</th><th>Out</th><th class="num">Break h</th><th class="num">Paid h</th><th>Status / flags</th></tr></thead>' +
+    '<tbody>' + rows + '<tr class="totalrow"><td colspan="5">Total (counted)</td><td class="num">' + fmtH(total) + '</td><td></td></tr></tbody></table>';
+}
+
+/* ---------------- employee actions ---------------- */
+function doClockIn() {
+  empError('');
+  var open = openEntryFor(state.me);
+  if (open) { empError('Already clocked in (since ' + fmtDT(open.clockIn) + '). Clock out first.'); return; }
+  var jobId = document.getElementById('sel-job').value;
+  if (!jobId) { empError('Pick a job first.'); return; }
+  Store.saveEntry({ id: nid('ent'), empId: state.me, jobId: jobId, clockIn: Date.now(), clockOut: null,
+                    breaks: [], status: 'open', edits: [], seeded: false });
+  toast('Clocked in');
+  renderAll();
+}
+function doClockOut() {
+  empError('');
+  var open = openEntryFor(state.me);
+  if (!open) { empError('Not clocked in — nothing to clock out of.'); return; }
+  var now = Date.now();
+  var patch = { clockOut: now, status: 'pending' };
+  if (onBreak(open)) { // auto-end a running break at clock-out
+    var brs = open.breaks.slice(); brs[brs.length - 1] = { start: brs[brs.length - 1].start, end: now };
+    patch.breaks = brs;
+  }
+  Store.updateEntry(open.id, patch);
+  toast('Clocked out — ' + fmtH(workedMs(Object.assign({}, open, patch), now)) + ' h recorded (pending approval)');
+  renderAll();
+}
+function doBreakToggle() {
+  empError('');
+  var open = openEntryFor(state.me);
+  if (!open) { empError('Not clocked in.'); return; }
+  if (isStale(open, Date.now())) { empError('This shift is flagged as left open. Clock out or ask a PM to correct it.'); return; }
+  var brs = (open.breaks || []).slice();
+  if (onBreak(open)) {
+    brs[brs.length - 1] = { start: brs[brs.length - 1].start, end: Date.now() };
+    toast('Break ended');
+  } else {
+    brs.push({ start: Date.now(), end: null });
+    toast('Break started (unpaid)');
+  }
+  Store.updateEntry(open.id, { breaks: brs });
+  renderAll();
+}
+
+/* ---------------- PM view ---------------- */
+function renderRoster() {
+  var now = Date.now();
+  document.getElementById('pm-roster').innerHTML = employees().map(function (emp) {
+    var open = openEntryFor(emp.id);
+    var cls = 'off', label = 'Off the clock', extra = '';
+    if (open) {
+      if (isStale(open, now)) { cls = 'stale'; label = 'Shift left open ' + fmtH(now - open.clockIn) + ' h'; }
+      else if (onBreak(open)) { cls = 'break'; label = 'On break'; extra = jobById(open.jobId).name; }
+      else { cls = 'on'; label = 'On the clock — ' + fmtHMS(workedMs(open, now)); extra = jobById(open.jobId).name; }
+    }
+    return '<div class="emp"><div class="nm">' + esc(emp.name) + '</div>' +
+      '<div class="small muted">' + esc(emp.role) + '</div>' +
+      '<div class="small" style="margin-top:6px"><span class="dot ' + cls + '"></span>' + esc(label) + '</div>' +
+      (extra ? '<div class="small muted">' + esc(extra) + '</div>' : '') + '</div>';
+  }).join('');
+}
+function renderWeekNav() {
+  var r = weekRange(state.weekOffset);
+  var lbl = fmtD(r.start) + ' – ' + fmtD(r.end - 1) +
+    (state.weekOffset === 0 ? ' (this week)' : state.weekOffset === -1 ? ' (last week)' : '');
+  document.getElementById('wk-range').textContent = lbl;
+}
+function renderMatrix() {
+  var now = Date.now();
+  var list = entriesInWeek(state.weekOffset);
+  var r = weekRange(state.weekOffset);
+  var days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  // group per employee -> per job -> per day
+  var perEmp = {}; // empId -> { jobs: {jobId: [7]}, total, perDay:[7] }
+  list.forEach(function (e) {
+    if (!countable(e, now)) return;
+    var d = Math.floor((dayStart(e.clockIn) - r.start) / DAY);
+    if (d < 0 || d > 6) return;
+    var w = workedMs(e, now);
+    var pe = perEmp[e.empId] || (perEmp[e.empId] = { jobs: {}, total: 0, perDay: [0,0,0,0,0,0,0] });
+    var pj = pe.jobs[e.jobId] || (pe.jobs[e.jobId] = [0,0,0,0,0,0,0]);
+    pj[d] += w; pe.perDay[d] += w; pe.total += w;
+  });
+  var staleCount = list.filter(function (e) { return isStale(e, now); }).length;
+  var html = '<table><thead><tr><th>Employee</th><th>Job</th>';
+  days.forEach(function (dn) { html += '<th class="num">' + dn + '</th>'; });
+  html += '<th class="num">Total h</th><th>Flags</th></tr></thead><tbody>';
+  employees().forEach(function (emp) {
+    var pe = perEmp[emp.id];
+    if (!pe) return;
+    var jobIds = Object.keys(pe.jobs);
+    jobIds.forEach(function (jid, i) {
+      html += '<tr><td>' + (i === 0 ? '<b>' + esc(emp.name) + '</b>' : '') + '</td>' +
+        '<td class="small">' + esc(jobById(jid) ? jobById(jid).name : jid) + '</td>';
+      pe.jobs[jid].forEach(function (ms) { html += '<td class="num">' + (ms ? fmtH(ms) : '<span class="muted">·</span>') + '</td>'; });
+      html += '<td class="num">' + fmtH(pe.jobs[jid].reduce(function (a, b) { return a + b; }, 0)) + '</td><td></td></tr>';
+    });
+    // employee total row with flags
+    var flags = [];
+    if (pe.total > WEEKLY_OT_MS) flags.push('<span class="flag hard">OT &gt;40 h/week (weekly rule) — ' + fmtH(pe.total - WEEKLY_OT_MS) + ' h over</span>');
+    var longDays = pe.perDay.filter(function (ms) { return ms > DAILY_LONG_MS; }).length;
+    if (longDays) flags.push('<span class="flag soft">&gt;8 h/day (daily rule) &times;' + longDays + '</span>');
+    html += '<tr class="totalrow"><td></td><td>' + esc(emp.name) + ' — week total</td>';
+    pe.perDay.forEach(function (ms) {
+      html += '<td class="num"' + (ms > DAILY_LONG_MS ? ' style="color:var(--soft)"' : '') + '>' + (ms ? fmtH(ms) : '') + '</td>';
+    });
+    html += '<td class="num"' + (pe.total > WEEKLY_OT_MS ? ' style="color:var(--bad)"' : '') + '>' + fmtH(pe.total) + '</td>' +
+      '<td>' + (flags.join(' ') || '<span class="small muted">—</span>') + '</td></tr>';
+  });
+  html += '</tbody></table>';
+  if (!Object.keys(perEmp).length) html = '<p class="small muted">No countable entries this week.</p>';
+  document.getElementById('pm-matrix').innerHTML = html;
+
+  document.getElementById('pm-stale-alert').innerHTML = staleCount
+    ? '<div class="alert bad"><b>' + staleCount + ' shift(s) left open &gt;16 h.</b> They are excluded from all totals below until closed or corrected (see entries table).</div>'
+    : '';
+}
+function renderJobTotals() {
+  var now = Date.now();
+  var list = entriesInWeek(state.weekOffset);
+  var per = {};
+  var grand = 0;
+  list.forEach(function (e) {
+    if (!countable(e, now)) return;
+    var w = workedMs(e, now);
+    per[e.jobId] = (per[e.jobId] || 0) + w; grand += w;
+  });
+  var ids = Object.keys(per);
+  if (!ids.length) { document.getElementById('pm-jobs').innerHTML = '<p class="small muted">No countable entries this week.</p>'; return; }
+  var html = '<table><thead><tr><th>Job</th><th class="num">Labor h</th><th class="num">Share</th></tr></thead><tbody>';
+  ids.sort(function (a, b) { return per[b] - per[a]; }).forEach(function (jid) {
+    html += '<tr><td>' + esc(jobById(jid) ? jobById(jid).name : jid) + '</td>' +
+      '<td class="num"><b>' + fmtH(per[jid]) + '</b></td>' +
+      '<td class="num">' + (grand ? Math.round(per[jid] / grand * 100) : 0) + '%</td></tr>';
+  });
+  html += '<tr class="totalrow"><td>All jobs</td><td class="num">' + fmtH(grand) + '</td><td class="num">100%</td></tr></tbody></table>';
+  document.getElementById('pm-jobs').innerHTML = html;
+}
+function renderPmEntries() {
+  var now = Date.now();
+  var list = entriesInWeek(state.weekOffset).slice().sort(function (a, b) { return a.clockIn - b.clockIn; });
+  if (!list.length) { document.getElementById('pm-entries').innerHTML = '<p class="small muted">No entries this week.</p>'; return; }
+  var html = '<table><thead><tr><th>Employee</th><th>Date</th><th>Job</th><th>In</th><th>Out</th><th class="num">Break h</th><th class="num">Paid h</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+  list.forEach(function (e) {
+    var stale = isStale(e, now);
+    var st = e.clockOut == null ? (stale ? 'stale' : 'open') : e.status;
+    var stChip = { approved: 'ok', rejected: 'hard', pending: 'warn', open: 'ok', stale: 'hard' }[st];
+    var canJudge = e.clockOut != null;
+    var audit = '';
+    if (e.edits && e.edits.length) {
+      audit = '<div class="audit"><b>Audit trail:</b><br>' + e.edits.map(function (ed) {
+        var parts = [];
+        for (var k in ed.changes) {
+          var c = ed.changes[k];
+          var f = k === 'breakMinutes' ? c.from + ' min' : fmtDT(c.from);
+          var t = k === 'breakMinutes' ? c.to + ' min' : fmtDT(c.to);
+          parts.push(esc(k) + ': <del>' + esc(f) + '</del> &rarr; <ins>' + esc(t) + '</ins>');
+        }
+        return esc(ed.by) + ' on ' + esc(fmtDT(ed.at)) + ' — ' + parts.join('; ') +
+          (ed.note ? ' <i>(' + esc(ed.note) + ')</i>' : '');
+      }).join('<br>') + '</div>';
+    }
+    html += '<tr><td><b>' + esc(empById(e.empId).name) + '</b></td>' +
+      '<td>' + esc(fmtD(e.clockIn)) + '</td>' +
+      '<td class="small">' + esc(jobById(e.jobId).name) + '</td>' +
+      '<td>' + esc(fmtT(e.clockIn)) + '</td>' +
+      '<td>' + esc(fmtT(e.clockOut)) + (e.clockOut != null && dayStart(e.clockOut) !== dayStart(e.clockIn) ? ' <span class="small muted">(+1d)</span>' : '') + '</td>' +
+      '<td class="num">' + fmtH(breakMs(e, now)) + '</td>' +
+      '<td class="num"><b>' + (stale ? '—' : fmtH(workedMs(e, now))) + '</b></td>' +
+      '<td><span class="flag ' + stChip + '">' + st + '</span>' +
+        (stale ? ' <span class="flag hard">left open &gt;16 h</span>' : '') +
+        (e.seeded ? ' <span class="flag demo">demo</span>' : '') +
+        (e.edits && e.edits.length ? ' <span class="flag warn">edited</span>' : '') + audit + '</td>' +
+      '<td style="white-space:nowrap">' +
+        (canJudge && st !== 'approved' ? '<button class="btn small" data-act="approve" data-id="' + e.id + '" type="button">Approve</button> ' : '') +
+        (canJudge && st !== 'rejected' ? '<button class="btn small ghost" data-act="reject" data-id="' + e.id + '" type="button">Reject</button> ' : '') +
+        '<button class="btn small secondary" data-act="edit" data-id="' + e.id + '" type="button">Edit</button>' +
+      '</td></tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('pm-entries').innerHTML = html;
+}
+
+/* ---------------- PM actions ---------------- */
+var editingId = null;
+function openEdit(id) {
+  var e = entries().filter(function (x) { return x.id === id; })[0];
+  if (!e) return;
+  editingId = id;
+  document.getElementById('ed-in').value = toLocalInput(e.clockIn);
+  document.getElementById('ed-out').value = toLocalInput(e.clockOut == null ? Date.now() : e.clockOut);
+  document.getElementById('ed-break').value = Math.round(breakMs(e, e.clockOut == null ? Date.now() : e.clockOut) / 60000);
+  document.getElementById('ed-error').innerHTML = '';
+  var audit = document.getElementById('ed-audit');
+  if (e.edits && e.edits.length) {
+    audit.innerHTML = '<div class="audit"><b>Previous edits (originals preserved):</b><br>' +
+      e.edits.map(function (ed) {
+        var parts = [];
+        for (var k in ed.changes) {
+          var c = ed.changes[k];
+          var f = k === 'breakMinutes' ? c.from + ' min' : fmtDT(c.from);
+          var t = k === 'breakMinutes' ? c.to + ' min' : fmtDT(c.to);
+          parts.push(esc(k) + ': <del>' + esc(f) + '</del> &rarr; <ins>' + esc(t) + '</ins>');
+        }
+        return esc(ed.by) + ' — ' + esc(fmtDT(ed.at)) + ': ' + parts.join('; ');
+      }).join('<br>') + '</div>';
+  } else audit.innerHTML = '<p class="small muted">No prior edits on this entry.</p>';
+  document.getElementById('dlg-edit').showModal();
+}
+function saveEdit() {
+  var e = entries().filter(function (x) { return x.id === editingId; })[0];
+  if (!e) return;
+  var errEl = document.getElementById('ed-error');
+  var nIn = fromLocalInput(document.getElementById('ed-in').value);
+  var nOut = fromLocalInput(document.getElementById('ed-out').value);
+  var nBrk = Math.max(0, Math.round(Number(document.getElementById('ed-break').value) || 0));
+  var by = document.getElementById('ed-by').value.trim() || 'Project Manager (demo)';
+  if (nIn == null || nOut == null) { errEl.innerHTML = '<div class="alert bad">Both clock in and clock out are required.</div>'; return; }
+  if (nOut <= nIn) { errEl.innerHTML = '<div class="alert bad">Clock out must be after clock in (shifts crossing midnight: use the next day’s date).</div>'; return; }
+  if (nBrk * 60000 >= nOut - nIn) { errEl.innerHTML = '<div class="alert bad">Break cannot be as long as the whole shift.</div>'; return; }
+  var oldBrk = Math.round(breakMs(e, e.clockOut == null ? Date.now() : e.clockOut) / 60000);
+  var changes = {};
+  if (nIn !== e.clockIn) changes.clockIn = { from: e.clockIn, to: nIn };
+  if (nOut !== e.clockOut) changes.clockOut = { from: e.clockOut, to: nOut };
+  if (nBrk !== oldBrk) changes.breakMinutes = { from: oldBrk, to: nBrk };
+  if (!Object.keys(changes).length) { document.getElementById('dlg-edit').close(); return; }
+  var brs = e.breaks;
+  if ('breakMinutes' in changes || 'clockIn' in changes || 'clockOut' in changes) {
+    // re-materialize the break as one segment centered mid-shift (timestamps stay the source of truth)
+    if (nBrk > 0) { var mid = nIn + Math.round((nOut - nIn) / 2) - Math.round(nBrk * 60000 / 2); brs = [{ start: mid, end: mid + nBrk * 60000 }]; }
+    else brs = [];
+  }
+  var edits = (e.edits || []).concat([{ at: Date.now(), by: by, changes: changes }]);
+  Store.updateEntry(e.id, { clockIn: nIn, clockOut: nOut, breaks: brs, edits: edits,
+                            status: e.status === 'open' ? 'pending' : e.status });
+  document.getElementById('dlg-edit').close();
+  toast('Entry edited — audit trail updated');
+  renderAll();
+}
+function judge(id, status) {
+  Store.updateEntry(id, { status: status });
+  toast('Entry ' + status);
+  renderAll();
+}
+
+/* ---------------- CSV export ---------------- */
+function csvEscape(v) {
+  v = String(v == null ? '' : v);
+  return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}
+function buildCsv() {
+  var now = Date.now();
+  var r = weekRange(state.weekOffset);
+  var list = entriesInWeek(state.weekOffset).slice().sort(function (a, b) { return a.clockIn - b.clockIn; });
+  var head = ['entry_id', 'employee', 'role', 'job', 'date', 'clock_in_iso', 'clock_out_iso',
+    'clock_in_ms', 'clock_out_ms', 'break_ms', 'worked_ms', 'worked_hours_precise', 'status',
+    'stale_open', 'crosses_midnight', 'edited', 'seeded_demo'];
+  var rows = [head.join(',')];
+  list.forEach(function (e) {
+    var emp = empById(e.empId), job = jobById(e.jobId);
+    var stale = isStale(e, now);
+    var w = workedMs(e, now);
+    rows.push([
+      e.id, emp ? emp.name : e.empId, emp ? emp.role : '', job ? job.name : e.jobId,
+      new Date(e.clockIn).toISOString().slice(0, 10),
+      new Date(e.clockIn).toISOString(),
+      e.clockOut == null ? '' : new Date(e.clockOut).toISOString(),
+      e.clockIn, e.clockOut == null ? '' : e.clockOut,
+      breakMs(e, now), stale ? '' : w,
+      stale ? '' : (w / HOUR),                       // full precision, not rounded
+      e.clockOut == null ? (stale ? 'stale-open' : 'open') : e.status,
+      stale ? 'yes' : '',
+      e.clockOut != null && dayStart(e.clockOut) !== dayStart(e.clockIn) ? 'yes' : '',
+      e.edits && e.edits.length ? 'yes' : '', e.seeded ? 'yes' : ''
+    ].map(csvEscape).join(','));
+  });
+  return { name: 'timesheet-week-' + new Date(r.start).toISOString().slice(0, 10) + '.csv', text: rows.join('\n') };
+}
+function exportCsv() {
+  var c = buildCsv();
+  try {
+    var blob = new Blob([c.text], { type: 'text/csv' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = c.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+  } catch (err) { /* fall through to the copy dialog */ }
+  document.getElementById('csv-text').value = c.text;
+  document.getElementById('dlg-csv').showModal();
+}
+
+/* ---------------- render root ---------------- */
+function renderAll() {
+  renderEmpSelectors();
+  renderEmployee();
+  renderRoster();
+  renderWeekNav();
+  renderMatrix();
+  renderJobTotals();
+  renderPmEntries();
+  document.getElementById('storage-warning').innerHTML = Store.ok() ? '' :
+    '<div class="alert warn"><b>Browser storage unavailable.</b> The demo still works, but changes are kept in memory only and vanish on reload.</div>';
+}
+function setView(v) {
+  state.view = v;
+  document.getElementById('view-emp').hidden = v !== 'emp';
+  document.getElementById('view-pm').hidden = v !== 'pm';
+  document.getElementById('tab-emp').classList.toggle('active', v === 'emp');
+  document.getElementById('tab-pm').classList.toggle('active', v === 'pm');
+  renderAll();
+}
+
+/* ---------------- wiring ---------------- */
+function init() {
+  Store.seed(false);
+  var emps = employees();
+  state.me = emps.length ? emps[0].id : null;
+  document.getElementById('tab-emp').addEventListener('click', function () { setView('emp'); });
+  document.getElementById('tab-pm').addEventListener('click', function () { setView('pm'); });
+  document.getElementById('sel-emp').addEventListener('change', function (ev) { state.me = ev.target.value; empError(''); renderAll(); });
+  document.getElementById('btn-in').addEventListener('click', doClockIn);
+  document.getElementById('btn-out').addEventListener('click', doClockOut);
+  document.getElementById('btn-break').addEventListener('click', doBreakToggle);
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    Store.resetDemo(); state.weekOffset = 0; toast('Demo data reset'); renderAll();
+  });
+  document.getElementById('wk-prev').addEventListener('click', function () { state.weekOffset--; renderAll(); });
+  document.getElementById('wk-next').addEventListener('click', function () { state.weekOffset++; renderAll(); });
+  document.getElementById('btn-csv').addEventListener('click', exportCsv);
+  document.getElementById('pm-entries').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button[data-act]');
+    if (!b) return;
+    if (b.dataset.act === 'approve') judge(b.dataset.id, 'approved');
+    else if (b.dataset.act === 'reject') judge(b.dataset.id, 'rejected');
+    else if (b.dataset.act === 'edit') openEdit(b.dataset.id);
+  });
+  document.getElementById('ed-save').addEventListener('click', saveEdit);
+  document.getElementById('ed-cancel').addEventListener('click', function () { document.getElementById('dlg-edit').close(); });
+  document.getElementById('csv-close').addEventListener('click', function () { document.getElementById('dlg-csv').close(); });
+  document.getElementById('csv-copy').addEventListener('click', function () {
+    var ta = document.getElementById('csv-text'); ta.select();
+    try { navigator.clipboard.writeText(ta.value); toast('CSV copied'); }
+    catch (e) { try { document.execCommand('copy'); toast('CSV copied'); } catch (e2) { toast('Select the text and copy manually'); } }
+  });
+  renderAll();
+  // durations always derive from timestamps, so a backgrounded tab loses nothing;
+  // this interval only refreshes what is displayed.
+  setInterval(function () {
+    tickElapsed();
+    if (state.view === 'pm') renderRoster();
+  }, 1000);
+}
+init();
+</script>
