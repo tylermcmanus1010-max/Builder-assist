@@ -4534,6 +4534,7 @@ function loadDB(){ try{DB=JSON.parse(localStorage.getItem(PKEY));}catch(e){DB=nu
   if(Array.isArray(DB.importedComp)) DB.importedComp.forEach(ic=>DB.competitors.push(ic));
   _gradeCache={};
   if(!DB.walkthroughs) DB.walkthroughs=[];
+  if(!DB.pricingLeads) DB.pricingLeads=[];
   if(!DB.buildOrders) DB.buildOrders=[];
   if(!DB.boseq) DB.boseq=5001;
   if(!DB.config) DB.config=JSON.parse(JSON.stringify(DEFAULT_CONFIG));
@@ -4734,13 +4735,18 @@ function viewGetPricing(){
     <header class="portal-auth-header"><a href="#/">${PLOGO}</a><a href="#/">&larr; Back to Builder Assist</a></header>
     <section class="portal-auth-shell">
       <div class="portal-auth-story"><span>BUILDER ASSIST / GET PRICING</span><h1>Tell us the<br><em>scope.</em></h1><p>Share linear footage, square footage, product type, and job location and the Builder Assist team aligns available inventory, quantities, and fulfillment.</p><div><strong>FENCING</strong><strong>FLOORING</strong><strong>AUTOQUOTE</strong></div></div>
-      <div class="portal-auth-card"><span>REQUEST PRICING</span><h2>Start a quote.</h2><p>This booking flow is part of the live site; in this prototype it is a placeholder. Use the portals to see the interactive dashboards.</p>
-        <form class="portal-login-form" data-noop>
-          <label><span>NAME</span><input placeholder="Your name"></label>
-          <label><span>COMPANY</span><input placeholder="Company"></label>
-          <label><span>WHAT DO YOU NEED?</span><input placeholder="Fencing, flooring, or AutoQuote"></label>
-          <button type="submit">Request pricing <b aria-hidden="true">&rarr;</b></button>
+      <div class="portal-auth-card"><span>REQUEST PRICING</span><h2>Start a quote.</h2><p>Tell us the scope and a Builder Assist team member follows up. Your request is saved to the team&rsquo;s queue, and you get a copy you can send us directly.</p>
+        <form class="portal-login-form" data-pricingsubmit>
+          <label><span>NAME</span><input name="name" placeholder="Your name" required></label>
+          <label><span>COMPANY</span><input name="company" placeholder="Company"></label>
+          <label><span>PHONE</span><input name="phone" placeholder="(517) 555-0123" required></label>
+          <label><span>EMAIL</span><input name="email" type="email" placeholder="you@company.com" required></label>
+          <label style="grid-column:1/-1"><span>WHAT DO YOU NEED?</span><input name="need" placeholder="Fencing, flooring, or AutoQuote" required></label>
+          <label style="grid-column:1/-1"><span>SCOPE &mdash; LF, SF, PRODUCT, LOCATION</span><input name="scope" placeholder="e.g. 1,600 LF temporary fence, Phoenix AZ, 6 months"></label>
+          <button type="submit" style="grid-column:1/-1">Request pricing <b aria-hidden="true">&rarr;</b></button>
+          <p class="portal-form-error" data-pricingerr hidden></p>
         </form>
+        <div id="pricingDone" hidden></div>
         <small>Member access? <a href="#/member-signin">Member sign in</a> &middot; <a href="#/admin-signin">Admin sign in</a></small>
       </div>
     </section>
@@ -5307,9 +5313,21 @@ function adminCompetitorsBody(){
   </section>`;
 }
 
+function adminPricingLeadsPanel(){
+  const rows=DB.pricingLeads||[];
+  return `
+  <section class="ac-panel">
+    <header class="ac-phead"><div><span>PRICING REQUESTS</span><h2>Inbound pricing requests</h2><p>Submitted from the public Get pricing page. Newest first.</p></div></header>
+    ${rows.length ? `<table class="ac-table"><thead><tr><th>Code</th><th>Name</th><th>Company</th><th>Contact</th><th>Need</th><th>Scope</th><th>Received</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr><td><b>${esc(r.code)}</b></td><td>${esc(r.name)}</td><td>${esc(r.company||"—")}</td>
+        <td>${esc(r.phone)}<br><small>${esc(r.email)}</small></td><td>${esc(r.need)}</td>
+        <td>${esc(r.scope||"—")}</td><td>${esc(r.createdAt)}</td></tr>`).join("")}
+    </tbody></table>` : `<p class="ac-empty">No pricing requests yet. They arrive here when a visitor submits the Get pricing form.</p>`}
+  </section>`;
+}
 function adminWalkthroughsBody(){
   const whs=DB.config.warehouses, reqs=DB.walkthroughs;
-  return `
+  return adminPricingLeadsPanel() + `
   <section class="ac-panel">
     <header class="ac-phead"><div><span>WAREHOUSE WALKTHROUGHS</span><h2>Locations &amp; requests</h2><p>Manage the locations shown on the landing-page scheduler and review incoming complimentary walkthrough requests.</p></div></header>
     <div class="ac-wh">
@@ -7512,6 +7530,49 @@ function submitWalkthrough(f){
   wt={location:wt.location, date:null, time:null, monthOffset:0};
   location.hash="#/walkthrough-done";
 }
+function submitPricing(f){
+  const fd=new FormData(f), err=f.querySelector("[data-pricingerr]");
+  const get=k=>String(fd.get(k)||"").trim();
+  const name=get("name"), phone=get("phone"), email=get("email"), need=get("need");
+  if(!name||!phone||!email||!need){
+    if(err){ err.hidden=false; err.textContent="Add your name, phone, email, and what you need so we can price it."; }
+    return;
+  }
+  const r={ id:Date.now(), code:"PR-"+(1000+DB.pricingLeads.length+1), name:name, company:get("company"),
+    phone:phone, email:email, need:need, scope:get("scope"),
+    status:"new", createdAt:new Date().toLocaleDateString() };
+  DB.pricingLeads.unshift(r); saveDB();
+
+  const body=["Pricing request "+r.code,"","Name: "+r.name,"Company: "+(r.company||"—"),
+    "Phone: "+r.phone,"Email: "+r.email,"Need: "+r.need,"Scope: "+(r.scope||"—")].join("\n");
+  const host=f.parentNode.querySelector("#pricingDone");
+  f.hidden=true;
+  if(host){
+    host.hidden=false;
+    host.innerHTML='<span>REQUEST '+esc(r.code)+' SAVED</span>'
+      + '<h2>We have your scope.</h2>'
+      + '<p>A Builder Assist team member follows up by phone. To reach us right now, call or send the summary below.</p>'
+      + '<p style="display:flex;gap:10px;flex-wrap:wrap">'
+      + '<a class="button button-cyan" href="tel:+15178550947">Call (517) 855-0947</a>'
+      + '<button type="button" data-pricingcopy>Copy the details</button></p>'
+      + '<textarea readonly id="pricingBody" rows="8" style="width:100%;font:12px/1.5 Arial,Helvetica,sans-serif">'
+      + esc(body) + '</textarea>';
+    host.scrollIntoView({block:"nearest"});
+  }
+}
+function copyPricingDetails(){
+  const ta=document.getElementById("pricingBody"); if(!ta) return;
+  ta.select();
+  // Clipboard API is unavailable or permission-gated in some embeds; the
+  // textarea stays selected either way so the viewer can copy by hand.
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(ta.value).then(()=>toast("Details copied"),()=>toast("Press Ctrl/Cmd+C to copy"));
+      return;
+    }
+    toast(document.execCommand && document.execCommand("copy") ? "Details copied" : "Press Ctrl/Cmd+C to copy");
+  }catch(err){ toast("Press Ctrl/Cmd+C to copy"); }
+}
 function saveConfig(f){
   const fd=new FormData(f); const n=k=>+fd.get(k);
   DB.config.rates={ waste:n("waste"), labmult:n("labmult"), conting:n("conting"), ohp:n("ohp") };
@@ -7548,16 +7609,18 @@ function importCompetitorCSV(file){
 document.addEventListener("submit", (e)=>{
   const f=e.target;
   if(f.dataset.wtsubmit!==undefined){ e.preventDefault(); submitWalkthrough(f); return; }
+  if(f.dataset.pricingsubmit!==undefined){ e.preventDefault(); submitPricing(f); return; }
   if(f.dataset.cfgsave!==undefined){ e.preventDefault(); saveConfig(f); return; }
   if(f.dataset.whsave!==undefined){ e.preventDefault(); saveWarehouse(f, +f.dataset.whsave); return; }
 });
 document.addEventListener("click", (e)=>{
-  const t=e.target.closest("[data-calmonth],[data-calday],[data-calslot],[data-cfgreset],[data-wtdone]");
+  const t=e.target.closest("[data-calmonth],[data-calday],[data-calslot],[data-cfgreset],[data-wtdone],[data-pricingcopy]");
   if(!t) return;
   if(t.dataset.calmonth!==undefined){ e.preventDefault(); wt.monthOffset=Math.max(0, wt.monthOffset + (+t.dataset.calmonth)); refreshWt(); return; }
   if(t.dataset.calday!==undefined){ e.preventDefault(); wt.date=t.dataset.calday; refreshWt(); return; }
   if(t.dataset.calslot!==undefined){ e.preventDefault(); wt.time=t.dataset.calslot; refreshWt(); return; }
   if(t.dataset.cfgreset!==undefined){ e.preventDefault(); DB.config=JSON.parse(JSON.stringify(DEFAULT_CONFIG)); saveDB(); show("admin-portal","autoquote"); toast("Reset to Builder Assist defaults"); return; }
+  if(t.dataset.pricingcopy!==undefined){ e.preventDefault(); copyPricingDetails(); return; }
   if(t.dataset.wtdone!==undefined){ e.preventDefault(); const id=+t.dataset.wtdone; const r=DB.walkthroughs.find(x=>x.id===id); if(r){ r.status="done"; saveDB(); show("admin-portal","walkthroughs"); } return; }
 });
 document.addEventListener("change", (e)=>{

@@ -316,6 +316,13 @@ function fmtD(t) {
   return new Date(t).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
 }
 function fmtDT(t) { return t == null ? '—' : fmtD(t) + ' ' + fmtT(t); }
+// The UI attributes a shift to a day in the viewer's local time, so the CSV
+// date column must too - toISOString() would push an evening shift onto the
+// next day's payroll. The raw epoch columns stay exact for reconciliation.
+function localDateKey(t) {
+  var d = new Date(t), p = function (n) { return String(n).padStart(2, '0'); };
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
 function toLocalInput(t) {
   if (t == null) return '';
   var d = new Date(t - new Date(t).getTimezoneOffset() * 60000);
@@ -1027,7 +1034,7 @@ function renderMyRequests() {
       '<div class="rhead"><span class="rref">' + esc(r.ref) + ' · ' +
         (r.type === 'correction' ? 'Correction' : 'Missing shift') + '</span>' +
         '<span>' + statusFlag(r) + (r.seeded ? ' <span class="flag demo">demo</span>' : '') + '</span></div>' +
-      proposalSummary(r) + requestDelta(r) +
+      proposalSummary(r) + (r.status === 'pending' ? requestDelta(r) : '') +
       '<div class="reason"><b>Reason:</b> ' + esc(r.reason) + '</div>' +
       (r.status === 'approved'
         ? '<div class="small" style="margin-top:8px;color:var(--ok)"><b>Approved</b> by ' + esc(r.decidedBy) + ' on ' +
@@ -1386,7 +1393,7 @@ function buildCsv() {
     var w = workedMs(e, now);
     rows.push([
       e.id, emp ? emp.name : e.empId, emp ? emp.role : '', job ? job.name : e.jobId,
-      new Date(e.clockIn).toISOString().slice(0, 10),
+      localDateKey(e.clockIn),
       new Date(e.clockIn).toISOString(),
       e.clockOut == null ? '' : new Date(e.clockOut).toISOString(),
       e.clockIn, e.clockOut == null ? '' : e.clockOut,
