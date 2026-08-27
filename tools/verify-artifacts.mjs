@@ -27,7 +27,8 @@ function loadPlaywright() {
 }
 const { chromium } = loadPlaywright();
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { basename, join } from 'node:path';
+import { basename, dirname, join, resolve, sep } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const FRAME_RUNTIME = /<!-- frame-runtime -->[\s\S]*?<!-- \/frame-runtime -->/g;
 const BASE_TAG = /<base\s+href="\/_f\/[^"]*"\s*>/g;
@@ -96,7 +97,15 @@ function detectCapabilities(html) {
 
 async function verify(page, file, outDir) {
   const raw = await readFile(file, 'utf8');
-  const { html, frameRuntimeRemoved, bytesRemoved } = unwrap(raw);
+  const unwrapped = unwrap(raw);
+  let { html } = unwrapped;
+  const { frameRuntimeRemoved, bytesRemoved } = unwrapped;
+  // The report copy lives outside the source directory. Preserve the source
+  // directory as the base so checked-in relative scripts, styles, JSON, and
+  // iframes are exercised instead of producing false missing-file failures.
+  const sourceBase = pathToFileURL(resolve(dirname(file)) + sep).href;
+  if (!/<base\b/i.test(html)) html = html.replace(/<head([^>]*)>/i, `<head$1><base href="${sourceBase}">`);
+  const artifactKey = `${basename(dirname(file))}-${basename(file, '.html')}`;
   const capabilities = detectCapabilities(html);
   const externalRefs = findExternalRefs(html);
   const cspBlocked = externalRefs.filter((r) => r.kind === 'subresource' && !r.allowed);
@@ -123,7 +132,7 @@ async function verify(page, file, outDir) {
     failedRequests.push({ url: r.url().slice(0, 200), reason: r.failure()?.errorText });
   });
 
-  const tmp = join(outDir, basename(file).replace(/\.html$/, '.unwrapped.html'));
+  const tmp = join(outDir, `${artifactKey}.unwrapped.html`);
   await writeFile(tmp, html);
 
   const started = Date.now();
@@ -199,7 +208,7 @@ async function verify(page, file, outDir) {
   } catch {}
 
   await page.screenshot({
-    path: join(outDir, basename(file).replace(/\.html$/, '.png')),
+    path: join(outDir, `${artifactKey}.png`),
     fullPage: false,
   });
 
@@ -345,7 +354,7 @@ async function verify(page, file, outDir) {
         await p2.waitForTimeout(400);
       } catch {}
       await p2.screenshot({
-        path: join(outDir, basename(file).replace(/\.html$/, '.390.png')),
+        path: join(outDir, `${artifactKey}.390.png`),
         fullPage: false,
       });
       return r;
@@ -404,7 +413,7 @@ async function verify(page, file, outDir) {
     problems.push(`${controls.deadForms.length} form(s) with no submit handling`);
 
   return {
-    file: basename(file),
+    file,
     status:
       problems.length === 0
         ? 'PASS'
@@ -448,7 +457,7 @@ for (const f of files) {
   try {
     results.push(await verify(page, f, outDir));
   } catch (e) {
-    results.push({ file: basename(f), status: 'FAIL', problems: ['harness error: ' + e.message] });
+    results.push({ file: f, status: 'FAIL', problems: ['harness error: ' + e.message] });
   }
   await ctx.close();
 }

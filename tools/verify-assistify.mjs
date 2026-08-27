@@ -1,0 +1,58 @@
+#!/usr/bin/env node
+import { createRequire } from 'node:module';
+import { createServer } from 'node:http';
+import { readFile } from 'node:fs/promises';
+import { extname, join, normalize, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const req=createRequire(import.meta.url);
+function loadPlaywright(){for(const name of ['playwright','playwright-core']){try{return req(name);}catch{}}throw new Error('playwright or playwright-core is required');}
+const {chromium}=loadPlaywright();
+const repo=resolve(fileURLToPath(new URL('..',import.meta.url)));
+const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.css':'text/css; charset=utf-8'};
+const server=createServer(async(request,response)=>{try{const pathname=decodeURIComponent(new URL(request.url,'http://127.0.0.1').pathname);const path=normalize(join(repo,pathname));if(relative(repo,path).startsWith('..'))throw new Error('outside root');const data=await readFile(path);response.writeHead(200,{'content-type':mime[extname(path)]||'application/octet-stream','cache-control':'no-store'});response.end(data);}catch(error){response.writeHead(404);response.end('not found');}});
+await new Promise(resolveListen=>server.listen(0,'127.0.0.1',resolveListen));
+const port=server.address().port,url=`http://127.0.0.1:${port}/web/blueprint-3d/index.html`;
+const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||undefined});
+let passed=0,failed=0;
+function check(condition,label,detail=''){if(condition){passed++;console.log('PASS',label);}else{failed++;console.error('FAIL',label,detail);}}
+function fixture(){
+  const hash='0'.repeat(64),ref={documentId:'plan-a',page:1,region:'detail A'};
+  const stages=['site-controls','clearing-erosion','earthwork-grading','underground-utilities','footings','foundation-waterproofing','slabs-flatwork','floor-structure','wall-framing-sheathing','roof-structure-envelope','mep-insulation','finishes-closeout'];
+  return {schemaVersion:'1.0.0',project:{id:'verification-fixture',displayName:'Verification fixture',status:'VERIFIED'},units:'ft',sources:{documents:[{id:'plan-a',title:'Synthetic verification plan',sha256:hash,pageCount:1,revision:'TEST',status:'CURRENT'}]},facts:{supported:{state:'VERIFIED',value:true,unit:null,confidence:1,sourceRefs:[ref],derivation:null,reviewedBy:'test',reviewedAt:'2026-08-27T00:00:00Z'}},parcel:{state:'UNVERIFIED',value:null,sourceRefs:[]},terrain:{state:'UNVERIFIED',value:null,sourceRefs:[]},systems:{state:'UNVERIFIED',value:null,sourceRefs:[]},mapRegistration:{state:'UNVERIFIED',value:null,sourceRefs:[]},geometry:{elements:stages.map((stage,index)=>({id:'element-'+(index+1),name:'Stage '+(index+1)+' verification element',type:'box',buildStage:stage,state:'VERIFIED',sourceRefs:[ref],factRefs:['supported'],role:index<4?'earth':index<8?'concrete':'wood',geometry:{min:[index*3,index%2*4,index*.4],size:[2,2,1]}}))},takeoff:{items:[]},unresolved:[{id:'parcel',label:'Parcel',state:'UNVERIFIED',reason:'Synthetic fixture has no parcel.'}]};
+}
+
+async function freshPage(viewport,reducedMotion='no-preference'){
+  const context=await browser.newContext({viewport,reducedMotion});const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(String(error)));page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});await page.goto(url,{waitUntil:'networkidle'});await page.waitForFunction(()=>window.assistifyViewer&&window.Assistify3D);return{context,page,errors};
+}
+
+try{
+  const run=await freshPage({width:1440,height:900}),page=run.page;
+  const counts=await page.evaluate(()=>({stages:Assistify3D.STAGES.length,tools:Assistify3D.TOOLS.length,buttons:document.querySelectorAll('[data-tool]').length,uniqueStages:new Set(Assistify3D.STAGES.map(x=>x.id)).size,uniqueTools:new Set(Assistify3D.TOOLS.map(x=>x.id)).size}));
+  check(counts.stages===12&&counts.uniqueStages===12,'exactly 12 unique construction stages',JSON.stringify(counts));
+  check(counts.tools===12&&counts.uniqueTools===12&&counts.buttons===12,'exactly 12 unique reachable Assistify tools',JSON.stringify(counts));
+  const truth=await page.evaluate(()=>({map:document.querySelector('[data-tool="map-sync"]').disabled,source:document.querySelector('[data-tool="source"]').disabled,geometry:assistifyViewer.getModel().geometry.elements.length,unknown:document.querySelectorAll('#unknownList li').length,status:document.querySelector('#projectStatus').textContent}));
+  check(truth.map&&truth.source&&truth.geometry===0&&truth.unknown>=4&&truth.status==='UNVERIFIED','empty boot model remains truthful and evidence-gated',JSON.stringify(truth));
+  const validation=await page.evaluate(model=>{const invalid=structuredClone(model);invalid.geometry.elements[0].sourceRefs=[];const unresolved=structuredClone(model);unresolved.parcel.value=12;const badMap=structuredClone(model);badMap.mapRegistration={state:'VERIFIED',value:{controlPoints:[]},sourceRefs:[{documentId:'plan-a',page:1,region:'detail A'}]};return{valid:Assistify3D.validateModel(model),missingCitation:Assistify3D.validateModel(invalid),falseUnknown:Assistify3D.validateModel(unresolved),badMap:Assistify3D.validateModel(badMap)};},fixture());
+  check(validation.valid.length===0,'valid source-linked model accepted',validation.valid.join(' | '));
+  check(validation.missingCitation.length>0&&validation.falseUnknown.length>0&&validation.badMap.length>0,'missing provenance, false unknowns, and unsupported map registration rejected');
+  await page.evaluate(model=>assistifyViewer.loadModel(model),fixture());
+  const operations=await page.evaluate(async()=>{const results={};for(const id of ['orbit','pan','zoom','measure','inspect']){document.querySelector(`[data-tool="${id}"]`).click();results[id]=document.querySelector(`[data-tool="${id}"]`).getAttribute('aria-pressed');}document.querySelector('[data-tool="fit"]').click();document.querySelector('[data-tool="stage-filter"]').click();results.stageFocus=document.activeElement.id;document.querySelector('[data-tool="dimensions"]').click();results.dimensions=document.querySelector('[data-tool="dimensions"]').getAttribute('aria-pressed');document.querySelector('[data-tool="section"]').click();results.section=document.querySelector('[data-tool="section"]').textContent;return results;});
+  check(['orbit','pan','zoom','measure','inspect'].every(id=>operations[id]==='true')&&operations.stageFocus==='stageSelect'&&/Section [XY]/.test(operations.section),'enabled camera, filter, dimensions, measurement, section, and inspection tools perform operations',JSON.stringify(operations));
+  const stageCounts=[];for(let i=0;i<12;i++){await page.selectOption('#stageSelect',String(i));stageCounts.push(await page.locator('#visibleCount').textContent());}
+  check(stageCounts.join(',')==='1,2,3,4,5,6,7,8,9,10,11,12','all 12 stages control actual fixture geometry',stageCounts.join(','));
+  const evidence=await page.evaluate(()=>({docs:document.querySelectorAll('#planRegister li').length,outline:document.querySelectorAll('#modelOutline li').length,stored:!!localStorage.getItem('assistify3d:model:verification-fixture'),scoped:!!localStorage.getItem('assistify3d:v1:verification-fixture:view')}));
+  check(evidence.docs===1&&evidence.outline===12,'plan register and nonvisual 12-stage outline rendered',JSON.stringify(evidence));
+  check(evidence.stored&&evidence.scoped,'project model and view state persist under project-scoped keys',JSON.stringify(evidence));
+  await page.reload({waitUntil:'networkidle'});await page.waitForFunction(()=>window.assistifyViewer);check((await page.locator('#projectName').textContent())==='Verification fixture','project-scoped model restores after reload');
+  const before=await page.locator('[data-tool="dimensions"]').getAttribute('aria-pressed');await page.locator('#modelCanvas').focus();await page.keyboard.press('d');const after=await page.locator('[data-tool="dimensions"]').getAttribute('aria-pressed');check(before!==after,'keyboard shortcut performs a real dimensions operation');
+  check(run.errors.length===0,'desktop run has no page or console errors',run.errors.join(' | '));await run.context.close();
+
+  const sizes=[[320,568],[390,844],[768,1024],[1366,768],[1440,900],[1920,1080]];
+  for(const [width,height] of sizes){const current=await freshPage({width,height}),metrics=await current.page.evaluate(()=>({overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,buttons:[...document.querySelectorAll('[data-tool]')].every(button=>{const r=button.getBoundingClientRect();return r.width>0&&r.height>=44&&r.right<=document.documentElement.scrollWidth+1;})}));check(metrics.overflow<=0&&metrics.buttons&&current.errors.length===0,`${width}x${height} has no horizontal overflow and all tools are reachable`,JSON.stringify(metrics)+' '+current.errors.join(' | '));await current.context.close();}
+  const zoomed=await freshPage({width:1440,height:900});await zoomed.page.evaluate(()=>{document.documentElement.style.zoom='200%';});await zoomed.page.waitForTimeout(100);const zoomOverflow=await zoomed.page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);check(zoomOverflow<=0,'200% CSS zoom has no page-level horizontal overflow',String(zoomOverflow));await zoomed.context.close();
+  const reduced=await freshPage({width:390,height:844},'reduce');const disabled=await reduced.page.locator('[data-tool="sequence"]').isDisabled();check(disabled,'reduced motion disables automatic construction sequence');await reduced.context.close();
+}finally{await browser.close();await new Promise(resolveClose=>server.close(resolveClose));}
+
+console.log(`Assistify verification: ${passed} passed, ${failed} failed`);
+process.exit(failed?1:0);

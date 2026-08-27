@@ -10,6 +10,9 @@
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
+import { dirname, join, resolve, sep } from 'node:path';
+import { tmpdir } from 'node:os';
+import { pathToFileURL } from 'node:url';
 
 const req = createRequire(import.meta.url);
 function loadPlaywright() {
@@ -32,10 +35,12 @@ if (!file) {
 }
 
 const raw = await readFile(file, 'utf8');
-const html = raw
+let html = raw
   .replace(/<!-- frame-runtime -->[\s\S]*?<!-- \/frame-runtime -->/g, '')
   .replace(/<base\s+href="\/_f\/[^"]*"\s*>/g, '');
-const tmp = '/tmp/recompute-check.html';
+const sourceBase = pathToFileURL(resolve(dirname(file)) + sep).href;
+if (!/<base\b/i.test(html)) html = html.replace(/<head([^>]*)>/i, `<head$1><base href="${sourceBase}">`);
+const tmp = join(tmpdir(), `recompute-check-${process.pid}.html`);
 await writeFile(tmp, html);
 
 const browser = await chromium.launch({
@@ -44,7 +49,7 @@ const browser = await chromium.launch({
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errs = [];
 page.on('pageerror', (e) => errs.push(String(e).slice(0, 200)));
-await page.goto('file://' + tmp, { waitUntil: 'load' });
+await page.goto(pathToFileURL(tmp).href, { waitUntil: 'load' });
 await page.waitForTimeout(2000);
 
 const readTotals = () =>
