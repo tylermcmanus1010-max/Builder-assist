@@ -37,13 +37,18 @@
   .brand{font-weight:900;letter-spacing:.16em;text-transform:uppercase;font-size:17px;color:#fff}
   .brand span{color:var(--cyan)}
   .eyebrow{color:var(--cyan);font-weight:800;text-transform:uppercase;letter-spacing:.16em;font-size:11px;margin:0 0 6px}
-  .tabs{display:flex;gap:0;margin-top:16px}
-  .tabs button{appearance:none;border:1px solid rgba(255,255,255,.25);border-bottom:none;background:transparent;color:#cfe0ff;
-    font-weight:800;text-transform:uppercase;letter-spacing:.14em;font-size:12px;padding:11px 22px;cursor:pointer;border-radius:0}
-  .tabs button.active{background:var(--bg);color:var(--blue-bright);border-color:var(--bg)}
+  .sessionbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;
+    margin-top:14px;padding:10px 0 12px;border-top:1px solid rgba(255,255,255,.18);color:#cfe0ff;font-size:13px}
+  .sessionbar .who{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .sessionbar .nm{color:#fff;font-weight:900;letter-spacing:.06em}
+  .rolechip{display:inline-block;padding:4px 10px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.14em}
+  .rolechip.employer{background:var(--cyan);color:#04203f}
+  .rolechip.employee{background:#cfe0ff;color:#08214a}
   h1,h2,h3{color:var(--head);margin:0 0 10px;letter-spacing:.02em}
+  h1{font-size:22px;text-transform:uppercase;letter-spacing:.1em;font-weight:900}
   h2{font-size:20px;text-transform:uppercase;letter-spacing:.08em;font-weight:900}
   h3{font-size:14px;text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+  h3 .count{margin-left:8px}
   .demo-banner{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;
     background:var(--demo-bg);color:var(--demo);border:1px dashed var(--demo);padding:10px 14px;margin:18px 0;
     font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.1em}
@@ -52,9 +57,10 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   @media(max-width:860px){.grid2{grid-template-columns:1fr}}
   label.fld{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0 0 4px}
-  select,input[type=datetime-local],input[type=number],input[type=text]{
+  select,input[type=datetime-local],input[type=number],input[type=text],textarea{
     width:100%;padding:9px 10px;border:1px solid var(--line);background:var(--panel);color:var(--text);
     font-family:inherit;font-size:14px;border-radius:0}
+  textarea{resize:vertical;min-height:64px}
   .btn{appearance:none;border:none;border-radius:0;cursor:pointer;font-family:inherit;
     font-weight:900;text-transform:uppercase;letter-spacing:.14em;font-size:12px;padding:12px 20px;
     background:var(--blue);color:var(--btn-text)}
@@ -76,6 +82,10 @@
   .flag.warn{background:var(--warn-bg);color:var(--warn)}
   .flag.demo{background:var(--demo-bg);color:var(--demo)}
   .flag.ok{background:var(--ok-bg);color:var(--ok)}
+  .flag.info{background:var(--ice);color:var(--muted)}
+  .count{display:inline-block;min-width:22px;text-align:center;padding:2px 8px;font-size:11px;font-weight:900;
+    letter-spacing:.06em;background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn)}
+  .count.zero{background:var(--ice);color:var(--muted);border-color:var(--line)}
   .tablewrap{overflow-x:auto}
   table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
   th{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);text-align:left;
@@ -95,6 +105,7 @@
   .alert{padding:12px 14px;margin:0 0 14px;font-size:13px;border:1px solid}
   .alert.bad{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
   .alert.warn{background:var(--warn-bg);color:var(--warn);border-color:var(--warn)}
+  .alert.ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
   .audit{background:var(--ice);border:1px dashed var(--line);padding:8px 10px;font-size:12px;margin-top:6px}
   .audit del{color:var(--bad)}
   .audit ins{color:var(--ok);text-decoration:none;font-weight:700}
@@ -111,169 +122,99 @@
   .kv{display:flex;gap:26px;flex-wrap:wrap;margin:10px 0 0}
   .kv .k{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
   .kv .v{font-size:22px;font-weight:900;font-variant-numeric:tabular-nums}
+  /* --- sign-in --- */
+  .signin{max-width:620px;margin:34px auto 0}
+  .rolepick{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:6px 0 16px}
+  @media(max-width:620px){.rolepick{grid-template-columns:1fr}}
+  .rolepick button{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;
+    width:100%;height:100%;text-align:left;border:1px solid var(--line);border-radius:0;
+    background:var(--panel);color:var(--text);padding:14px;cursor:pointer;font-family:inherit}
+  .rolepick button.sel{border-color:var(--blue-bright);background:var(--ice);box-shadow:inset 0 0 0 2px var(--blue-bright)}
+  .rolepick .rt{font-weight:900;text-transform:uppercase;letter-spacing:.12em;font-size:12px;color:var(--head)}
+  .rolepick .rd{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.4}
+  .perms{font-size:12px;color:var(--muted);margin:10px 0 0;padding-left:18px}
+  .perms li{margin:3px 0}
+  /* --- requests --- */
+  .reqcard{border:1px solid var(--line);border-left:4px solid var(--line);padding:12px 14px;margin:0 0 12px;background:var(--panel)}
+  .reqcard.pending{border-left-color:var(--warn)}
+  .reqcard.approved{border-left-color:var(--ok)}
+  .reqcard.denied{border-left-color:var(--bad)}
+  .reqcard.withdrawn{border-left-color:var(--muted)}
+  .reqcard .rhead{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between}
+  .reqcard .rref{font-weight:900;letter-spacing:.1em;font-size:12px;text-transform:uppercase}
+  .reqcard .rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 18px;margin:10px 0 0;font-size:13px}
+  .reqcard .rk{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+  .reqcard .reason{margin-top:10px;font-size:13px;background:var(--ice);border:1px dashed var(--line);padding:8px 10px}
+  .reqactions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+  .reqactions input[type=text]{flex:1 1 200px;width:auto}
+  .delta{color:var(--muted)}
+  .delta del{color:var(--bad)} .delta ins{color:var(--ok);text-decoration:none;font-weight:700}
 </style>
 
 <header class="site"><div class="wrap">
   <div class="brandrow">
-    <div class="brand">Builder <span>Assist</span> · Employee Hub</div>
+    <div class="brand">Builder <span>Assist</span> &middot; Employee Hub</div>
     <div class="small" style="color:#cfe0ff">Time clock &amp; hours monitoring</div>
   </div>
-  <div class="tabs">
-    <button id="tab-emp" class="active" type="button">Employee</button>
-    <button id="tab-pm" type="button">Project Manager</button>
-  </div>
+  <div id="sessionbar"></div>
 </div></header>
 
 <div class="wrap">
-  <div class="demo-banner">
-    <span>&#9888; Seeded demo data &mdash; every employee, job and time entry below was generated for this demo. Not real payroll records.</span>
-    <span style="display:flex;gap:8px;align-items:center">
-      <button class="btn small ghost" id="btn-reset" type="button">Reset demo data</button>
-    </span>
-  </div>
+  <div id="banner"></div>
   <div id="storage-warning"></div>
-
-  <!-- ============ EMPLOYEE VIEW ============ -->
-  <section id="view-emp">
-    <div class="grid2">
-      <div class="card">
-        <p class="eyebrow" style="color:var(--blue-bright)">Time clock</p>
-        <div class="formrow">
-          <div>
-            <label class="fld" for="sel-emp">Acting as (demo &mdash; no login)</label>
-            <select id="sel-emp"></select>
-          </div>
-          <div>
-            <label class="fld" for="sel-job">Job / project</label>
-            <select id="sel-job"></select>
-          </div>
-        </div>
-        <div id="clock-status"></div>
-        <div class="clockbig" id="clock-elapsed">0:00:00</div>
-        <div class="small muted" id="clock-sub"></div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
-          <button class="btn" id="btn-in" type="button">Clock in</button>
-          <button class="btn secondary" id="btn-break" type="button">Start break</button>
-          <button class="btn danger" id="btn-out" type="button">Clock out</button>
-        </div>
-        <div id="emp-error" style="margin-top:12px"></div>
-      </div>
-      <div class="card">
-        <p class="eyebrow" style="color:var(--blue-bright)">My week</p>
-        <div class="kv">
-          <div><div class="k">Today</div><div class="v" id="me-today">0.00 h</div></div>
-          <div><div class="k">This week</div><div class="v" id="me-week">0.00 h</div></div>
-        </div>
-        <div id="me-flags" style="margin-top:10px"></div>
-        <p class="small muted" style="margin-top:12px">Unpaid breaks are subtracted. Hours shown to 2 decimals; full precision is kept in storage and in the CSV export.</p>
-      </div>
-    </div>
-    <div class="card">
-      <h3>Today&rsquo;s entries</h3>
-      <div class="tablewrap" id="me-today-table"></div>
-    </div>
-    <div class="card">
-      <h3>This week</h3>
-      <div class="tablewrap" id="me-week-table"></div>
-    </div>
-  </section>
-
-  <!-- ============ PM VIEW ============ -->
-  <section id="view-pm" hidden>
-    <div class="card">
-      <h3>Roster &mdash; right now</h3>
-      <div class="roster" id="pm-roster"></div>
-    </div>
-
-    <div class="card">
-      <div class="weeknav">
-        <button class="btn small ghost" id="wk-prev" type="button">&larr; Prev week</button>
-        <span class="range" id="wk-range"></span>
-        <button class="btn small ghost" id="wk-next" type="button">Next week &rarr;</button>
-        <span style="flex:1"></span>
-        <button class="btn small" id="btn-csv" type="button">Export week CSV</button>
-      </div>
-      <div id="pm-stale-alert"></div>
-      <h3>Hours per employee per job</h3>
-      <div class="tablewrap" id="pm-matrix"></div>
-      <p class="small muted" style="margin-top:8px">
-        Overtime flags: <span class="flag hard">OT &gt;40 h/week</span> weekly rule &middot;
-        <span class="flag soft">&gt;8 h/day</span> daily rule (softer flag).
-        Thresholds as implemented here (40 h/week, 8 h/day); no specific jurisdiction&rsquo;s law is asserted &mdash; confirm rules with payroll.
-      </p>
-    </div>
-
-    <div class="card">
-      <h3>Labor hours per job (selected week)</h3>
-      <div class="tablewrap" id="pm-jobs"></div>
-    </div>
-
-    <div class="card">
-      <h3>Timesheet entries (selected week)</h3>
-      <div class="tablewrap" id="pm-entries"></div>
-    </div>
-  </section>
-
-  <p class="footer-note">Employee Hub demo &mdash; data lives only in this browser (localStorage). No login, no server, no payroll integration. A production deployment replaces the storage module with a real backend; see the README in <code>web/employee-hub/</code>.</p>
+  <!-- Everything below is built by JS for the signed-in role only. Surfaces a role
+       may not use are never inserted into the document at all - they are not
+       hidden, they do not exist, and no handler is bound for them. -->
+  <main id="app"></main>
+  <p class="footer-note" id="footnote"></p>
 </div>
-
-<dialog id="dlg-edit">
-  <div class="dlg-head">Edit entry &mdash; audit trail kept</div>
-  <div class="dlg-body">
-    <div class="formrow">
-      <div><label class="fld" for="ed-in">Clock in</label><input type="datetime-local" id="ed-in" step="60"></div>
-      <div><label class="fld" for="ed-out">Clock out</label><input type="datetime-local" id="ed-out" step="60"></div>
-    </div>
-    <div class="formrow">
-      <div><label class="fld" for="ed-break">Unpaid break (minutes)</label><input type="number" id="ed-break" min="0" step="1"></div>
-      <div><label class="fld" for="ed-by">Edited by</label><input type="text" id="ed-by" value="Project Manager (demo)"></div>
-    </div>
-    <div id="ed-error"></div>
-    <div id="ed-audit"></div>
-    <div style="display:flex;gap:10px;margin-top:16px">
-      <button class="btn" id="ed-save" type="button">Save edit</button>
-      <button class="btn ghost" id="ed-cancel" type="button">Cancel</button>
-    </div>
-  </div>
-</dialog>
-
-<dialog id="dlg-csv">
-  <div class="dlg-head">Week CSV</div>
-  <div class="dlg-body">
-    <p class="small muted">The file could not be saved in this viewer, so copy the CSV below instead.</p>
-    <textarea id="csv-text" style="width:100%;height:220px;font-family:monospace;font-size:11px;border:1px solid var(--line);background:var(--ice);color:var(--text)"></textarea>
-    <div style="display:flex;gap:10px;margin-top:12px">
-      <button class="btn small" id="csv-copy" type="button">Copy to clipboard</button>
-      <button class="btn small ghost" id="csv-close" type="button">Close</button>
-    </div>
-  </div>
-</dialog>
 
 <div class="toast" id="toast"></div>
 
 <script>
 'use strict';
 /* =====================================================================
-   Employee Hub — time clock + hours monitoring (seeded demo).
-   All timestamps are epoch milliseconds; everything else is derived.
+   Employee Hub - two portals, one page.
+
+   * EMPLOYER portal: roster, weekly matrix across all employees, overtime
+     flags, approve/reject, edit with audit trail, requests queue, CSV export,
+     reset demo data.
+   * EMPLOYEE portal: clock in / out / break, request hours, own entries and
+     own weekly total. Nothing else.
+
+   The gate is structural: renderApp() writes only the signed-in role's markup
+   into #app. An employee's document contains no employer control, so there is
+   nothing to un-hide and no handler to trigger. This is still DEMO-GRADE:
+   there is no server, so anyone with devtools can call the Store directly.
+   Real enforcement needs a backend. See README.
+
+   All timestamps are epoch milliseconds; every duration is derived.
    ===================================================================== */
 
 var HOUR = 3600000, DAY = 86400000;
 var STALE_MS = 16 * HOUR;            // open shift older than this is flagged, not counted
 var WEEKLY_OT_MS = 40 * HOUR;        // weekly rule (hard flag)
 var DAILY_LONG_MS = 8 * HOUR;        // daily rule (soft flag)
-var SCHEMA = 'bah.employeehub.v1';
+var REQ_WINDOW_DAYS = 21;            // how far back an employee may file a correction
+var SCHEMA = 'bah.employeehub.v2';
 
 /* ---------------- storage module ----------------
-   Interface a real backend would implement:
-     listEmployees() -> [{id,name,role}]
-     listJobs()      -> [{id,name,seeded}]
-     listEntries()   -> [entry]           (entry: see README)
-     saveEntry(e)    -> entry             (insert)
-     updateEntry(id, patch) -> entry|null (shallow merge)
-     resetDemo()     -> void              (wipe + reseed)
-   Backed by localStorage here, with an in-memory fallback when
-   localStorage throws (private windows, embedded contexts). */
+   Interface a real backend would implement (see README):
+     listEmployees()  -> [{id,name,role}]
+     listManagers()   -> [{id,name,title}]
+     listJobs()       -> [{id,name,seeded}]
+     listEntries()    -> [entry]
+     saveEntry(e)     -> entry              (insert)
+     updateEntry(id, patch)   -> entry|null (shallow merge)
+     listRequests()   -> [request]
+     saveRequest(r)   -> request            (insert)
+     updateRequest(id, patch) -> request|null
+     getSession()     -> session|null       (a real backend returns this from a
+     setSession(s)    -> session             token, and every call above is
+     clearSession()   -> void                authorised against it server-side)
+     resetDemo()      -> void               (wipe + reseed; demo only)
+   Backed by localStorage here, with an in-memory fallback when localStorage
+   throws (private windows, embedded contexts). */
 var Store = (function () {
   var mem = {};                 // fallback
   var storageOK = true;
@@ -286,30 +227,49 @@ var Store = (function () {
     try { localStorage.setItem(k, JSON.stringify(v)); }
     catch (e) { storageOK = false; }
   }
-  var K = { emp: SCHEMA + '.employees', job: SCHEMA + '.jobs', ent: SCHEMA + '.entries' };
+  function lsDel(k) {
+    delete mem[k];
+    try { localStorage.removeItem(k); } catch (e) { storageOK = false; }
+  }
+  var K = {
+    emp: SCHEMA + '.employees', mgr: SCHEMA + '.managers', job: SCHEMA + '.jobs',
+    ent: SCHEMA + '.entries',   req: SCHEMA + '.requests', ses: SCHEMA + '.session'
+  };
   function listEmployees() { return lsGet(K.emp) || []; }
+  function listManagers() { return lsGet(K.mgr) || []; }
   function listJobs() { return lsGet(K.job) || []; }
   function listEntries() { return lsGet(K.ent) || []; }
+  function listRequests() { return lsGet(K.req) || []; }
   function saveEntry(e) { var a = listEntries(); a.push(e); lsSet(K.ent, a); return e; }
-  function updateEntry(id, patch) {
-    var a = listEntries();
+  function saveRequest(r) { var a = listRequests(); a.push(r); lsSet(K.req, a); return r; }
+  function patchIn(key, id, patch) {
+    var a = lsGet(key) || [];
     for (var i = 0; i < a.length; i++) {
       if (a[i].id === id) {
         for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) a[i][k] = patch[k];
-        lsSet(K.ent, a); return a[i];
+        lsSet(key, a); return a[i];
       }
     }
     return null;
   }
+  function updateEntry(id, patch) { return patchIn(K.ent, id, patch); }
+  function updateRequest(id, patch) { return patchIn(K.req, id, patch); }
+  function getSession() { return lsGet(K.ses); }
+  function setSession(s) { lsSet(K.ses, s); return s; }
+  function clearSession() { lsDel(K.ses); }
   function seed(force) {
     if (!force && listEmployees().length && listEntries().length) return;
     var s = buildSeed();
-    lsSet(K.emp, s.employees); lsSet(K.job, s.jobs); lsSet(K.ent, s.entries);
+    lsSet(K.emp, s.employees); lsSet(K.mgr, s.managers); lsSet(K.job, s.jobs);
+    lsSet(K.ent, s.entries);   lsSet(K.req, s.requests);
   }
   function resetDemo() { seed(true); }
-  return { listEmployees: listEmployees, listJobs: listJobs, listEntries: listEntries,
-           saveEntry: saveEntry, updateEntry: updateEntry, seed: seed, resetDemo: resetDemo,
-           ok: function () { return storageOK; } };
+  return { listEmployees: listEmployees, listManagers: listManagers, listJobs: listJobs,
+           listEntries: listEntries, listRequests: listRequests,
+           saveEntry: saveEntry, updateEntry: updateEntry,
+           saveRequest: saveRequest, updateRequest: updateRequest,
+           getSession: getSession, setSession: setSession, clearSession: clearSession,
+           seed: seed, resetDemo: resetDemo, ok: function () { return storageOK; } };
 })();
 
 /* ---------------- time helpers ---------------- */
@@ -336,6 +296,13 @@ function onBreak(e) {
   var bs = e.breaks || [];
   return bs.length > 0 && bs[bs.length - 1].end == null;
 }
+function materializeBreak(cin, cout, mins) {
+  // one unpaid segment centred mid-shift; timestamps stay the source of truth
+  if (!mins) return [];
+  var len = mins * 60000;
+  var start = cin + Math.round((cout - cin) / 2) - Math.round(len / 2);
+  return [{ start: start, end: start + len }];
+}
 function fmtH(ms) { return (ms / HOUR).toFixed(2); }
 function fmtHMS(ms) {
   ms = Math.max(0, ms);
@@ -355,7 +322,7 @@ function toLocalInput(t) {
   return d.toISOString().slice(0, 16);
 }
 function fromLocalInput(v) { return v ? new Date(v).getTime() : null; }
-function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
 /* ---------------- seed data (all demo) ---------------- */
 var idSeq = 0;
@@ -367,6 +334,10 @@ function buildSeed() {
     { id: 'emp_dana', name: 'Dana Whitfield', role: 'Carpenter' },
     { id: 'emp_luis', name: 'Luis Ortega',    role: 'Laborer' },
     { id: 'emp_sam',  name: 'Sam Pruitt',     role: 'Electrician' }
+  ];
+  var managers = [
+    { id: 'mgr_pat',  name: 'Pat Rivera',   title: 'Project Manager' },
+    { id: 'mgr_owner', name: 'J. Whitcomb', title: 'Owner' }
   ];
   // Job 1 is the real project name from the site's takeoff data; the rest are invented demo jobs.
   var jobs = [
@@ -381,13 +352,9 @@ function buildSeed() {
   function mk(empId, jobId, weekStart, dayIdx, inH, outH, brkMin, status) {
     var cin = weekStart + dayIdx * DAY + Math.round(inH * HOUR);
     var cout = weekStart + dayIdx * DAY + Math.round(outH * HOUR); // outH may be >24 => crosses midnight
-    var brks = [];
-    if (brkMin > 0) {
-      var mid = cin + Math.round((cout - cin) / 2);
-      brks = [{ start: mid, end: mid + brkMin * 60000 }];
-    }
     var e = { id: nid('ent'), empId: empId, jobId: jobId, clockIn: cin, clockOut: cout,
-              breaks: brks, status: status || 'pending', edits: [], seeded: true };
+              breaks: materializeBreak(cin, cout, brkMin), status: status || 'pending',
+              edits: [], seeded: true };
     entries.push(e); return e;
   }
   // --- last week (complete) ---
@@ -395,19 +362,22 @@ function buildSeed() {
   for (var d = 0; d < 6; d++) mk('emp_mike', d < 4 ? 'job_vanhorn' : 'job_maple', wk1, d, 6.5, 16.5, 30, d < 3 ? 'approved' : 'pending');
   // Dana: 5 days x 8.0h (7:00-15:30, 30 min break) = 40.00h -> boundary, no OT (rule is >40)
   for (d = 0; d < 5; d++) mk('emp_dana', 'job_vanhorn', wk1, d, 7, 15.5, 30, d < 3 ? 'approved' : 'pending');
-  // Luis: Mon-Wed 8h on shop, Thu night pour 21:00->01:30 (+1 day, 4.5h, midnight-crossing), Fri 10.5h (daily flag)
+  // Luis: Mon-Wed 8h on shop, Thu night pour 21:00->01:30 (+1 day, 4.5h), Fri 10.5h (daily flag).
+  // Luis's Saturday is deliberately left empty - the seeded PENDING request fills it.
   for (d = 0; d < 3; d++) mk('emp_luis', 'job_shop', wk1, d, 7, 15.5, 30, 'approved');
   mk('emp_luis', 'job_vanhorn', wk1, 3, 21, 25.5, 0, 'pending');       // 21:00 Thu -> 01:30 Fri
   mk('emp_luis', 'job_vanhorn', wk1, 4, 6, 17, 30, 'pending');         // 10.5h paid
   // Sam: Mon-Thu 8h
   for (d = 0; d < 4; d++) mk('emp_sam', 'job_maple', wk1, d, 7, 15.5, 30, 'approved');
-  // one pre-seeded edit so the audit trail is visible out of the box (Sam, Sat 4h -> 36h wk, no OT;
-  // Dana stays at exactly 40.00 to show the weekly rule is strictly >40)
-  var edited = mk('emp_sam', 'job_maple', wk1, 5, 8, 12, 0, 'approved');
-  edited.edits.push({
-    at: wk1 + 6 * DAY + 9 * HOUR, by: 'Project Manager (demo)',
-    changes: { clockOut: { from: wk1 + 5 * DAY + 11.5 * HOUR, to: edited.clockOut } },
-    note: 'Forgot to clock out; corrected from site log.'
+  // Sam's Saturday half-day: he forgot to clock out, filed a correction request, and the PM
+  // approved it. The entry therefore carries an audit edit that cites the request id.
+  var fixed = mk('emp_sam', 'job_maple', wk1, 5, 8, 12, 0, 'approved');
+  var reqSamId = 'req_demo_sam';
+  var decidedAt = wk1 + 6 * DAY + 9 * HOUR;
+  fixed.edits.push({
+    at: decidedAt, by: 'Pat Rivera (Project Manager)', requestId: reqSamId,
+    changes: { clockOut: { from: wk1 + 5 * DAY + 11.5 * HOUR, to: fixed.clockOut } },
+    note: 'Applied correction request R-1001 - employee reason: "Forgot to clock out, left site at noon after the panel swap."'
   });
   // --- this week (partial: full days before today) ---
   var todayIdx = Math.floor((dayStart(now) - wk0) / DAY);
@@ -423,17 +393,45 @@ function buildSeed() {
   // Sam left a shift open ~26h ago -> stale, must be flagged, not silently counted
   entries.push({ id: nid('ent'), empId: 'emp_sam', jobId: 'job_shop', clockIn: now - 26 * HOUR, clockOut: null,
     breaks: [], status: 'open', edits: [], seeded: true });
-  return { employees: employees, jobs: jobs, entries: entries };
+
+  // --- demo requests: one already approved (above), one still pending ---
+  var requests = [
+    { id: reqSamId, ref: 'R-1001', type: 'correction', empId: 'emp_sam', jobId: 'job_maple',
+      entryId: fixed.id, proposedIn: fixed.clockIn, proposedOut: fixed.clockOut, proposedBreakMin: 0,
+      reason: 'Forgot to clock out, left site at noon after the panel swap.',
+      submittedAt: wk1 + 5 * DAY + 19 * HOUR, status: 'approved',
+      decidedAt: decidedAt, decidedBy: 'Pat Rivera (Project Manager)',
+      decisionNote: 'Confirmed against the site log.', appliedEntryId: fixed.id, seeded: true },
+    { id: 'req_demo_luis', ref: 'R-1002', type: 'missing', empId: 'emp_luis', jobId: 'job_vanhorn',
+      entryId: null, proposedIn: wk1 + 5 * DAY + 8 * HOUR, proposedOut: wk1 + 5 * DAY + 12.5 * HOUR,
+      proposedBreakMin: 0,
+      reason: 'Called in Saturday to backfill the trench; tablet was dead so I never clocked in.',
+      submittedAt: wk1 + 5 * DAY + 17 * HOUR, status: 'pending',
+      decidedAt: null, decidedBy: null, decisionNote: '', appliedEntryId: null, seeded: true }
+  ];
+  return { employees: employees, managers: managers, jobs: jobs, entries: entries, requests: requests };
 }
 
 /* ---------------- app state ---------------- */
-var state = { view: 'emp', me: null, weekOffset: 0 };
+/* session = { role:'employer'|'employee', userId, name, title } */
+var state = { session: null, weekOffset: 0, pick: { role: 'employee', empId: null, mgrId: null } };
 
 function employees() { return Store.listEmployees(); }
+function managers() { return Store.listManagers(); }
 function jobs() { return Store.listJobs(); }
 function entries() { return Store.listEntries(); }
+function requests() { return Store.listRequests(); }
 function empById(id) { var a = employees(); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
 function jobById(id) { var a = jobs(); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
+function entryById(id) { var a = entries(); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
+function reqById(id) { var a = requests(); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
+function jobName(id) { var j = jobById(id); return j ? j.name : String(id); }
+function empName(id) { var e = empById(id); return e ? e.name : String(id); }
+function isEmployer() { return !!state.session && state.session.role === 'employer'; }
+function isEmployee() { return !!state.session && state.session.role === 'employee'; }
+function myId() { return state.session ? state.session.userId : null; }
+function actorLabel() { return state.session ? state.session.name + ' (' + state.session.title + ')' : 'unknown'; }
+
 function openEntryFor(empId) {
   var a = entries();
   for (var i = 0; i < a.length; i++) if (a[i].empId === empId && a[i].clockOut == null) return a[i];
@@ -450,31 +448,327 @@ function entriesInWeek(offset) {
 /* countable = closed entries + fresh open entries (live). Stale open shifts are
    excluded from totals and surfaced as flags instead. Rejected entries excluded. */
 function countable(e, now) { return e.status !== 'rejected' && !isStale(e, now); }
+function pendingRequests() { return requests().filter(function (r) { return r.status === 'pending'; }); }
+function myRequests() {
+  var me = myId();
+  return requests().filter(function (r) { return r.empId === me; })
+    .sort(function (a, b) { return b.submittedAt - a.submittedAt; });
+}
 
-/* ---------------- toast / errors ---------------- */
+/* ---------------- toast ---------------- */
 var toastTimer = null;
 function toast(msg) {
   var t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
 }
-function empError(msg) {
-  document.getElementById('emp-error').innerHTML = msg ? '<div class="alert bad">' + esc(msg) + '</div>' : '';
+function alertInto(id, kind, msg) {
+  var el = document.getElementById(id);
+  if (el) el.innerHTML = msg ? '<div class="alert ' + kind + '">' + msg + '</div>' : '';
 }
 
-/* ---------------- employee view ---------------- */
-function renderEmpSelectors() {
-  var selE = document.getElementById('sel-emp'), selJ = document.getElementById('sel-job');
-  selE.innerHTML = employees().map(function (e) {
-    return '<option value="' + e.id + '"' + (e.id === state.me ? ' selected' : '') + '>' + esc(e.name) + ' — ' + esc(e.role) + '</option>';
-  }).join('');
-  selJ.innerHTML = jobs().map(function (j) {
-    return '<option value="' + j.id + '">' + esc(j.name) + '</option>';
-  }).join('');
+/* =====================================================================
+   VALIDATION - shared by the employee's submit and the employer's approve.
+   Approving re-runs it, so a request that went stale cannot be applied.
+   ===================================================================== */
+function findOverlap(empId, inMs, outMs, excludeEntryId) {
+  var now = Date.now(), a = entries();
+  for (var i = 0; i < a.length; i++) {
+    var e = a[i];
+    if (e.empId !== empId) continue;
+    if (excludeEntryId && e.id === excludeEntryId) continue;
+    if (e.status === 'rejected') continue;
+    var s = e.clockIn;
+    var en = e.clockOut == null ? Math.max(now, e.clockIn) : e.clockOut;
+    if (inMs < en && s < outMs) return e;   // half-open intervals: touching is fine
+  }
+  return null;
 }
-function renderEmployee() {
+/* returns null when valid, otherwise an HTML message saying what is wrong AND how to fix it */
+function validateProposal(p) {
   var now = Date.now();
-  var me = state.me, open = openEntryFor(me);
+  if (!p.jobId) return 'Pick the job this shift was worked on — hours have to be attributed to a job.';
+  if (p.clockIn == null || p.clockOut == null)
+    return 'Enter <b>both</b> a clock-in and a clock-out time. Use the date pickers; a request with only one end cannot be costed.';
+  if (p.clockOut <= p.clockIn)
+    return 'Clock-out (<b>' + esc(fmtDT(p.clockOut)) + '</b>) is not after clock-in (<b>' + esc(fmtDT(p.clockIn)) +
+           '</b>), so the shift would be zero or negative length. Fix: if the shift ran past midnight, set the clock-out to the <b>next day’s date</b>; otherwise correct whichever end is wrong.';
+  if (p.clockIn > now + 60000 || p.clockOut > now + 60000)
+    return 'Those times are in the future. You can only request hours you have already worked — set both ends to times on or before ' +
+           esc(fmtDT(now)) + '.';
+  if (!(p.breakMin >= 0))
+    return 'Break minutes must be 0 or more. Enter <b>0</b> if you took no unpaid break.';
+  if (p.breakMin * 60000 >= p.clockOut - p.clockIn)
+    return 'The unpaid break (<b>' + p.breakMin + ' min</b>) is as long as or longer than the shift itself (' +
+           fmtH(p.clockOut - p.clockIn) + ' h), which would leave no paid time. Fix: shorten the break, or widen the clock-in/clock-out window.';
+  if (!p.reason || !p.reason.trim())
+    return 'Add a reason. The project manager approves or denies from this text, so say what happened (for example “forgot to clock out”).';
+  var clash = findOverlap(p.empId, p.clockIn, p.clockOut, p.excludeEntryId);
+  if (clash) {
+    return 'These times overlap an entry that already exists for ' + esc(empName(p.empId)) + ': <b>' +
+      esc(fmtD(clash.clockIn)) + ' ' + esc(fmtT(clash.clockIn)) + ' → ' + esc(fmtT(clash.clockOut)) +
+      '</b> on ' + esc(jobName(clash.jobId)) +
+      '. Fix: move this request outside that window, or file a <b>correction</b> on that entry instead of adding a second shift.';
+  }
+  return null;
+}
+
+/* =====================================================================
+   SIGN-IN  (demo-grade: a role picker, not authentication)
+   ===================================================================== */
+function signInHtml() {
+  var emps = employees(), mgrs = managers();
+  var r = state.pick.role;
+  return '' +
+  '<div class="signin">' +
+    '<div class="card">' +
+      '<p class="eyebrow" style="color:var(--blue-bright)">Demo sign-in</p>' +
+      '<h1>Choose a portal</h1>' +
+      '<div class="alert warn"><b>This is a demo, not a login.</b> There is no password, no server and no real ' +
+        'authentication — picking a role here simply decides which portal this browser builds. ' +
+        'Anyone using this page can pick either one. Real access control needs a backend.</div>' +
+      '<div class="rolepick">' +
+        '<button type="button" data-role="employer" class="' + (r === 'employer' ? 'sel' : '') + '">' +
+          '<div class="rt">Employer portal</div>' +
+          '<div class="rd">Project manager / owner. Sees every employee’s hours, approves or rejects ' +
+          'timesheets, edits entries with an audit trail, works the hours-request queue, exports the week.</div>' +
+        '</button>' +
+        '<button type="button" data-role="employee" class="' + (r === 'employee' ? 'sel' : '') + '">' +
+          '<div class="rt">Employee portal</div>' +
+          '<div class="rd">Crew. Clock in, clock out, start and end a break, and request hours. ' +
+          'Sees only their own entries and their own weekly total — nothing about anyone else.</div>' +
+        '</button>' +
+      '</div>' +
+      (r === 'employer'
+        ? '<label class="fld" for="pick-user">Sign in as (employer)</label>' +
+          '<select id="pick-user">' + mgrs.map(function (m) {
+              return '<option value="' + esc(m.id) + '"' + (state.pick.mgrId === m.id ? ' selected' : '') + '>' +
+                esc(m.name) + ' — ' + esc(m.title) + '</option>'; }).join('') + '</select>'
+        : '<label class="fld" for="pick-user">Sign in as (employee)</label>' +
+          '<select id="pick-user">' + emps.map(function (e) {
+              return '<option value="' + esc(e.id) + '"' + (state.pick.empId === e.id ? ' selected' : '') + '>' +
+                esc(e.name) + ' — ' + esc(e.role) + '</option>'; }).join('') + '</select>') +
+      '<div style="margin-top:16px"><button class="btn" id="btn-signin" type="button">Enter ' +
+        (r === 'employer' ? 'employer' : 'employee') + ' portal</button></div>' +
+      '<ul class="perms">' +
+        '<li><b>Employer</b> can: roster, all-employee weekly matrix, overtime flags, approve / reject, edit + audit trail, requests queue, CSV export, reset demo data.</li>' +
+        '<li><b>Employee</b> can: clock in / out, break, submit and withdraw hours requests, view own entries + own weekly total.</li>' +
+        '<li>An employee cannot edit a timesheet at all — corrections go through a request the employer approves.</li>' +
+      '</ul>' +
+    '</div>' +
+  '</div>';
+}
+function wireSignIn() {
+  var pick = document.querySelector('.rolepick');
+  pick.addEventListener('click', function (ev) {
+    var b = ev.target.closest('button[data-role]');
+    if (!b) return;
+    state.pick.role = b.dataset.role;
+    renderApp();
+  });
+  document.getElementById('pick-user').addEventListener('change', function (ev) {
+    if (state.pick.role === 'employer') state.pick.mgrId = ev.target.value;
+    else state.pick.empId = ev.target.value;
+  });
+  document.getElementById('btn-signin').addEventListener('click', function () {
+    var v = document.getElementById('pick-user').value;
+    if (state.pick.role === 'employer') {
+      var m = managers().filter(function (x) { return x.id === v; })[0];
+      if (!m) return;
+      state.session = { role: 'employer', userId: m.id, name: m.name, title: m.title };
+    } else {
+      var e = employees().filter(function (x) { return x.id === v; })[0];
+      if (!e) return;
+      state.session = { role: 'employee', userId: e.id, name: e.name, title: e.role };
+    }
+    Store.setSession(state.session);
+    state.weekOffset = 0;
+    toast('Signed in as ' + state.session.name);
+    renderApp();
+  });
+}
+function signOut() {
+  Store.clearSession();
+  state.session = null;
+  renderApp();
+  toast('Signed out');
+}
+
+/* =====================================================================
+   SHELLS - only one of these is ever inserted into the document.
+   ===================================================================== */
+function employeeShellHtml() {
+  return '' +
+  '<div class="grid2">' +
+    '<div class="card">' +
+      '<p class="eyebrow" style="color:var(--blue-bright)">Time clock</p>' +
+      '<div style="margin-bottom:12px">' +
+        '<label class="fld" for="sel-job">Job / project</label>' +
+        '<select id="sel-job"></select>' +
+      '</div>' +
+      '<div id="clock-status"></div>' +
+      '<div class="clockbig" id="clock-elapsed">0:00:00</div>' +
+      '<div class="small muted" id="clock-sub"></div>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">' +
+        '<button class="btn" id="btn-in" type="button">Clock in</button>' +
+        '<button class="btn secondary" id="btn-break" type="button">Start break</button>' +
+        '<button class="btn danger" id="btn-out" type="button">Clock out</button>' +
+      '</div>' +
+      '<div id="emp-error" style="margin-top:12px"></div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<p class="eyebrow" style="color:var(--blue-bright)">My week</p>' +
+      '<div class="kv">' +
+        '<div><div class="k">Today</div><div class="v" id="me-today">0.00 h</div></div>' +
+        '<div><div class="k">This week</div><div class="v" id="me-week">0.00 h</div></div>' +
+      '</div>' +
+      '<div id="me-flags" style="margin-top:10px"></div>' +
+      '<p class="small muted" style="margin-top:12px">Unpaid breaks are subtracted. Hours shown to 2 decimals; ' +
+        'full precision is kept in storage. These totals are <b>yours only</b> — this portal never shows another ' +
+        'employee’s hours, the roster, or the approval queue.</p>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<h3>Today’s entries</h3>' +
+    '<div class="tablewrap" id="me-today-table"></div>' +
+  '</div>' +
+  '<div class="card">' +
+    '<h3>This week’s entries</h3>' +
+    '<div class="tablewrap" id="me-week-table"></div>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<p class="eyebrow" style="color:var(--blue-bright)">Request hours</p>' +
+    '<h3>Ask the project manager to fix or add hours</h3>' +
+    '<p class="small muted">You cannot edit a timesheet yourself. Send a request instead — a manager ' +
+      'approves or denies it, and only an approval changes your hours.</p>' +
+    '<div class="formrow">' +
+      '<div><label class="fld" for="req-type">Request type</label>' +
+        '<select id="req-type">' +
+          '<option value="correction">Correct an existing entry (wrong clock-out, forgot a break)</option>' +
+          '<option value="missing">Add a missing shift (worked but never clocked in)</option>' +
+        '</select></div>' +
+      '<div id="req-entry-wrap"><label class="fld" for="req-entry">Entry to correct</label>' +
+        '<select id="req-entry"></select></div>' +
+    '</div>' +
+    '<div class="formrow">' +
+      '<div><label class="fld" for="req-job">Job / project</label><select id="req-job"></select></div>' +
+      '<div><label class="fld" for="req-break">Unpaid break (minutes)</label>' +
+        '<input type="number" id="req-break" min="0" step="1" value="0"></div>' +
+    '</div>' +
+    '<div class="formrow">' +
+      '<div><label class="fld" for="req-in">Clock in (proposed)</label><input type="datetime-local" id="req-in" step="60"></div>' +
+      '<div><label class="fld" for="req-out">Clock out (proposed)</label><input type="datetime-local" id="req-out" step="60"></div>' +
+    '</div>' +
+    '<div style="margin-bottom:12px"><label class="fld" for="req-reason">Reason (required)</label>' +
+      '<textarea id="req-reason" placeholder="What happened? e.g. tablet was dead, forgot to clock out."></textarea></div>' +
+    '<div id="req-error"></div>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="btn-req-submit" type="button">Submit request</button></div>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<h3>My requests <span class="count" id="my-req-count">0</span></h3>' +
+    '<div id="my-requests"></div>' +
+  '</div>';
+}
+
+function employerShellHtml() {
+  return '' +
+  '<div class="card">' +
+    '<h3>Hours requests <span class="count" id="req-count">0</span></h3>' +
+    '<p class="small muted">Employees cannot edit timesheets. Approving a request <b>applies it</b> — the entry is ' +
+      'created or amended and the change is written to the same audit trail as a manual edit, attributed to you and ' +
+      'citing the request. Denying changes no hours.</p>' +
+    '<div id="req-queue"></div>' +
+    '<details id="req-history-wrap" style="margin-top:18px">' +
+      '<summary style="cursor:pointer;font-size:14px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:var(--head)">' +
+        'Decided requests <span class="count zero" id="req-done-count">0</span></summary>' +
+      '<div id="req-history" style="margin-top:12px"></div>' +
+    '</details>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<h3>Roster — right now</h3>' +
+    '<div class="roster" id="pm-roster"></div>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<div class="weeknav">' +
+      '<button class="btn small ghost" id="wk-prev" type="button">&larr; Prev week</button>' +
+      '<span class="range" id="wk-range"></span>' +
+      '<button class="btn small ghost" id="wk-next" type="button">Next week &rarr;</button>' +
+      '<span style="flex:1"></span>' +
+      '<button class="btn small" id="btn-csv" type="button">Export week CSV</button>' +
+    '</div>' +
+    '<div id="pm-stale-alert"></div>' +
+    '<h3>Hours per employee per job</h3>' +
+    '<div class="tablewrap" id="pm-matrix"></div>' +
+    '<p class="small muted" style="margin-top:8px">' +
+      'Overtime flags: <span class="flag hard">OT &gt;40 h/week</span> weekly rule &middot; ' +
+      '<span class="flag soft">&gt;8 h/day</span> daily rule (softer flag). ' +
+      'Thresholds as implemented here (40 h/week, 8 h/day); no specific jurisdiction’s law is asserted — confirm rules with payroll.' +
+    '</p>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<h3>Labor hours per job (selected week)</h3>' +
+    '<div class="tablewrap" id="pm-jobs"></div>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<h3>Timesheet entries (selected week)</h3>' +
+    '<div class="tablewrap" id="pm-entries"></div>' +
+  '</div>' +
+
+  '<dialog id="dlg-edit">' +
+    '<div class="dlg-head">Edit entry — audit trail kept</div>' +
+    '<div class="dlg-body">' +
+      '<div class="formrow">' +
+        '<div><label class="fld" for="ed-in">Clock in</label><input type="datetime-local" id="ed-in" step="60"></div>' +
+        '<div><label class="fld" for="ed-out">Clock out</label><input type="datetime-local" id="ed-out" step="60"></div>' +
+      '</div>' +
+      '<div class="formrow">' +
+        '<div><label class="fld" for="ed-break">Unpaid break (minutes)</label><input type="number" id="ed-break" min="0" step="1"></div>' +
+        '<div><label class="fld" for="ed-by">Edited by</label><input type="text" id="ed-by"></div>' +
+      '</div>' +
+      '<div id="ed-error"></div>' +
+      '<div id="ed-audit"></div>' +
+      '<div style="display:flex;gap:10px;margin-top:16px">' +
+        '<button class="btn" id="ed-save" type="button">Save edit</button>' +
+        '<button class="btn ghost" id="ed-cancel" type="button">Cancel</button>' +
+      '</div>' +
+    '</div>' +
+  '</dialog>' +
+
+  '<dialog id="dlg-csv">' +
+    '<div class="dlg-head">Week CSV</div>' +
+    '<div class="dlg-body">' +
+      '<p class="small muted">The file could not be saved in this viewer, so copy the CSV below instead.</p>' +
+      '<textarea id="csv-text" style="height:220px;font-family:monospace;font-size:11px;background:var(--ice)"></textarea>' +
+      '<div style="display:flex;gap:10px;margin-top:12px">' +
+        '<button class="btn small" id="csv-copy" type="button">Copy to clipboard</button>' +
+        '<button class="btn small ghost" id="csv-close" type="button">Close</button>' +
+      '</div>' +
+    '</div>' +
+  '</dialog>';
+}
+
+/* =====================================================================
+   EMPLOYEE PORTAL
+   ===================================================================== */
+function empError(msgHtml) { alertInto('emp-error', 'bad', msgHtml); }
+
+function renderJobSelect(sel, keep) {
+  var cur = keep && sel.value ? sel.value : null;
+  sel.innerHTML = jobs().map(function (j) {
+    return '<option value="' + esc(j.id) + '">' + esc(j.name) + '</option>';
+  }).join('');
+  if (cur) sel.value = cur;
+}
+function renderClock() {
+  var now = Date.now();
+  var open = openEntryFor(myId());
   var stale = open && isStale(open, now);
   var statusEl = document.getElementById('clock-status');
   var sub = document.getElementById('clock-sub');
@@ -489,36 +783,32 @@ function renderEmployee() {
     selJ.disabled = false;
   } else if (stale) {
     statusEl.innerHTML = '<span class="statuschip chip-stale">Shift left open ' + fmtH(now - open.clockIn) + ' h ago — flagged</span>';
-    sub.innerHTML = 'Open since <b>' + esc(fmtDT(open.clockIn)) + '</b> on ' + esc(jobById(open.jobId).name) +
-      '. This shift is <b>excluded from totals</b> until a PM closes or corrects it.';
+    sub.innerHTML = 'Open since <b>' + esc(fmtDT(open.clockIn)) + '</b> on ' + esc(jobName(open.jobId)) +
+      '. This shift is <b>excluded from your totals</b> until you clock out or a manager corrects it.';
     btnIn.disabled = true; btnBreak.disabled = true; btnOut.disabled = false;
-    selJ.disabled = true;
+    selJ.disabled = true; selJ.value = open.jobId;
   } else {
     var br = onBreak(open);
     statusEl.innerHTML = br
       ? '<span class="statuschip chip-break">On unpaid break</span>'
       : '<span class="statuschip chip-on">On the clock</span>';
-    sub.innerHTML = 'Since <b>' + esc(fmtT(open.clockIn)) + '</b> on ' + esc(jobById(open.jobId).name) +
+    sub.innerHTML = 'Since <b>' + esc(fmtT(open.clockIn)) + '</b> on ' + esc(jobName(open.jobId)) +
       (breakMs(open, now) > 0 ? ' · break so far ' + fmtH(breakMs(open, now)) + ' h' : '');
     btnIn.disabled = true; btnOut.disabled = false; btnBreak.disabled = false;
     btnBreak.textContent = br ? 'End break' : 'Start break';
     selJ.disabled = true; selJ.value = open.jobId;
   }
   tickElapsed();
-  renderMyTables();
 }
 function tickElapsed() {
-  var now = Date.now();
-  var open = openEntryFor(state.me);
   var el = document.getElementById('clock-elapsed');
-  if (!open) { el.textContent = '0:00:00'; return; }
-  el.textContent = fmtHMS(workedMs(open, now));
+  if (!el) return;
+  var open = openEntryFor(myId());
+  el.textContent = open ? fmtHMS(workedMs(open, Date.now())) : '0:00:00';
 }
 function renderMyTables() {
-  var now = Date.now();
-  var me = state.me;
-  var t0 = dayStart(now);
-  var wk = weekRange(0);
+  var now = Date.now(), me = myId();
+  var t0 = dayStart(now), wk = weekRange(0);
   var mine = entries().filter(function (e) { return e.empId === me; });
   var today = mine.filter(function (e) { return e.clockIn >= t0 && e.clockIn < t0 + DAY; });
   var week = mine.filter(function (e) { return e.clockIn >= wk.start && e.clockIn < wk.end; });
@@ -533,13 +823,13 @@ function renderMyTables() {
   if (todayMs > DAILY_LONG_MS) flags.push('<span class="flag soft">&gt;8 h today (daily rule)</span>');
   if (weekMs > WEEKLY_OT_MS) flags.push('<span class="flag hard">OT &gt;40 h this week (weekly rule)</span>');
   var staleMine = mine.filter(function (e) { return isStale(e, now); });
-  if (staleMine.length) flags.push('<span class="flag warn">' + staleMine.length + ' shift(s) left open &mdash; not counted, see PM</span>');
+  if (staleMine.length) flags.push('<span class="flag warn">' + staleMine.length + ' shift(s) left open — not counted, see your manager</span>');
   document.getElementById('me-flags').innerHTML = flags.join(' ') || '<span class="small muted">No overtime flags.</span>';
 
-  document.getElementById('me-today-table').innerHTML = entryTable(today, now, false);
-  document.getElementById('me-week-table').innerHTML = entryTable(week, now, false);
+  document.getElementById('me-today-table').innerHTML = entryTable(today, now);
+  document.getElementById('me-week-table').innerHTML = entryTable(week, now);
 }
-function entryTable(list, now, pm) {
+function entryTable(list, now) {
   if (!list.length) return '<p class="small muted">No entries.</p>';
   list = list.slice().sort(function (a, b) { return a.clockIn - b.clockIn; });
   var rows = list.map(function (e) {
@@ -547,15 +837,15 @@ function entryTable(list, now, pm) {
     var w = workedMs(e, now);
     var flags = [];
     if (e.seeded) flags.push('<span class="flag demo">demo</span>');
-    if (stale) flags.push('<span class="flag hard">left open &mdash; flagged, not counted</span>');
+    if (stale) flags.push('<span class="flag hard">left open — flagged, not counted</span>');
     else if (e.clockOut != null && dayStart(e.clockOut) !== dayStart(e.clockIn)) flags.push('<span class="flag warn">crosses midnight</span>');
     if (!stale && w > DAILY_LONG_MS) flags.push('<span class="flag soft">&gt;8 h/day</span>');
-    if (e.edits && e.edits.length) flags.push('<span class="flag warn">edited</span>');
+    if (e.edits && e.edits.length) flags.push('<span class="flag warn">edited by manager</span>');
     var st = e.clockOut == null ? (stale ? 'stale' : 'open') : e.status;
     var stChip = { approved: 'ok', rejected: 'hard', pending: 'warn', open: 'ok', stale: 'hard' }[st] || 'warn';
     return '<tr>' +
       '<td>' + esc(fmtD(e.clockIn)) + '</td>' +
-      '<td>' + esc(jobById(e.jobId) ? jobById(e.jobId).name : e.jobId) + '</td>' +
+      '<td>' + esc(jobName(e.jobId)) + '</td>' +
       '<td>' + esc(fmtT(e.clockIn)) + '</td>' +
       '<td>' + esc(fmtT(e.clockOut)) + (e.clockOut != null && dayStart(e.clockOut) !== dayStart(e.clockIn) ? ' <span class="small muted">(+1d)</span>' : '') + '</td>' +
       '<td class="num">' + fmtH(breakMs(e, now)) + '</td>' +
@@ -568,21 +858,21 @@ function entryTable(list, now, pm) {
     '<tbody>' + rows + '<tr class="totalrow"><td colspan="5">Total (counted)</td><td class="num">' + fmtH(total) + '</td><td></td></tr></tbody></table>';
 }
 
-/* ---------------- employee actions ---------------- */
+/* ---- employee clock actions ---- */
 function doClockIn() {
   empError('');
-  var open = openEntryFor(state.me);
-  if (open) { empError('Already clocked in (since ' + fmtDT(open.clockIn) + '). Clock out first.'); return; }
+  var open = openEntryFor(myId());
+  if (open) { empError('Already clocked in (since ' + esc(fmtDT(open.clockIn)) + '). Clock out first.'); return; }
   var jobId = document.getElementById('sel-job').value;
   if (!jobId) { empError('Pick a job first.'); return; }
-  Store.saveEntry({ id: nid('ent'), empId: state.me, jobId: jobId, clockIn: Date.now(), clockOut: null,
+  Store.saveEntry({ id: nid('ent'), empId: myId(), jobId: jobId, clockIn: Date.now(), clockOut: null,
                     breaks: [], status: 'open', edits: [], seeded: false });
   toast('Clocked in');
-  renderAll();
+  refresh();
 }
 function doClockOut() {
   empError('');
-  var open = openEntryFor(state.me);
+  var open = openEntryFor(myId());
   if (!open) { empError('Not clocked in — nothing to clock out of.'); return; }
   var now = Date.now();
   var patch = { clockOut: now, status: 'pending' };
@@ -591,14 +881,15 @@ function doClockOut() {
     patch.breaks = brs;
   }
   Store.updateEntry(open.id, patch);
-  toast('Clocked out — ' + fmtH(workedMs(Object.assign({}, open, patch), now)) + ' h recorded (pending approval)');
-  renderAll();
+  var merged = { clockIn: open.clockIn, clockOut: patch.clockOut, breaks: patch.breaks || open.breaks };
+  toast('Clocked out — ' + fmtH(workedMs(merged, now)) + ' h recorded (pending approval)');
+  refresh();
 }
 function doBreakToggle() {
   empError('');
-  var open = openEntryFor(state.me);
+  var open = openEntryFor(myId());
   if (!open) { empError('Not clocked in.'); return; }
-  if (isStale(open, Date.now())) { empError('This shift is flagged as left open. Clock out or ask a PM to correct it.'); return; }
+  if (isStale(open, Date.now())) { empError('This shift is flagged as left open. Clock out, or request a correction below.'); return; }
   var brs = (open.breaks || []).slice();
   if (onBreak(open)) {
     brs[brs.length - 1] = { start: brs[brs.length - 1].start, end: Date.now() };
@@ -608,19 +899,169 @@ function doBreakToggle() {
     toast('Break started (unpaid)');
   }
   Store.updateEntry(open.id, { breaks: brs });
-  renderAll();
+  refresh();
 }
 
-/* ---------------- PM view ---------------- */
-function renderRoster() {
+/* ---- employee: request hours ---- */
+function correctableEntries() {
+  var now = Date.now(), cutoff = now - REQ_WINDOW_DAYS * DAY;
+  return entries().filter(function (e) {
+    return e.empId === myId() && e.clockIn >= cutoff && e.status !== 'rejected';
+  }).sort(function (a, b) { return b.clockIn - a.clockIn; });
+}
+function renderRequestForm(keepValues) {
+  var typeSel = document.getElementById('req-type');
+  var entrySel = document.getElementById('req-entry');
+  var wrap = document.getElementById('req-entry-wrap');
+  var jobSel = document.getElementById('req-job');
+  var isCorrection = typeSel.value === 'correction';
+  var prevEntry = keepValues ? entrySel.value : null;
+
+  var list = correctableEntries();
+  entrySel.innerHTML = list.length
+    ? list.map(function (e) {
+        return '<option value="' + esc(e.id) + '">' + esc(fmtD(e.clockIn)) + ' · ' +
+          esc(fmtT(e.clockIn)) + '–' + esc(fmtT(e.clockOut)) + ' · ' + esc(jobName(e.jobId)) + '</option>';
+      }).join('')
+    : '<option value="">No entries in the last ' + REQ_WINDOW_DAYS + ' days</option>';
+  if (prevEntry) entrySel.value = prevEntry;
+  wrap.hidden = !isCorrection;
+  entrySel.disabled = !isCorrection;
+  renderJobSelect(jobSel, true);
+}
+function prefillFromEntry() {
+  var e = entryById(document.getElementById('req-entry').value);
+  if (!e) return;
+  document.getElementById('req-job').value = e.jobId;
+  document.getElementById('req-in').value = toLocalInput(e.clockIn);
+  document.getElementById('req-out').value = toLocalInput(e.clockOut == null ? Date.now() : e.clockOut);
+  document.getElementById('req-break').value = Math.round(breakMs(e, e.clockOut == null ? Date.now() : e.clockOut) / 60000);
+}
+function submitRequest() {
+  alertInto('req-error', 'bad', '');
+  var type = document.getElementById('req-type').value;
+  var entryId = type === 'correction' ? document.getElementById('req-entry').value : null;
+  var p = {
+    empId: myId(),
+    jobId: document.getElementById('req-job').value,
+    clockIn: fromLocalInput(document.getElementById('req-in').value),
+    clockOut: fromLocalInput(document.getElementById('req-out').value),
+    breakMin: Math.round(Number(document.getElementById('req-break').value) || 0),
+    reason: document.getElementById('req-reason').value,
+    excludeEntryId: entryId
+  };
+  if (type === 'correction' && !entryId) {
+    alertInto('req-error', 'bad', 'Pick the entry you want corrected. If the shift was never clocked in at all, ' +
+      'switch the request type to <b>Add a missing shift</b>.');
+    return;
+  }
+  if (type === 'correction' && !entryById(entryId)) {
+    alertInto('req-error', 'bad', 'That entry no longer exists. Reload and pick again.');
+    return;
+  }
+  var err = validateProposal(p);
+  if (err) { alertInto('req-error', 'bad', err); return; }
+
+  var all = requests();
+  var r = {
+    id: nid('req'), ref: 'R-' + (1001 + all.length), type: type,
+    empId: p.empId, jobId: p.jobId, entryId: entryId,
+    proposedIn: p.clockIn, proposedOut: p.clockOut, proposedBreakMin: p.breakMin,
+    reason: p.reason.trim(), submittedAt: Date.now(), status: 'pending',
+    decidedAt: null, decidedBy: null, decisionNote: '', appliedEntryId: null, seeded: false
+  };
+  Store.saveRequest(r);
+  document.getElementById('req-reason').value = '';
+  alertInto('req-error', 'ok', 'Request <b>' + esc(r.ref) + '</b> submitted for ' +
+    fmtH(r.proposedOut - r.proposedIn - r.proposedBreakMin * 60000) + ' h. ' +
+    'It is <b>pending</b> until a manager approves it — your hours have not changed yet.');
+  toast('Request ' + r.ref + ' submitted');
+  refresh();
+}
+function withdrawRequest(id) {
+  var r = reqById(id);
+  if (!r || r.empId !== myId() || r.status !== 'pending') return;
+  Store.updateRequest(id, { status: 'withdrawn', decidedAt: Date.now(), decidedBy: state.session.name + ' (withdrew)' });
+  toast('Request ' + r.ref + ' withdrawn');
+  refresh();
+}
+function proposalSummary(r) {
+  var worked = Math.max(0, r.proposedOut - r.proposedIn - r.proposedBreakMin * 60000);
+  return '<div class="rgrid">' +
+    '<div><div class="rk">Job</div>' + esc(jobName(r.jobId)) + '</div>' +
+    '<div><div class="rk">Proposed clock in</div>' + esc(fmtDT(r.proposedIn)) + '</div>' +
+    '<div><div class="rk">Proposed clock out</div>' + esc(fmtDT(r.proposedOut)) +
+      (dayStart(r.proposedOut) !== dayStart(r.proposedIn) ? ' <span class="small muted">(+1d)</span>' : '') + '</div>' +
+    '<div><div class="rk">Unpaid break</div>' + r.proposedBreakMin + ' min</div>' +
+    '<div><div class="rk">Paid hours if approved</div><b>' + fmtH(worked) + ' h</b></div>' +
+    '<div><div class="rk">Submitted</div>' + esc(fmtDT(r.submittedAt)) + '</div>' +
+  '</div>';
+}
+function requestDelta(r) {
+  if (r.type !== 'correction') return '';
+  var e = entryById(r.entryId);
+  if (!e) return '<div class="small delta">Target entry no longer exists.</div>';
   var now = Date.now();
-  document.getElementById('pm-roster').innerHTML = employees().map(function (emp) {
+  var oldBrk = Math.round(breakMs(e, e.clockOut == null ? now : e.clockOut) / 60000);
+  var parts = [];
+  if (e.clockIn !== r.proposedIn) parts.push('in: <del>' + esc(fmtDT(e.clockIn)) + '</del> → <ins>' + esc(fmtDT(r.proposedIn)) + '</ins>');
+  if (e.clockOut !== r.proposedOut) parts.push('out: <del>' + esc(fmtDT(e.clockOut)) + '</del> → <ins>' + esc(fmtDT(r.proposedOut)) + '</ins>');
+  if (oldBrk !== r.proposedBreakMin) parts.push('break: <del>' + oldBrk + ' min</del> → <ins>' + r.proposedBreakMin + ' min</ins>');
+  if (e.jobId !== r.jobId) parts.push('job: <del>' + esc(jobName(e.jobId)) + '</del> → <ins>' + esc(jobName(r.jobId)) + '</ins>');
+  var cur = workedMs(e, now), next = Math.max(0, r.proposedOut - r.proposedIn - r.proposedBreakMin * 60000);
+  parts.push('paid: <del>' + fmtH(cur) + ' h</del> → <ins>' + fmtH(next) + ' h</ins>');
+  return '<div class="small delta" style="margin-top:8px"><b>Change to entry:</b> ' + parts.join(' &middot; ') + '</div>';
+}
+function statusFlag(r) {
+  var cls = { pending: 'warn', approved: 'ok', denied: 'hard', withdrawn: 'info' }[r.status] || 'info';
+  return '<span class="flag ' + cls + '">' + r.status + '</span>';
+}
+function renderMyRequests() {
+  var mine = myRequests();
+  var pend = mine.filter(function (r) { return r.status === 'pending'; }).length;
+  var cnt = document.getElementById('my-req-count');
+  cnt.textContent = pend + ' pending';
+  cnt.className = 'count' + (pend ? '' : ' zero');
+  document.getElementById('my-requests').innerHTML = mine.length ? mine.map(function (r) {
+    return '<div class="reqcard ' + r.status + '">' +
+      '<div class="rhead"><span class="rref">' + esc(r.ref) + ' · ' +
+        (r.type === 'correction' ? 'Correction' : 'Missing shift') + '</span>' +
+        '<span>' + statusFlag(r) + (r.seeded ? ' <span class="flag demo">demo</span>' : '') + '</span></div>' +
+      proposalSummary(r) + requestDelta(r) +
+      '<div class="reason"><b>Reason:</b> ' + esc(r.reason) + '</div>' +
+      (r.status === 'approved'
+        ? '<div class="small" style="margin-top:8px;color:var(--ok)"><b>Approved</b> by ' + esc(r.decidedBy) + ' on ' +
+          esc(fmtDT(r.decidedAt)) + ' — hours applied.' + (r.decisionNote ? ' Note: ' + esc(r.decisionNote) : '') + '</div>'
+        : '') +
+      (r.status === 'denied'
+        ? '<div class="small" style="margin-top:8px;color:var(--bad)"><b>Denied</b> by ' + esc(r.decidedBy) + ' on ' +
+          esc(fmtDT(r.decidedAt)) + ' — no hours changed.' + (r.decisionNote ? ' Note: ' + esc(r.decisionNote) : '') + '</div>'
+        : '') +
+      (r.status === 'withdrawn'
+        ? '<div class="small muted" style="margin-top:8px">Withdrawn ' + esc(fmtDT(r.decidedAt)) + ' — no hours changed.</div>'
+        : '') +
+      (r.status === 'pending'
+        ? '<div class="reqactions"><button class="btn small ghost" data-act="withdraw" data-id="' + esc(r.id) + '" type="button">Withdraw</button>' +
+          '<span class="small muted">Waiting on a manager. Your hours are unchanged until it is approved.</span></div>'
+        : '') +
+      '</div>';
+  }).join('') : '<p class="small muted">You have not sent any requests.</p>';
+}
+
+/* =====================================================================
+   EMPLOYER PORTAL
+   ===================================================================== */
+function renderRoster() {
+  var el = document.getElementById('pm-roster');
+  if (!el) return;
+  var now = Date.now();
+  el.innerHTML = employees().map(function (emp) {
     var open = openEntryFor(emp.id);
     var cls = 'off', label = 'Off the clock', extra = '';
     if (open) {
       if (isStale(open, now)) { cls = 'stale'; label = 'Shift left open ' + fmtH(now - open.clockIn) + ' h'; }
-      else if (onBreak(open)) { cls = 'break'; label = 'On break'; extra = jobById(open.jobId).name; }
-      else { cls = 'on'; label = 'On the clock — ' + fmtHMS(workedMs(open, now)); extra = jobById(open.jobId).name; }
+      else if (onBreak(open)) { cls = 'break'; label = 'On break'; extra = jobName(open.jobId); }
+      else { cls = 'on'; label = 'On the clock — ' + fmtHMS(workedMs(open, now)); extra = jobName(open.jobId); }
     }
     return '<div class="emp"><div class="nm">' + esc(emp.name) + '</div>' +
       '<div class="small muted">' + esc(emp.role) + '</div>' +
@@ -630,17 +1071,15 @@ function renderRoster() {
 }
 function renderWeekNav() {
   var r = weekRange(state.weekOffset);
-  var lbl = fmtD(r.start) + ' – ' + fmtD(r.end - 1) +
+  document.getElementById('wk-range').textContent = fmtD(r.start) + ' – ' + fmtD(r.end - 1) +
     (state.weekOffset === 0 ? ' (this week)' : state.weekOffset === -1 ? ' (last week)' : '');
-  document.getElementById('wk-range').textContent = lbl;
 }
 function renderMatrix() {
   var now = Date.now();
   var list = entriesInWeek(state.weekOffset);
   var r = weekRange(state.weekOffset);
   var days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  // group per employee -> per job -> per day
-  var perEmp = {}; // empId -> { jobs: {jobId: [7]}, total, perDay:[7] }
+  var perEmp = {};
   list.forEach(function (e) {
     if (!countable(e, now)) return;
     var d = Math.floor((dayStart(e.clockIn) - r.start) / DAY);
@@ -657,14 +1096,12 @@ function renderMatrix() {
   employees().forEach(function (emp) {
     var pe = perEmp[emp.id];
     if (!pe) return;
-    var jobIds = Object.keys(pe.jobs);
-    jobIds.forEach(function (jid, i) {
+    Object.keys(pe.jobs).forEach(function (jid, i) {
       html += '<tr><td>' + (i === 0 ? '<b>' + esc(emp.name) + '</b>' : '') + '</td>' +
-        '<td class="small">' + esc(jobById(jid) ? jobById(jid).name : jid) + '</td>';
+        '<td class="small">' + esc(jobName(jid)) + '</td>';
       pe.jobs[jid].forEach(function (ms) { html += '<td class="num">' + (ms ? fmtH(ms) : '<span class="muted">·</span>') + '</td>'; });
       html += '<td class="num">' + fmtH(pe.jobs[jid].reduce(function (a, b) { return a + b; }, 0)) + '</td><td></td></tr>';
     });
-    // employee total row with flags
     var flags = [];
     if (pe.total > WEEKLY_OT_MS) flags.push('<span class="flag hard">OT &gt;40 h/week (weekly rule) — ' + fmtH(pe.total - WEEKLY_OT_MS) + ' h over</span>');
     var longDays = pe.perDay.filter(function (ms) { return ms > DAILY_LONG_MS; }).length;
@@ -687,8 +1124,7 @@ function renderMatrix() {
 function renderJobTotals() {
   var now = Date.now();
   var list = entriesInWeek(state.weekOffset);
-  var per = {};
-  var grand = 0;
+  var per = {}, grand = 0;
   list.forEach(function (e) {
     if (!countable(e, now)) return;
     var w = workedMs(e, now);
@@ -698,13 +1134,33 @@ function renderJobTotals() {
   if (!ids.length) { document.getElementById('pm-jobs').innerHTML = '<p class="small muted">No countable entries this week.</p>'; return; }
   var html = '<table><thead><tr><th>Job</th><th class="num">Labor h</th><th class="num">Share</th></tr></thead><tbody>';
   ids.sort(function (a, b) { return per[b] - per[a]; }).forEach(function (jid) {
-    html += '<tr><td>' + esc(jobById(jid) ? jobById(jid).name : jid) + '</td>' +
+    html += '<tr><td>' + esc(jobName(jid)) + '</td>' +
       '<td class="num"><b>' + fmtH(per[jid]) + '</b></td>' +
       '<td class="num">' + (grand ? Math.round(per[jid] / grand * 100) : 0) + '%</td></tr>';
   });
   html += '<tr class="totalrow"><td>All jobs</td><td class="num">' + fmtH(grand) + '</td><td class="num">100%</td></tr></tbody></table>';
   document.getElementById('pm-jobs').innerHTML = html;
 }
+function auditVal(k, v) {
+  if (k === 'breakMinutes') return v + ' min';
+  if (k === 'job') return String(v);
+  return v == null ? '(none)' : fmtDT(v);
+}
+function auditHtml(e, heading) {
+  if (!e.edits || !e.edits.length) return '';
+  return '<div class="audit"><b>' + heading + '</b><br>' + e.edits.map(function (ed) {
+    var parts = [];
+    for (var k in ed.changes) {
+      var c = ed.changes[k];
+      parts.push(esc(k) + ': <del>' + esc(auditVal(k, c.from)) + '</del> &rarr; <ins>' + esc(auditVal(k, c.to)) + '</ins>');
+    }
+    return esc(ed.by) + ' on ' + esc(fmtDT(ed.at)) + ' — ' + parts.join('; ') +
+      (ed.requestId ? ' <span class="flag info">via request ' + esc(refOf(ed.requestId)) + '</span>' : '') +
+      (ed.note ? ' <i>(' + esc(ed.note) + ')</i>' : '');
+  }).join('<br>') + '</div>';
+}
+function refOf(reqId) { var r = reqById(reqId); return r ? r.ref : reqId; }
+
 function renderPmEntries() {
   var now = Date.now();
   var list = entriesInWeek(state.weekOffset).slice().sort(function (a, b) { return a.clockIn - b.clockIn; });
@@ -715,104 +1171,203 @@ function renderPmEntries() {
     var st = e.clockOut == null ? (stale ? 'stale' : 'open') : e.status;
     var stChip = { approved: 'ok', rejected: 'hard', pending: 'warn', open: 'ok', stale: 'hard' }[st];
     var canJudge = e.clockOut != null;
-    var audit = '';
-    if (e.edits && e.edits.length) {
-      audit = '<div class="audit"><b>Audit trail:</b><br>' + e.edits.map(function (ed) {
-        var parts = [];
-        for (var k in ed.changes) {
-          var c = ed.changes[k];
-          var f = k === 'breakMinutes' ? c.from + ' min' : fmtDT(c.from);
-          var t = k === 'breakMinutes' ? c.to + ' min' : fmtDT(c.to);
-          parts.push(esc(k) + ': <del>' + esc(f) + '</del> &rarr; <ins>' + esc(t) + '</ins>');
-        }
-        return esc(ed.by) + ' on ' + esc(fmtDT(ed.at)) + ' — ' + parts.join('; ') +
-          (ed.note ? ' <i>(' + esc(ed.note) + ')</i>' : '');
-      }).join('<br>') + '</div>';
-    }
-    html += '<tr><td><b>' + esc(empById(e.empId).name) + '</b></td>' +
+    html += '<tr data-entry="' + esc(e.id) + '"><td><b>' + esc(empName(e.empId)) + '</b></td>' +
       '<td>' + esc(fmtD(e.clockIn)) + '</td>' +
-      '<td class="small">' + esc(jobById(e.jobId).name) + '</td>' +
+      '<td class="small">' + esc(jobName(e.jobId)) + '</td>' +
       '<td>' + esc(fmtT(e.clockIn)) + '</td>' +
       '<td>' + esc(fmtT(e.clockOut)) + (e.clockOut != null && dayStart(e.clockOut) !== dayStart(e.clockIn) ? ' <span class="small muted">(+1d)</span>' : '') + '</td>' +
       '<td class="num">' + fmtH(breakMs(e, now)) + '</td>' +
-      '<td class="num"><b>' + (stale ? '—' : fmtH(workedMs(e, now))) + '</b></td>' +
+      '<td class="num" data-paid="' + esc(e.id) + '"><b>' + (stale ? '—' : fmtH(workedMs(e, now))) + '</b></td>' +
       '<td><span class="flag ' + stChip + '">' + st + '</span>' +
         (stale ? ' <span class="flag hard">left open &gt;16 h</span>' : '') +
         (e.seeded ? ' <span class="flag demo">demo</span>' : '') +
-        (e.edits && e.edits.length ? ' <span class="flag warn">edited</span>' : '') + audit + '</td>' +
+        (e.edits && e.edits.length ? ' <span class="flag warn">edited</span>' : '') +
+        auditHtml(e, 'Audit trail:') + '</td>' +
       '<td style="white-space:nowrap">' +
-        (canJudge && st !== 'approved' ? '<button class="btn small" data-act="approve" data-id="' + e.id + '" type="button">Approve</button> ' : '') +
-        (canJudge && st !== 'rejected' ? '<button class="btn small ghost" data-act="reject" data-id="' + e.id + '" type="button">Reject</button> ' : '') +
-        '<button class="btn small secondary" data-act="edit" data-id="' + e.id + '" type="button">Edit</button>' +
+        (canJudge && st !== 'approved' ? '<button class="btn small" data-act="approve" data-id="' + esc(e.id) + '" type="button">Approve</button> ' : '') +
+        (canJudge && st !== 'rejected' ? '<button class="btn small ghost" data-act="reject" data-id="' + esc(e.id) + '" type="button">Reject</button> ' : '') +
+        '<button class="btn small secondary" data-act="edit" data-id="' + esc(e.id) + '" type="button">Edit</button>' +
       '</td></tr>';
   });
   html += '</tbody></table>';
   document.getElementById('pm-entries').innerHTML = html;
 }
 
-/* ---------------- PM actions ---------------- */
+function renderReqQueue() {
+  var pend = pendingRequests().sort(function (a, b) { return a.submittedAt - b.submittedAt; });
+  var cnt = document.getElementById('req-count');
+  cnt.textContent = pend.length + ' pending';
+  cnt.className = 'count' + (pend.length ? '' : ' zero');
+  document.getElementById('req-queue').innerHTML = pend.length ? pend.map(function (r) {
+    return '<div class="reqcard pending" data-req="' + esc(r.id) + '">' +
+      '<div class="rhead"><span class="rref">' + esc(r.ref) + ' · ' + esc(empName(r.empId)) + ' · ' +
+        (r.type === 'correction' ? 'Correction' : 'Missing shift') + '</span>' +
+        '<span>' + statusFlag(r) + (r.seeded ? ' <span class="flag demo">demo</span>' : '') + '</span></div>' +
+      proposalSummary(r) + requestDelta(r) +
+      '<div class="reason"><b>Employee reason:</b> ' + esc(r.reason) + '</div>' +
+      '<div id="req-err-' + esc(r.id) + '"></div>' +
+      '<div class="reqactions">' +
+        '<input type="text" id="req-note-' + esc(r.id) + '" placeholder="Note (optional) — shown to the employee">' +
+        '<button class="btn small" data-ract="approve" data-id="' + esc(r.id) + '" type="button">Approve &amp; apply</button>' +
+        '<button class="btn small ghost" data-ract="deny" data-id="' + esc(r.id) + '" type="button">Deny</button>' +
+      '</div>' +
+    '</div>';
+  }).join('') : '<p class="small muted">No pending requests.</p>';
+
+  var done = requests().filter(function (r) { return r.status !== 'pending'; })
+    .sort(function (a, b) { return (b.decidedAt || 0) - (a.decidedAt || 0); });
+  var doneCount = document.getElementById('req-done-count');
+  doneCount.textContent = done.length;
+  document.getElementById('req-history').innerHTML = done.length ? done.map(function (r) {
+    return '<div class="reqcard ' + r.status + '">' +
+      '<div class="rhead"><span class="rref">' + esc(r.ref) + ' · ' + esc(empName(r.empId)) + ' · ' +
+        (r.type === 'correction' ? 'Correction' : 'Missing shift') + '</span>' +
+        '<span>' + statusFlag(r) + (r.seeded ? ' <span class="flag demo">demo</span>' : '') + '</span></div>' +
+      '<div class="small muted" style="margin-top:6px">' +
+        esc(fmtDT(r.proposedIn)) + ' → ' + esc(fmtT(r.proposedOut)) + ' · ' + esc(jobName(r.jobId)) +
+        ' · ' + fmtH(Math.max(0, r.proposedOut - r.proposedIn - r.proposedBreakMin * 60000)) + ' h' +
+        (r.decidedBy ? ' · ' + (r.status === 'withdrawn' ? '' : r.status + ' by ') + esc(r.decidedBy) + ' on ' + esc(fmtDT(r.decidedAt)) : '') +
+        (r.decisionNote ? ' · note: ' + esc(r.decisionNote) : '') +
+        (r.status === 'approved' && r.appliedEntryId ? ' · applied to entry ' + esc(r.appliedEntryId) : '') +
+        (r.status === 'denied' ? ' · no hours changed' : '') +
+      '</div>' +
+      '<div class="reason"><b>Reason:</b> ' + esc(r.reason) + '</div>' +
+    '</div>';
+  }).join('') : '<p class="small muted">Nothing decided yet.</p>';
+}
+
+/* ---- employer: approve / deny a request ---- */
+function approveRequest(id) {
+  if (!isEmployer()) return;                        // belt and braces; the button only exists for employers
+  var r = reqById(id);
+  if (!r || r.status !== 'pending') return;
+  var noteEl = document.getElementById('req-note-' + id);
+  var note = noteEl ? noteEl.value.trim() : '';
+  var at = Date.now(), by = actorLabel();
+
+  if (r.type === 'correction' && !entryById(r.entryId)) {
+    alertInto('req-err-' + id, 'bad', 'The entry this request points at no longer exists, so there is nothing to amend. Deny it and ask for a missing-shift request instead.');
+    return;
+  }
+  // re-validate at apply time: the timesheet may have moved since submission
+  var err = validateProposal({
+    empId: r.empId, jobId: r.jobId, clockIn: r.proposedIn, clockOut: r.proposedOut,
+    breakMin: r.proposedBreakMin, reason: r.reason, excludeEntryId: r.entryId
+  });
+  if (err) { alertInto('req-err-' + id, 'bad', '<b>Cannot apply this request.</b> ' + err); return; }
+
+  var brs = materializeBreak(r.proposedIn, r.proposedOut, r.proposedBreakMin);
+  var appliedId;
+  if (r.type === 'missing') {
+    var ne = {
+      id: nid('ent'), empId: r.empId, jobId: r.jobId,
+      clockIn: r.proposedIn, clockOut: r.proposedOut, breaks: brs, status: 'approved',
+      edits: [{
+        at: at, by: by, requestId: r.id,
+        changes: {
+          clockIn: { from: null, to: r.proposedIn },
+          clockOut: { from: null, to: r.proposedOut },
+          breakMinutes: { from: 0, to: r.proposedBreakMin }
+        },
+        note: 'Entry created by approving missing-shift request ' + r.ref +
+              ' from ' + empName(r.empId) + (note ? ' — ' + note : '') +
+              ' (employee reason: "' + r.reason + '")'
+      }],
+      seeded: false, fromRequestId: r.id
+    };
+    Store.saveEntry(ne);
+    appliedId = ne.id;
+  } else {
+    var e = entryById(r.entryId);
+    var oldBrk = Math.round(breakMs(e, e.clockOut == null ? at : e.clockOut) / 60000);
+    var changes = {};
+    if (e.clockIn !== r.proposedIn) changes.clockIn = { from: e.clockIn, to: r.proposedIn };
+    if (e.clockOut !== r.proposedOut) changes.clockOut = { from: e.clockOut, to: r.proposedOut };
+    if (oldBrk !== r.proposedBreakMin) changes.breakMinutes = { from: oldBrk, to: r.proposedBreakMin };
+    if (e.jobId !== r.jobId) changes.job = { from: jobName(e.jobId), to: jobName(r.jobId) };
+    if (!Object.keys(changes).length) changes.clockOut = { from: e.clockOut, to: r.proposedOut }; // no-op request: still record the review
+    Store.updateEntry(e.id, {
+      clockIn: r.proposedIn, clockOut: r.proposedOut, breaks: brs, jobId: r.jobId, status: 'approved',
+      edits: (e.edits || []).concat([{
+        at: at, by: by, requestId: r.id, changes: changes,
+        note: 'Applied correction request ' + r.ref + ' from ' + empName(r.empId) +
+              (note ? ' — ' + note : '') + ' (employee reason: "' + r.reason + '")'
+      }])
+    });
+    appliedId = e.id;
+  }
+  Store.updateRequest(r.id, { status: 'approved', decidedAt: at, decidedBy: by, decisionNote: note, appliedEntryId: appliedId });
+  toast('Request ' + r.ref + ' approved and applied');
+  refresh();
+}
+function denyRequest(id) {
+  if (!isEmployer()) return;
+  var r = reqById(id);
+  if (!r || r.status !== 'pending') return;
+  var noteEl = document.getElementById('req-note-' + id);
+  Store.updateRequest(id, {
+    status: 'denied', decidedAt: Date.now(), decidedBy: actorLabel(),
+    decisionNote: noteEl ? noteEl.value.trim() : ''
+  });
+  toast('Request ' + r.ref + ' denied — no hours changed');
+  refresh();
+}
+
+/* ---- employer: edit + judge entries ---- */
 var editingId = null;
 function openEdit(id) {
-  var e = entries().filter(function (x) { return x.id === id; })[0];
+  var e = entryById(id);
   if (!e) return;
   editingId = id;
   document.getElementById('ed-in').value = toLocalInput(e.clockIn);
   document.getElementById('ed-out').value = toLocalInput(e.clockOut == null ? Date.now() : e.clockOut);
   document.getElementById('ed-break').value = Math.round(breakMs(e, e.clockOut == null ? Date.now() : e.clockOut) / 60000);
+  document.getElementById('ed-by').value = actorLabel();
   document.getElementById('ed-error').innerHTML = '';
-  var audit = document.getElementById('ed-audit');
-  if (e.edits && e.edits.length) {
-    audit.innerHTML = '<div class="audit"><b>Previous edits (originals preserved):</b><br>' +
-      e.edits.map(function (ed) {
-        var parts = [];
-        for (var k in ed.changes) {
-          var c = ed.changes[k];
-          var f = k === 'breakMinutes' ? c.from + ' min' : fmtDT(c.from);
-          var t = k === 'breakMinutes' ? c.to + ' min' : fmtDT(c.to);
-          parts.push(esc(k) + ': <del>' + esc(f) + '</del> &rarr; <ins>' + esc(t) + '</ins>');
-        }
-        return esc(ed.by) + ' — ' + esc(fmtDT(ed.at)) + ': ' + parts.join('; ');
-      }).join('<br>') + '</div>';
-  } else audit.innerHTML = '<p class="small muted">No prior edits on this entry.</p>';
+  document.getElementById('ed-audit').innerHTML =
+    auditHtml(e, 'Previous edits (originals preserved):') || '<p class="small muted">No prior edits on this entry.</p>';
   document.getElementById('dlg-edit').showModal();
 }
 function saveEdit() {
-  var e = entries().filter(function (x) { return x.id === editingId; })[0];
+  var e = entryById(editingId);
   if (!e) return;
-  var errEl = document.getElementById('ed-error');
   var nIn = fromLocalInput(document.getElementById('ed-in').value);
   var nOut = fromLocalInput(document.getElementById('ed-out').value);
   var nBrk = Math.max(0, Math.round(Number(document.getElementById('ed-break').value) || 0));
-  var by = document.getElementById('ed-by').value.trim() || 'Project Manager (demo)';
-  if (nIn == null || nOut == null) { errEl.innerHTML = '<div class="alert bad">Both clock in and clock out are required.</div>'; return; }
-  if (nOut <= nIn) { errEl.innerHTML = '<div class="alert bad">Clock out must be after clock in (shifts crossing midnight: use the next day’s date).</div>'; return; }
-  if (nBrk * 60000 >= nOut - nIn) { errEl.innerHTML = '<div class="alert bad">Break cannot be as long as the whole shift.</div>'; return; }
+  var by = document.getElementById('ed-by').value.trim() || actorLabel();
+  if (nIn == null || nOut == null) { alertInto('ed-error', 'bad', 'Both clock in and clock out are required.'); return; }
+  if (nOut <= nIn) { alertInto('ed-error', 'bad', 'Clock out must be after clock in (shifts crossing midnight: use the next day’s date).'); return; }
+  if (nBrk * 60000 >= nOut - nIn) { alertInto('ed-error', 'bad', 'Break cannot be as long as the whole shift.'); return; }
+  var clash = findOverlap(e.empId, nIn, nOut, e.id);
+  if (clash) {
+    alertInto('ed-error', 'bad', 'These times overlap another entry for ' + esc(empName(e.empId)) + ' (<b>' +
+      esc(fmtD(clash.clockIn)) + ' ' + esc(fmtT(clash.clockIn)) + ' → ' + esc(fmtT(clash.clockOut)) +
+      '</b>). Adjust the times, or edit that entry instead.');
+    return;
+  }
   var oldBrk = Math.round(breakMs(e, e.clockOut == null ? Date.now() : e.clockOut) / 60000);
   var changes = {};
   if (nIn !== e.clockIn) changes.clockIn = { from: e.clockIn, to: nIn };
   if (nOut !== e.clockOut) changes.clockOut = { from: e.clockOut, to: nOut };
   if (nBrk !== oldBrk) changes.breakMinutes = { from: oldBrk, to: nBrk };
   if (!Object.keys(changes).length) { document.getElementById('dlg-edit').close(); return; }
-  var brs = e.breaks;
-  if ('breakMinutes' in changes || 'clockIn' in changes || 'clockOut' in changes) {
-    // re-materialize the break as one segment centered mid-shift (timestamps stay the source of truth)
-    if (nBrk > 0) { var mid = nIn + Math.round((nOut - nIn) / 2) - Math.round(nBrk * 60000 / 2); brs = [{ start: mid, end: mid + nBrk * 60000 }]; }
-    else brs = [];
-  }
-  var edits = (e.edits || []).concat([{ at: Date.now(), by: by, changes: changes }]);
-  Store.updateEntry(e.id, { clockIn: nIn, clockOut: nOut, breaks: brs, edits: edits,
-                            status: e.status === 'open' ? 'pending' : e.status });
+  Store.updateEntry(e.id, {
+    clockIn: nIn, clockOut: nOut, breaks: materializeBreak(nIn, nOut, nBrk),
+    edits: (e.edits || []).concat([{ at: Date.now(), by: by, changes: changes }]),
+    status: e.status === 'open' ? 'pending' : e.status
+  });
   document.getElementById('dlg-edit').close();
   toast('Entry edited — audit trail updated');
-  renderAll();
+  refresh();
 }
 function judge(id, status) {
+  if (!isEmployer()) return;
   Store.updateEntry(id, { status: status });
   toast('Entry ' + status);
-  renderAll();
+  refresh();
 }
 
-/* ---------------- CSV export ---------------- */
+/* ---------------- CSV export (employer only) ---------------- */
 function csvEscape(v) {
   v = String(v == null ? '' : v);
   return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
@@ -823,7 +1378,7 @@ function buildCsv() {
   var list = entriesInWeek(state.weekOffset).slice().sort(function (a, b) { return a.clockIn - b.clockIn; });
   var head = ['entry_id', 'employee', 'role', 'job', 'date', 'clock_in_iso', 'clock_out_iso',
     'clock_in_ms', 'clock_out_ms', 'break_ms', 'worked_ms', 'worked_hours_precise', 'status',
-    'stale_open', 'crosses_midnight', 'edited', 'seeded_demo'];
+    'stale_open', 'crosses_midnight', 'edited', 'from_request', 'seeded_demo'];
   var rows = [head.join(',')];
   list.forEach(function (e) {
     var emp = empById(e.empId), job = jobById(e.jobId);
@@ -840,7 +1395,9 @@ function buildCsv() {
       e.clockOut == null ? (stale ? 'stale-open' : 'open') : e.status,
       stale ? 'yes' : '',
       e.clockOut != null && dayStart(e.clockOut) !== dayStart(e.clockIn) ? 'yes' : '',
-      e.edits && e.edits.length ? 'yes' : '', e.seeded ? 'yes' : ''
+      e.edits && e.edits.length ? 'yes' : '',
+      e.fromRequestId ? refOf(e.fromRequestId) : '',
+      e.seeded ? 'yes' : ''
     ].map(csvEscape).join(','));
   });
   return { name: 'timesheet-week-' + new Date(r.start).toISOString().slice(0, 10) + '.csv', text: rows.join('\n') };
@@ -856,14 +1413,13 @@ async function exportCsv() {
       if (dl) {
         try {
           await dl.save({ filename: c.name, data: c.text });
-          return; // saved (or the viewer declined the confirm - either way done)
+          return;
         } catch (err) {
-          if (err && err.code === 'declined') return; // their choice; no dialog
+          if (err && err.code === 'declined') return;
           if (err && err.code === 'extension_not_enabled') {
             try { await dl.save({ filename: c.name.replace(/\.csv$/, '.csv.txt'), data: c.text }); return; }
             catch (e2) { if (e2 && e2.code === 'declined') return; }
           }
-          // anything else: fall through to the copy dialog
         }
       }
     } else {
@@ -879,43 +1435,95 @@ async function exportCsv() {
   document.getElementById('dlg-csv').showModal();
 }
 
-/* ---------------- render root ---------------- */
-function renderAll() {
-  renderEmpSelectors();
-  renderEmployee();
-  renderRoster();
-  renderWeekNav();
-  renderMatrix();
-  renderJobTotals();
-  renderPmEntries();
+/* =====================================================================
+   RENDER ROOT
+   ===================================================================== */
+function renderChrome() {
+  var s = state.session;
+  document.getElementById('sessionbar').innerHTML = s
+    ? '<div class="sessionbar"><div class="who">' +
+        '<span class="rolechip ' + s.role + '">' + (s.role === 'employer' ? 'Employer portal' : 'Employee portal') + '</span>' +
+        '<span class="nm">' + esc(s.name) + '</span><span>' + esc(s.title) + '</span>' +
+        '<span class="small">demo sign-in — no password, no server</span>' +
+      '</div>' +
+      '<button class="btn small ghost" id="btn-signout" type="button" style="color:#cfe0ff;border-color:rgba(255,255,255,.35)">Sign out</button></div>'
+    : '';
+  if (s) document.getElementById('btn-signout').addEventListener('click', signOut);
+
+  document.getElementById('banner').innerHTML =
+    '<div class="demo-banner">' +
+      '<span>⚠ Seeded demo data — every employee, job, time entry and request on this page was generated for this demo. Not real payroll records.</span>' +
+      (isEmployer() ? '<span style="display:flex;gap:8px;align-items:center"><button class="btn small ghost" id="btn-reset" type="button">Reset demo data</button></span>' : '') +
+    '</div>';
+  if (isEmployer()) {
+    document.getElementById('btn-reset').addEventListener('click', function () {
+      Store.resetDemo(); state.weekOffset = 0; toast('Demo data reset'); refresh();
+    });
+  }
+
+  document.getElementById('footnote').innerHTML = !s
+    ? 'Employee Hub demo — data lives only in this browser (localStorage). The portal picker above is a demo affordance, not authentication.'
+    : isEmployer()
+      ? 'Employer portal — full timesheet powers. Data lives only in this browser (localStorage); there is no server, so this gate is a demo affordance, not real authorization. See the README in <code>web/employee-hub/</code>.'
+      : 'Employee portal — clock in/out, breaks, and hours requests only. Other employees’ hours, the roster, approvals, edits and the export are not built into this page for your role. Client-side gating is a demo affordance; real enforcement needs a backend.';
+
   document.getElementById('storage-warning').innerHTML = Store.ok() ? '' :
     '<div class="alert warn"><b>Browser storage unavailable.</b> The demo still works, but changes are kept in memory only and vanish on reload.</div>';
 }
-function setView(v) {
-  state.view = v;
-  document.getElementById('view-emp').hidden = v !== 'emp';
-  document.getElementById('view-pm').hidden = v !== 'pm';
-  document.getElementById('tab-emp').classList.toggle('active', v === 'emp');
-  document.getElementById('tab-pm').classList.toggle('active', v === 'pm');
-  renderAll();
+
+function renderApp() {
+  var app = document.getElementById('app');
+  renderChrome();
+  if (!state.session) { app.innerHTML = signInHtml(); wireSignIn(); return; }
+  if (state.session.role === 'employer') { app.innerHTML = employerShellHtml(); wireEmployer(); }
+  else { app.innerHTML = employeeShellHtml(); wireEmployee(); }
+  refresh();
 }
 
-/* ---------------- wiring ---------------- */
-function init() {
-  Store.seed(false);
-  var emps = employees();
-  state.me = emps.length ? emps[0].id : null;
-  document.getElementById('tab-emp').addEventListener('click', function () { setView('emp'); });
-  document.getElementById('tab-pm').addEventListener('click', function () { setView('pm'); });
-  document.getElementById('sel-emp').addEventListener('change', function (ev) { state.me = ev.target.value; empError(''); renderAll(); });
+/* refresh = update the mounted portal's dynamic regions (never crosses roles) */
+function refresh() {
+  renderChrome();
+  if (isEmployee()) {
+    renderJobSelect(document.getElementById('sel-job'), true);
+    renderClock();
+    renderMyTables();
+    renderRequestForm(true);
+    renderMyRequests();
+  } else if (isEmployer()) {
+    renderRoster();
+    renderWeekNav();
+    renderMatrix();
+    renderJobTotals();
+    renderPmEntries();
+    renderReqQueue();
+  }
+}
+
+function wireEmployee() {
   document.getElementById('btn-in').addEventListener('click', doClockIn);
   document.getElementById('btn-out').addEventListener('click', doClockOut);
   document.getElementById('btn-break').addEventListener('click', doBreakToggle);
-  document.getElementById('btn-reset').addEventListener('click', function () {
-    Store.resetDemo(); state.weekOffset = 0; toast('Demo data reset'); renderAll();
+  document.getElementById('req-type').addEventListener('change', function () {
+    renderRequestForm(false);
+    if (document.getElementById('req-type').value === 'correction') prefillFromEntry();
   });
-  document.getElementById('wk-prev').addEventListener('click', function () { state.weekOffset--; renderAll(); });
-  document.getElementById('wk-next').addEventListener('click', function () { state.weekOffset++; renderAll(); });
+  document.getElementById('req-entry').addEventListener('change', prefillFromEntry);
+  document.getElementById('btn-req-submit').addEventListener('click', submitRequest);
+  document.getElementById('my-requests').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button[data-act="withdraw"]');
+    if (b) withdrawRequest(b.dataset.id);
+  });
+  // first paint of the request form, then seed sensible defaults
+  renderRequestForm(false);
+  if (correctableEntries().length) prefillFromEntry();
+  else {
+    document.getElementById('req-type').value = 'missing';
+    renderRequestForm(false);
+  }
+}
+function wireEmployer() {
+  document.getElementById('wk-prev').addEventListener('click', function () { state.weekOffset--; refresh(); });
+  document.getElementById('wk-next').addEventListener('click', function () { state.weekOffset++; refresh(); });
   document.getElementById('btn-csv').addEventListener('click', exportCsv);
   document.getElementById('pm-entries').addEventListener('click', function (ev) {
     var b = ev.target.closest('button[data-act]');
@@ -923,6 +1531,12 @@ function init() {
     if (b.dataset.act === 'approve') judge(b.dataset.id, 'approved');
     else if (b.dataset.act === 'reject') judge(b.dataset.id, 'rejected');
     else if (b.dataset.act === 'edit') openEdit(b.dataset.id);
+  });
+  document.getElementById('req-queue').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button[data-ract]');
+    if (!b) return;
+    if (b.dataset.ract === 'approve') approveRequest(b.dataset.id);
+    else if (b.dataset.ract === 'deny') denyRequest(b.dataset.id);
   });
   document.getElementById('ed-save').addEventListener('click', saveEdit);
   document.getElementById('ed-cancel').addEventListener('click', function () { document.getElementById('dlg-edit').close(); });
@@ -932,12 +1546,25 @@ function init() {
     try { navigator.clipboard.writeText(ta.value); toast('CSV copied'); }
     catch (e) { try { document.execCommand('copy'); toast('CSV copied'); } catch (e2) { toast('Select the text and copy manually'); } }
   });
-  renderAll();
+}
+
+/* ---------------- boot ---------------- */
+function init() {
+  Store.seed(false);
+  var s = Store.getSession();
+  // a stored session is only honoured if the account still exists
+  if (s && s.role === 'employee' && !empById(s.userId)) s = null;
+  if (s && s.role === 'employer' && !managers().filter(function (m) { return m.id === s.userId; }).length) s = null;
+  state.session = s || null;
+  var emps = employees(), mgrs = managers();
+  state.pick.empId = emps.length ? emps[0].id : null;
+  state.pick.mgrId = mgrs.length ? mgrs[0].id : null;
+  renderApp();
   // durations always derive from timestamps, so a backgrounded tab loses nothing;
   // this interval only refreshes what is displayed.
   setInterval(function () {
-    tickElapsed();
-    if (state.view === 'pm') renderRoster();
+    if (isEmployee()) tickElapsed();
+    else if (isEmployer()) renderRoster();
   }, 1000);
 }
 init();
