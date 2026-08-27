@@ -1,5 +1,10 @@
 # Assistify project-specific 3D viewer
 
+The completed approved-plan test model is available as
+`approvedplans-4752-25-assistify-model.json`. Import it with **Import project
+model**, then use the **Plan note register** to inspect or filter all extracted
+plan notes.
+
 This directory contains the reusable, feet-based Assistify construction
 viewer. It intentionally ships with an **unconfigured project** and no
 physical building, parcel, terrain, utility, or grading geometry. A project
