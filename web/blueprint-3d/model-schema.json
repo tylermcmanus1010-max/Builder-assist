@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://builder-assist.example/schemas/assistify-project-model-1.0.0.json",
+  "title": "Assistify project-specific construction model",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "project", "units", "sources", "facts", "parcel", "terrain", "systems", "mapRegistration", "geometry", "takeoff", "unresolved"],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"},
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "displayName", "status"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$"},
+        "displayName": {"type": "string", "minLength": 1, "maxLength": 120},
+        "status": {"enum": ["VERIFIED", "INFERRED", "CONFLICT", "UNVERIFIED"]}
+      }
+    },
+    "units": {"const": "ft"},
+    "sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["documents"],
+      "properties": {
+        "documents": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/document"}
+        }
+      }
+    },
+    "facts": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/fact"}
+    },
+    "parcel": {"$ref": "#/$defs/fact"},
+    "terrain": {"$ref": "#/$defs/fact"},
+    "systems": {"$ref": "#/$defs/fact"},
+    "mapRegistration": {"$ref": "#/$defs/fact"},
+    "geometry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["elements"],
+      "properties": {
+        "elements": {"type": "array", "items": {"$ref": "#/$defs/element"}}
+      }
+    },
+    "takeoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": {"type": "array", "items": {"$ref": "#/$defs/takeoffItem"}}
+      }
+    },
+    "unresolved": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "state", "reason"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "label": {"type": "string", "minLength": 1},
+          "state": {"const": "UNVERIFIED"},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["documentId", "page", "region"],
+      "properties": {
+        "documentId": {"type": "string", "minLength": 1},
+        "page": {"type": "integer", "minimum": 1},
+        "region": {"type": "string", "minLength": 1},
+        "annotationId": {"type": ["string", "null"]}
+      }
+    },
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "sha256", "pageCount", "revision", "status"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "pageCount": {"type": "integer", "minimum": 1},
+        "revision": {"type": ["string", "null"]},
+        "status": {"enum": ["CURRENT", "SUPERSEDED", "UNVERIFIED"]}
+      }
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["state", "value", "sourceRefs"],
+      "properties": {
+        "state": {"enum": ["VERIFIED", "INFERRED", "CONFLICT", "UNVERIFIED"]},
+        "value": {},
+        "unit": {"type": ["string", "null"]},
+        "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "sourceRefs": {"type": "array", "items": {"$ref": "#/$defs/sourceRef"}},
+        "derivation": {"type": ["string", "null"]},
+        "reviewedBy": {"type": ["string", "null"]},
+        "reviewedAt": {"type": ["string", "null"], "format": "date-time"}
+      },
+      "allOf": [
+        {"if": {"properties": {"state": {"const": "UNVERIFIED"}}}, "then": {"properties": {"value": {"type": "null"}}}},
+        {"if": {"properties": {"state": {"const": "INFERRED"}}}, "then": {"required": ["derivation"], "properties": {"derivation": {"type": "string", "minLength": 1}}}}
+      ]
+    },
+    "element": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "type", "buildStage", "state", "sourceRefs", "factRefs", "geometry"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "type": {"enum": ["box", "face", "line"]},
+        "buildStage": {"enum": ["site-controls", "clearing-erosion", "earthwork-grading", "underground-utilities", "footings", "foundation-waterproofing", "slabs-flatwork", "floor-structure", "wall-framing-sheathing", "roof-structure-envelope", "mep-insulation", "finishes-closeout"]},
+        "state": {"enum": ["VERIFIED", "INFERRED"]},
+        "sourceRefs": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/sourceRef"}},
+        "factRefs": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "role": {"type": "string"},
+        "geometry": {"type": "object"}
+      }
+    },
+    "takeoffItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "quantity", "unit", "state", "sourceRefs"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "quantity": {"type": ["number", "null"]},
+        "unit": {"type": ["string", "null"]},
+        "state": {"enum": ["VERIFIED", "INFERRED", "CONFLICT", "UNVERIFIED"]},
+        "sourceRefs": {"type": "array", "items": {"$ref": "#/$defs/sourceRef"}},
+        "derivation": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

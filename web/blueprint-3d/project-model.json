@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "1.0.0",
+  "project": {
+    "id": "unconfigured",
+    "displayName": "Unconfigured project",
+    "status": "UNVERIFIED"
+  },
+  "units": "ft",
+  "sources": {
+    "documents": []
+  },
+  "facts": {},
+  "parcel": {
+    "state": "UNVERIFIED",
+    "value": null,
+    "sourceRefs": [],
+    "notice": "No parcel source loaded. GIS boundaries, when supplied, are context only and are not a legal survey."
+  },
+  "terrain": {
+    "state": "UNVERIFIED",
+    "value": null,
+    "sourceRefs": []
+  },
+  "systems": {
+    "state": "UNVERIFIED",
+    "value": null,
+    "sourceRefs": []
+  },
+  "mapRegistration": {
+    "state": "UNVERIFIED",
+    "value": null,
+    "sourceRefs": []
+  },
+  "geometry": {
+    "elements": []
+  },
+  "takeoff": {
+    "items": []
+  },
+  "unresolved": [
+    {
+      "id": "plans",
+      "label": "Issued plan set",
+      "state": "UNVERIFIED",
+      "reason": "No project plans have been loaded."
+    },
+    {
+      "id": "parcel",
+      "label": "Parcel boundary and frontage",
+      "state": "UNVERIFIED",
+      "reason": "No parcel or survey source has been loaded."
+    },
+    {
+      "id": "terrain",
+      "label": "Existing and proposed grades",
+      "state": "UNVERIFIED",
+      "reason": "No survey or grading plan has been loaded."
+    },
+    {
+      "id": "utilities",
+      "label": "Underground utilities",
+      "state": "UNVERIFIED",
+      "reason": "No civil or utility plan has been loaded."
+    }
+  ]
+}
