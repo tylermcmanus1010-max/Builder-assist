@@ -1,0 +1,216 @@
+[
+  {
+    "file": "web\\blueprint-3d\\index.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": false,
+    "bytesRemoved": 0,
+    "loadMs": 3025,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 0,
+      "candidatesChecked": 14,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 1730,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Assistify 3D | Builder Assist",
+      "scrollHeight": 1025,
+      "textLength": 1782,
+      "elements": 134,
+      "buttons": 16,
+      "visibleButtons": 16,
+      "inputs": 2,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 0,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  },
+  {
+    "file": "web\\employee-hub\\index.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [
+      "downloads"
+    ],
+    "externalRefs": [],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": false,
+    "bytesRemoved": 0,
+    "loadMs": 3007,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 0,
+      "candidatesChecked": 4,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 1227,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Builder Assist Employee Hub",
+      "scrollHeight": 900,
+      "textLength": 1453,
+      "elements": 50,
+      "buttons": 3,
+      "visibleButtons": 3,
+      "inputs": 1,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 0,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  },
+  {
+    "file": "web\\main-site\\index.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": false,
+    "bytesRemoved": 0,
+    "loadMs": 3448,
+    "routes": [
+      {
+        "route": "#/",
+        "ok": true,
+        "textLength": 6942
+      },
+      {
+        "route": "#/get-pricing",
+        "ok": true,
+        "textLength": 829
+      },
+      {
+        "route": "#/walkthrough",
+        "ok": true,
+        "textLength": 1338
+      },
+      {
+        "route": "#/admin-signin",
+        "ok": true,
+        "textLength": 639
+      }
+    ],
+    "controls": {
+      "delegatedClickHandlers": 10,
+      "candidatesChecked": 1,
+      "dead": [
+        "<button> \"DISMISS\""
+      ],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 13279,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Builder Assist LLC",
+      "scrollHeight": 8989,
+      "textLength": 6942,
+      "elements": 457,
+      "buttons": 2,
+      "visibleButtons": 2,
+      "inputs": 2,
+      "images": 4,
+      "brokenImages": 0,
+      "anchors": 21,
+      "deadAnchors": [],
+      "routes": [
+        "#/",
+        "#/get-pricing",
+        "#/walkthrough",
+        "#/admin-signin"
+      ]
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  },
+  {
+    "file": "web\\material-compare\\index.html",
+    "status": "PASS",
+    "problems": [],
+    "capabilities": [],
+    "externalRefs": [],
+    "cspBlocked": [],
+    "fallback": {
+      "externalImages": 0,
+      "withOnErrorFallback": 0,
+      "unguarded": 0
+    },
+    "frameRuntimeRemoved": false,
+    "bytesRemoved": 0,
+    "loadMs": 3250,
+    "routes": [],
+    "controls": {
+      "delegatedClickHandlers": 0,
+      "candidatesChecked": 3,
+      "dead": [],
+      "deadForms": []
+    },
+    "mobile": {
+      "overflowX": 0,
+      "wide": [],
+      "scrollHeight": 15212,
+      "routes": []
+    },
+    "metrics": {
+      "title": "Builder Assist Materials",
+      "scrollHeight": 12373,
+      "textLength": 51721,
+      "elements": 2040,
+      "buttons": 0,
+      "visibleButtons": 0,
+      "inputs": 3,
+      "images": 0,
+      "brokenImages": 0,
+      "anchors": 17,
+      "deadAnchors": [],
+      "routes": []
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": []
+  }
+]

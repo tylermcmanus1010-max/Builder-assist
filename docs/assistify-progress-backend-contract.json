@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://builder-assist.example/schemas/assistify-progress-backend-contract.json",
+  "title": "Assistify shared field-progress contract",
+  "description": "Vendor-neutral data contract for replacing the prototype localStorage progress store. Plan/model truth remains a separate versioned resource.",
+  "contractVersion": 1,
+  "statusValues": [
+    "not-started",
+    "in-progress",
+    "blocked",
+    "needs-inspection",
+    "complete"
+  ],
+  "stageIds": [
+    "site-controls",
+    "clearing-erosion",
+    "earthwork-grading",
+    "underground-utilities",
+    "footings",
+    "foundation-waterproofing",
+    "slabs-flatwork",
+    "floor-structure",
+    "wall-framing-sheathing",
+    "roof-structure-envelope",
+    "mep-insulation",
+    "finishes-closeout"
+  ],
+  "resources": {
+    "project": {
+      "required": ["id", "displayName", "createdAt", "updatedAt"],
+      "fields": {
+        "id": "stable UUID or existing Assistify project id",
+        "displayName": "human-readable project name",
+        "modelRevision": "immutable model revision or content hash; optional",
+        "createdAt": "ISO-8601 server timestamp",
+        "updatedAt": "ISO-8601 server timestamp"
+      }
+    },
+    "projectMember": {
+      "required": ["projectId", "userId", "role", "createdAt"],
+      "roleValues": ["owner", "admin", "superintendent", "worker", "viewer"],
+      "fields": {
+        "projectId": "project foreign key",
+        "userId": "authenticated user foreign key",
+        "role": "project-scoped permission",
+        "createdAt": "ISO-8601 server timestamp"
+      }
+    },
+    "stageProgress": {
+      "description": "Current materialized snapshot; unique by projectId plus stageId.",
+      "required": [
+        "projectId",
+        "stageId",
+        "status",
+        "percent",
+        "version",
+        "updatedByUserId",
+        "updatedAt"
+      ],
+      "fields": {
+        "projectId": "project foreign key",
+        "stageId": "one canonical stageIds value",
+        "status": "one statusValues value",
+        "percent": "integer from 0 through 100",
+        "note": "plain text, maximum 500 characters",
+        "version": "positive integer used for optimistic concurrency",
+        "latestEventId": "progressEvent foreign key",
+        "updatedByUserId": "authenticated actor foreign key",
+        "updatedAt": "ISO-8601 server timestamp"
+      }
+    },
+    "progressEvent": {
+      "description": "Append-only audit event. Never update or delete in normal application flows.",
+      "required": [
+        "id",
+        "idempotencyKey",
+        "projectId",
+        "stageId",
+        "status",
+        "percent",
+        "actorUserId",
+        "createdAt"
+      ],
+      "fields": {
+        "id": "server-generated UUID",
+        "idempotencyKey": "client-generated UUID; unique per project for safe offline retries",
+        "projectId": "project foreign key",
+        "stageId": "one canonical stageIds value",
+        "status": "one statusValues value",
+        "percent": "integer from 0 through 100",
+        "note": "plain text, maximum 500 characters",
+        "actorUserId": "authenticated actor foreign key; never trust a client display name",
+        "actorDisplayNameSnapshot": "optional display label captured for history",
+        "baseVersion": "stageProgress version the client edited",
+        "createdAt": "ISO-8601 server timestamp",
+        "clientCreatedAt": "optional ISO-8601 device timestamp",
+        "evidence": "zero or more evidenceAsset records"
+      }
+    },
+    "evidenceAsset": {
+      "required": [
+        "id",
+        "projectId",
+        "progressEventId",
+        "objectKey",
+        "originalName",
+        "mimeType",
+        "byteSize",
+        "sha256",
+        "uploadedByUserId",
+        "createdAt"
+      ],
+      "fields": {
+        "id": "server-generated UUID",
+        "projectId": "project foreign key",
+        "progressEventId": "event foreign key",
+        "objectKey": "private object-storage key, not a public URL",
+        "originalName": "sanitized original filename",
+        "mimeType": "server-validated media type",
+        "byteSize": "server-validated size",
+        "sha256": "lowercase content hash",
+        "caption": "optional plain text",
+        "capturedAt": "optional ISO-8601 capture timestamp",
+        "uploadedByUserId": "authenticated actor foreign key",
+        "createdAt": "ISO-8601 server timestamp"
+      }
+    }
+  },
+  "requiredOperations": [
+    "list projects visible to the authenticated user",
+    "get one project's twelve current stage snapshots",
+    "list progress events with cursor pagination",
+    "atomically append an event and update its stage snapshot",
+    "request a short-lived evidence upload target",
+    "finalize an uploaded evidence asset after server-side validation",
+    "subscribe to or poll changes after a server cursor"
+  ],
+  "writeRules": [
+    "The server derives actorUserId from the authenticated session.",
+    "Every read and write is authorized through project membership.",
+    "An idempotencyKey retry returns the original successful event.",
+    "A stale baseVersion returns a conflict and the current snapshot; do not silently overwrite it.",
+    "status complete requires percent 100; status not-started requires percent 0.",
+    "Timestamps used for ordering are generated by the server.",
+    "Event history is append-only; corrections are new events.",
+    "Progress data never changes geometry provenance or plan verification state."
+  ],
+  "clientSync": {
+    "sourceOfTruth": "shared service",
+    "offlineCache": "IndexedDB or localStorage may cache snapshots and an outbox, but is not authoritative",
+    "outbox": "queue idempotent events and evidence uploads while offline",
+    "conflictPolicy": "show the server snapshot and ask the user to reconcile a stale edit",
+    "cursor": "persist the last server cursor per project and fetch changes after it",
+    "migration": "read assistify3d:progress:<projectId> once, offer an explicit reviewed import, and mark it migrated only after server acknowledgement"
+  },
+  "securityMinimums": [
+    "private evidence storage with short-lived signed access",
+    "row- or service-level project authorization",
+    "server-side file type, size, and malware validation",
+    "rate limits and an immutable actor/time audit trail",
+    "no credentials, tokens, customer plan PDFs, or personal data committed to Git"
+  ]
+}

@@ -26,9 +26,8 @@ there is no backend call anywhere, and the only optional host integration
 when it is absent.
 
 Everything on the page is **seeded demo data** (banner + per-row `demo` badges).
-The one real string is the job name `Van Horn Residence - DeWitt, MI`, taken
-from the site's `__TAKEOFF` `project_name`; the other jobs, all employees,
-managers, hours and requests are invented.
+All jobs, employees, managers, hours, and requests are invented. Real records
+must come from an authorized workspace data source.
 
 ## The role gate — and exactly how far it goes
 

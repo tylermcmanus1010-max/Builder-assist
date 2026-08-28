@@ -1,0 +1,244 @@
+{
+  "schemaVersion": "1.0.0",
+  "project": {
+    "id": "minneapolis-sample-residential-site-plan",
+    "displayName": "Minneapolis sample residential site plan",
+    "status": "INFERRED"
+  },
+  "units": "ft",
+  "sources": {
+    "documents": [
+      {
+        "id": "minneapolis-sample-site-plan",
+        "title": "Sample Residential Site Plan - City of Minneapolis",
+        "sha256": "67bc690cc2e6e6d13173627c0bd36761dd3c9d8af4d75db4500294d0cdb9b0df",
+        "pageCount": 1,
+        "revision": null,
+        "status": "UNVERIFIED"
+      }
+    ]
+  },
+  "facts": {
+    "planScale": {
+      "state": "VERIFIED",
+      "value": 20,
+      "unit": "ft/in",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "bottom title area: SCALE 1 inch = 20 feet"}],
+      "derivation": null,
+      "reviewedBy": null,
+      "reviewedAt": null
+    },
+    "houseFootprint": {
+      "state": "VERIFIED",
+      "value": {"width": 30, "depth": 40},
+      "unit": "ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "central house outline with 30-foot and 40-foot dimensions"}],
+      "derivation": null,
+      "reviewedBy": null,
+      "reviewedAt": null
+    },
+    "houseFrontSetback": {
+      "state": "VERIFIED",
+      "value": 22,
+      "unit": "ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "front property line to house dimension: 22 feet"}],
+      "derivation": null,
+      "reviewedBy": null,
+      "reviewedAt": null
+    },
+    "sideSetbacks": {
+      "state": "VERIFIED",
+      "value": {"left": 5, "right": 5},
+      "unit": "ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "house side-yard dimensions: 5 feet each side"}],
+      "derivation": null,
+      "reviewedBy": null,
+      "reviewedAt": null
+    },
+    "lotWidth": {
+      "state": "INFERRED",
+      "value": 40,
+      "unit": "ft",
+      "confidence": 0.95,
+      "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "30-foot house width plus two labeled 5-foot side setbacks"}],
+      "derivation": "30-foot house width + 5-foot left setback + 5-foot right setback = 40 feet.",
+      "reviewedBy": null,
+      "reviewedAt": null
+    },
+    "lotDepth": {
+      "state": "VERIFIED",
+      "value": 130,
+      "unit": "ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "right property line dimension: 130 feet"}],
+      "derivation": null,
+      "reviewedBy": null,
+      "reviewedAt": null
+    },
+    "deckFootprint": {
+      "state": "VERIFIED",
+      "value": {"width": 20, "depth": 5},
+      "unit": "ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "hatched proposed deck with 20-foot and 5-foot dimensions"}],
+      "derivation": null,
+      "reviewedBy": null,
+      "reviewedAt": null
+    },
+    "garageFootprint": {
+      "state": "VERIFIED",
+      "value": {"width": 22, "depth": 22},
+      "unit": "ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "hatched proposed garage with two 22-foot dimensions"}],
+      "derivation": null,
+      "reviewedBy": null,
+      "reviewedAt": null
+    },
+    "garageRearSetback": {
+      "state": "VERIFIED",
+      "value": 1,
+      "unit": "ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "proposed garage to alley property line dimension: 1 foot"}],
+      "derivation": null,
+      "reviewedBy": null,
+      "reviewedAt": null
+    },
+    "garageRightSetback": {
+      "state": "VERIFIED",
+      "value": 1,
+      "unit": "ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "proposed garage to right property line dimension: 1 foot"}],
+      "derivation": null,
+      "reviewedBy": null,
+      "reviewedAt": null
+    },
+    "drivewayWidth": {
+      "state": "VERIFIED",
+      "value": 17,
+      "unit": "ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "driveway dimension: 17 feet"}],
+      "derivation": null,
+      "reviewedBy": null,
+      "reviewedAt": null
+    }
+  },
+  "parcel": {
+    "state": "INFERRED",
+    "value": {"width": 40, "depth": 130, "legalSurvey": false},
+    "unit": "ft",
+    "confidence": 0.95,
+    "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "diagram property lines and labeled dimensions"}],
+    "derivation": "Diagram-only test boundary: 130-foot labeled depth and 40-foot width derived from the house width and side setbacks. It is not a legal survey.",
+    "reviewedBy": null,
+    "reviewedAt": null
+  },
+  "terrain": {"state": "UNVERIFIED", "value": null, "sourceRefs": []},
+  "systems": {"state": "UNVERIFIED", "value": null, "sourceRefs": []},
+  "mapRegistration": {"state": "UNVERIFIED", "value": null, "sourceRefs": []},
+  "geometry": {
+    "elements": [
+      {
+        "id": "sample-parcel-outline",
+        "name": "Diagram property boundary",
+        "type": "face",
+        "buildStage": "site-controls",
+        "state": "INFERRED",
+        "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "diagram property lines and labeled dimensions"}],
+        "factRefs": ["lotWidth", "lotDepth"],
+        "role": "earth",
+        "geometry": {"points": [[0, 0, 0], [40, 0, 0], [40, 130, 0], [0, 130, 0]]}
+      },
+      {
+        "id": "sample-house-footprint",
+        "name": "Existing house footprint",
+        "type": "face",
+        "buildStage": "site-controls",
+        "state": "INFERRED",
+        "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "central house outline, dimensions, and setbacks"}],
+        "factRefs": ["houseFootprint", "houseFrontSetback", "sideSetbacks"],
+        "role": "envelope",
+        "geometry": {"points": [[5, 22, 0], [35, 22, 0], [35, 62, 0], [5, 62, 0]]}
+      },
+      {
+        "id": "sample-proposed-deck",
+        "name": "Proposed deck footprint",
+        "type": "face",
+        "buildStage": "floor-structure",
+        "state": "INFERRED",
+        "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "hatched proposed deck adjoining rear of house"}],
+        "factRefs": ["deckFootprint", "houseFootprint"],
+        "role": "wood",
+        "geometry": {"points": [[10, 62, 0], [30, 62, 0], [30, 67, 0], [10, 67, 0]]}
+      },
+      {
+        "id": "sample-proposed-garage",
+        "name": "Proposed garage footprint",
+        "type": "face",
+        "buildStage": "site-controls",
+        "state": "INFERRED",
+        "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "hatched proposed garage with setbacks at alley"}],
+        "factRefs": ["garageFootprint", "garageRearSetback", "garageRightSetback"],
+        "role": "concrete",
+        "geometry": {"points": [[17, 107, 0], [39, 107, 0], [39, 129, 0], [17, 129, 0]]}
+      },
+      {
+        "id": "sample-driveway",
+        "name": "Driveway plan area",
+        "type": "face",
+        "buildStage": "slabs-flatwork",
+        "state": "INFERRED",
+        "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "driveway label and 17-foot width beside proposed garage"}],
+        "factRefs": ["drivewayWidth", "garageFootprint"],
+        "role": "concrete",
+        "geometry": {"points": [[0, 107, 0], [17, 107, 0], [17, 130, 0], [0, 130, 0]]}
+      }
+    ]
+  },
+  "takeoff": {
+    "items": [
+      {
+        "id": "sample-house-footprint-area",
+        "name": "Existing house footprint area",
+        "quantity": 1200,
+        "unit": "sq ft",
+        "state": "INFERRED",
+        "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "house dimensions: 30 feet by 40 feet"}],
+        "derivation": "30 ft x 40 ft = 1,200 sq ft."
+      },
+      {
+        "id": "sample-deck-area",
+        "name": "Proposed deck plan area",
+        "quantity": 100,
+        "unit": "sq ft",
+        "state": "INFERRED",
+        "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "proposed deck dimensions: 20 feet by 5 feet"}],
+        "derivation": "20 ft x 5 ft = 100 sq ft."
+      },
+      {
+        "id": "sample-garage-area",
+        "name": "Proposed garage plan area",
+        "quantity": 484,
+        "unit": "sq ft",
+        "state": "INFERRED",
+        "sourceRefs": [{"documentId": "minneapolis-sample-site-plan", "page": 1, "region": "proposed garage dimensions: 22 feet by 22 feet"}],
+        "derivation": "22 ft x 22 ft = 484 sq ft."
+      }
+    ]
+  },
+  "unresolved": [
+    {"id": "sample-only", "label": "Real project identity", "state": "UNVERIFIED", "reason": "This is a municipal teaching example at 123 Fake Street NE, not a real project record."},
+    {"id": "vertical-geometry", "label": "Building, deck, and garage heights", "state": "UNVERIFIED", "reason": "The site plan provides footprints but no elevations or vertical dimensions; the model stays two-dimensional."},
+    {"id": "terrain", "label": "Existing and proposed grades", "state": "UNVERIFIED", "reason": "No elevations, contours, or grading design are shown."},
+    {"id": "utilities", "label": "Underground utilities and drainage design", "state": "UNVERIFIED", "reason": "A drainage label appears, but no route, invert, size, or utility plan is supplied."},
+    {"id": "assemblies", "label": "Materials and construction assemblies", "state": "UNVERIFIED", "reason": "The site plan does not provide structural, architectural, or MEP assemblies."},
+    {"id": "map-registration", "label": "Geographic map registration", "state": "UNVERIFIED", "reason": "The sample address is fictional and no coordinates or survey control points are supplied."}
+  ]
+}

@@ -1,100 +1,133 @@
-# Blueprint 3D — Van Horn Residence construction-stage model
+# Assistify project-specific 3D viewer
 
-`index.html` is a fully self-contained page (no external assets, artifact-safe)
-that renders the Van Horn Residence in 3D with a hand-written Canvas 2D
-pipeline and steps through seven construction stages. All quantities shown in
-the side panel come from the real takeoff (`takeoff.json`, extracted verbatim
-from `window.__TAKEOFF` in the published Builder Assist LLC artifact).
+The completed approved-plan test model is available as
+`approvedplans-4752-25-assistify-model.json`. When the repository is served,
+choose **Load 4752-25 approved plan** to fetch, validate, and persist it in one
+step. **Import project model** remains available for a downloaded or modified
+copy. **Plan intelligence** reports sheet-by-sheet coverage, separates the
+approved set into civil, architectural, MEP, electrical, and structural work,
+and shows which sheets actually support 3D. Use the **Plan note & detail
+register** to filter extracted requirements, callouts, dimensions, schedules,
+calculations, and drawing text by sheet, discipline, or processing status.
 
-## Coordinate system
+## PDF import
 
-World coordinates are in **feet**:
+Choose **Import plan PDF** to process a PDF entirely in the browser. Assistify
+hashes the file, extracts its text layer with the vendored PDF.js runtime, and
+builds a source-linked note register for review. It does not invent geometry:
+dimensions, symbols, schedules, and drawing context remain unverified until a
+reviewer applies them to a project model. Text-free scanned plans require OCR
+before their notes can be indexed.
 
-- **x** — east, along the 83'-0" overall front. House occupies `0 .. 56.5`,
-  garage `56.5 .. 83`.
-- **y** — north, into the lot. House `0 .. 32` (front wall at y=0),
-  garage `0 .. 38`.
-- **z** — up. **Datum z = 0 is the top of the house foundation wall**, which
-  is also grade (the 4'-0" site grid sits there). Everything below grade is
-  negative: basement wall bottom at −8'-0", footing bottom / excavation floor
-  at −8'-9".
+The exact `66thST4752-25_APPROVEDPlans_639076997322694800.pdf` file is matched
+by SHA-256 to its committed reviewed model, so importing it restores the 30
+source-linked geometry elements and 1,547-note register. Renamed copies work;
+modified PDFs fall back to the generic review flow.
 
-All derived elevations (top of subfloor, plates, heels, ridges, garage slab a
-7" step down, …) are computed once into the `D` object at the top of the
-script from the sheet dimensions — change a source dimension there and the
-whole model follows.
+For this reviewed set, all 18 sheets are indexed but only A103, A105, and A106
+currently cite physical 3D elements. Civil, ceiling/lighting, sections,
+plumbing, mechanical, gas, electrical, foundation, framing, schedules, and
+details remain visible as registered plan intelligence until their geometry is
+reviewed and reconstructed. Assistify labels that boundary instead of treating
+the floor-plan trace as a complete model.
 
-Rendering: orbit camera (azimuth / elevation / distance around a target),
-perspective projection with near-plane clipping, painter's-algorithm depth
-sort by view-space centroid, per-face Lambert shading precomputed against a
-fixed light. `devicePixelRatio`-aware, resizes with its container.
+The reviewed set also loads 104 optional **concept geometry** elements derived
+from 11 sheets. These approximate site/grading lines, demolition limits,
+utilities, footings, foundation walls, framing, roof members, plumbing,
+mechanical, gas, electrical distribution, and ceiling lights. Concept elements
+are `INFERRED`, carry a sheet citation plus a written inference basis, render as
+dashed discipline-colored geometry, and can be hidden independently. They are
+communication guesses—not permit, survey, coordination, fabrication, or
+takeoff geometry.
 
-## How stages are defined
+PDF.js 5.6.205 is vendored under `vendor/pdfjs/` with its Apache 2.0 license.
 
-Stage indices 1–7 are declared as constants (`S_EXC`, `S_FDN`, `S_SLAB`,
-`S_FLOOR`, `S_FRAME`, `S_ROOF`, `S_DONE`). Two parallel structures define a
-stage:
+This directory contains the reusable, feet-based Assistify construction
+viewer. It intentionally ships with an **unconfigured project** and no
+physical building, parcel, terrain, utility, or grading geometry. A project
+model must be generated from that property's plan evidence and pass runtime
+validation before it can render.
 
-1. **Geometry** — every element in the store `E` carries the stage `s` at
-   which it appears. `build()` creates them with the helpers
-   `F(stage, points, role)` (face), `L(stage, a, b, role)` (line),
-   `boxF`/`ringF` (boxes/wall rings), `frameWall` (plates + studs + headers)
-   and `skin` (cladding plane with openings). The `role` string picks fill
-   and edge colors from `STYLE`. At render time, elements with `s < current`
-   draw receded, `s === current` draws emphasized in blue, `s > current` is
-   hidden; forward stage changes tween in (grow from `zb` + fade), respecting
-   `prefers-reduced-motion`.
-2. **Panel copy** — `STAGES[n]` holds the name, description, headline metric,
-   the list of takeoff **item names** shown in the quantities table (looked
-   up by exact name in `BYNAME`; a missing name logs a console error), and a
-   `checks()` function returning rows that recompute quantities from the
-   drawn geometry and compare them against the takeoff (deltas are shown as
-   `Δ` with an explanatory note, never hidden).
+## Architecture
 
-## Adding a stage
+- `index.html` is the responsive and accessible viewer shell.
+- `engine.js` owns schema enforcement, the Canvas perspective renderer,
+  camera, near-plane clipping, depth sorting, interaction, twelve stage
+  controls, twelve tools, provenance display, and project-scoped prototype
+  persistence.
+- `concept-geometry.js` adds the optional, explicitly labeled conceptual
+  geometry layer for the reviewed 4752-25 plan set.
+- `progress-tracker.js` stores project-scoped field progress, stage status,
+  update history, crew notes, and evidence-photo references for the prototype.
+- `model-schema.json` is the machine-readable project-model contract.
+- `project-model.json` is the truthful empty boot model. All missing values are
+  explicitly `UNVERIFIED` and `null`.
 
-1. Add a stage constant and bump the count (search for `of 7`, the `for` loop
-   in `initSelect`, and the `setStage` clamp — they all use 7).
-2. Create its geometry in `build()` (or a helper called from it) tagging every
-   element with the new stage index. Keep element z-bases honest — `zb` drives
-   the grow-in animation.
-3. Append a `STAGES` entry: name, description, headline (an `item` name from
-   `takeoff.json`, or a `value()` function), the item-name list, and a
-   `checks()` function that derives at least one number from the geometry.
-4. If a new material is involved, add a `role` to `STYLE`.
+The admin portal embeds this shared viewer in an iframe. Run
+`web/main-site/build-bp3d.py` after changing the integration contract; it
+removes any legacy generated engine copy and keeps the portal pointed at this
+directory.
 
-## Data
+## Model truth rules
 
-`takeoff.json` is the source of truth (85 line items, verified byte-identical
-in content to the published artifact's `window.__TAKEOFF` items). The page
-inlines a subset of it between the `/*TAKEOFF:BEGIN*/ … /*TAKEOFF:END*/`
-markers so it stays a single self-contained file. To re-inject after editing
-`takeoff.json`:
+- Units are feet.
+- Physical geometry is accepted only in `VERIFIED` or `INFERRED` state.
+- Every physical element must cite a registered source document and fact.
+- Every source document requires a SHA-256 hash and page count; citations
+  require a page and region.
+- `UNVERIFIED` and `CONFLICT` facts use `value: null` and never compile into
+  geometry.
+- Unsupported geometry is omitted. The visible grid is a neutral reference
+  plane, not site grade or a survey.
+- GIS context is not a legal survey. Map synchronization remains disabled
+  until the model supplies verified registration control.
 
-```sh
-cd web/blueprint-3d && python3 - <<'EOF'
-import json, re
-d = json.load(open('takeoff.json'))
-p = {k: d[k] for k in ('project_name','source','items','assumptions','open_questions')}
-src = open('index.html').read()
-open('index.html','w').write(re.sub(
-  r'/\*TAKEOFF:BEGIN\*/[\s\S]*?/\*TAKEOFF:END\*/',
-  '/*TAKEOFF:BEGIN*/\nconst TAKEOFF = '+json.dumps(p,separators=(",",":"),ensure_ascii=False)+';\n/*TAKEOFF:END*/',
-  src))
-EOF
-```
+## Exactly twelve construction stages
 
-Known modeling liberties (all disclosed on the page under "What the model
-assumes"): opening positions along each wall are indicative (sizes/counts are
-real; only the three 9'-0" overhead doors are located by a dimension string),
-the partition layout is indicative of the scaled ~175 LF, garage walls use the
-takeoff's assumed 9'-0", porches are not modeled, and look-out wall heights are
-not dimensioned so those runs draw full height.
+1. Site controls
+2. Clearing & erosion control
+3. Earthwork & grading
+4. Underground utilities
+5. Footings
+6. Foundation & waterproofing
+7. Slabs & flatwork
+8. Floor structure
+9. Wall framing & sheathing
+10. Roof structure & envelope
+11. MEP & insulation
+12. Finishes & closeout
 
-## Verify
+A stage with no supported geometry reports `UNVERIFIED` instead of drawing a
+placeholder.
 
-```sh
-OUT_DIR=./reports node tools/verify-artifacts.mjs web/blueprint-3d/index.html
-```
+## Exactly twelve tools
 
-Then look at the screenshot — and click through all seven stages.
+Orbit, Pan, Zoom, Fit model, Stage filter, Play sequence, Dimensions,
+Measure, Section, Inspect, Source citation, and Map / 3D sync. Tools that lack
+required evidence are present but disabled with a reason.
+
+## Persistence boundary
+
+Imported model JSON and view state are stored in browser `localStorage` under
+project-scoped, versioned keys. This is a prototype convenience only. It is
+not production storage, authorization, authentication, backup, or workspace
+isolation.
+
+Field progress uses the same prototype boundary. Each construction stage can
+be marked not started, in progress, blocked, needing inspection, or complete,
+with a completion percentage, updater, field note, timestamp, and photo-file
+reference. Progress mode colors the model gray, blue, red, yellow, or green and
+rolls the twelve stages into overall completion and recent activity. Real
+multi-user jobsite updates require a shared project database, authenticated
+worker accounts, conflict handling, and durable evidence-photo storage.
+The vendor-neutral implementation contract is documented in
+`../../docs/assistify-progress-backend-contract.json`; Claude and other coding
+agents should begin with the repository-root `CLAUDE.md` and the project
+handoff in `../../docs/CODEX-PROJECT-HANDOFF.md`.
+
+## Verification
+
+From the repository root, run `node tools/verify-assistify.mjs` and the
+existing artifact verifier. The targeted harness covers schema rejection,
+stage/tool counts, reachability, persistence, provenance, reduced motion,
+keyboard operation, and the required viewport/zoom matrix.

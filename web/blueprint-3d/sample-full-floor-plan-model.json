@@ -1,0 +1,204 @@
+{
+  "schemaVersion": "1.0.0",
+  "project": {
+    "id": "los-angeles-complete-sfd-sample",
+    "displayName": "Los Angeles complete S.F.D. sample",
+    "status": "INFERRED"
+  },
+  "units": "ft",
+  "sources": {
+    "documents": [
+      {
+        "id": "ladbs-sfd-sample",
+        "title": "Sample Plan for S.F.D. - Los Angeles Department of Building and Safety",
+        "sha256": "b0474b609f2dcdec4ed5ccec04500a4ec859aabb9cd7a3ad18aeea6617e5b4ed",
+        "pageCount": 20,
+        "revision": "09/06/2021 sample construction documents",
+        "status": "CURRENT"
+      }
+    ]
+  },
+  "facts": {
+    "planScale": {
+      "state": "VERIFIED",
+      "value": 0.25,
+      "unit": "in/ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "ladbs-sfd-sample", "page": 8, "region": "A-2.01 title block: 1/4 inch = 1 foot"}],
+      "derivation": null
+    },
+    "firstFloorArea": {
+      "state": "VERIFIED",
+      "value": 1200,
+      "unit": "sq ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "ladbs-sfd-sample", "page": 2, "region": "project floor-area summary: FIRST FLOOR 1,200 SF"}],
+      "derivation": null
+    },
+    "secondFloorArea": {
+      "state": "VERIFIED",
+      "value": 1445,
+      "unit": "sq ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "ladbs-sfd-sample", "page": 2, "region": "project floor-area summary: SECOND FLOOR 1,445 SF"}],
+      "derivation": null
+    },
+    "garageArea": {
+      "state": "VERIFIED",
+      "value": 451,
+      "unit": "sq ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "ladbs-sfd-sample", "page": 2, "region": "project floor-area summary: GARAGE 451 SF"}],
+      "derivation": null
+    },
+    "coveredPatioArea": {
+      "state": "VERIFIED",
+      "value": 146,
+      "unit": "sq ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "ladbs-sfd-sample", "page": 2, "region": "project floor-area summary: PATIO 146 SF"}],
+      "derivation": null
+    },
+    "mainFloorBounds": {
+      "state": "VERIFIED",
+      "value": {"width": 44.75, "depth": 35.7292},
+      "unit": "ft",
+      "confidence": 0.99,
+      "sourceRefs": [{"documentId": "ladbs-sfd-sample", "page": 8, "region": "A-2.01 first-level outer dimension strings: 44 feet 9 inches and 35 feet 8-3/4 inches"}],
+      "derivation": null
+    },
+    "secondFloorBounds": {
+      "state": "VERIFIED",
+      "value": {"width": 44.7396, "depth": 35.8021},
+      "unit": "ft",
+      "confidence": 0.99,
+      "sourceRefs": [{"documentId": "ladbs-sfd-sample", "page": 9, "region": "A-2.02 second-level outer dimension strings: 44 feet 8-7/8 inches and 35 feet 9-5/8 inches"}],
+      "derivation": null
+    },
+    "garageBounds": {
+      "state": "VERIFIED",
+      "value": {"width": 20.8646, "depth": 18.6146},
+      "unit": "ft",
+      "confidence": 0.98,
+      "sourceRefs": [{"documentId": "ladbs-sfd-sample", "page": 8, "region": "A-2.01 garage dimension strings: 20 feet 10-3/8 inches and 18 feet 7-3/8 inches"}],
+      "derivation": null
+    },
+    "levelElevations": {
+      "state": "VERIFIED",
+      "value": {"first": 0, "second": 10.6563, "roof": 20.4583, "topOfParapet": 21.75, "chimney": 25.75},
+      "unit": "ft",
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "ladbs-sfd-sample", "page": 11, "region": "A-3.01 building sections: FIRST LEVEL, SECOND LEVEL, ROOF, T.O.P., and CHIMNEY elevations"}],
+      "derivation": null
+    },
+    "roomLayout": {
+      "state": "INFERRED",
+      "value": {
+        "firstFloor": ["Living room", "Great room", "Dining room", "Kitchen", "Nook", "Half bath", "Closet", "Covered patio", "Garage"],
+        "secondFloor": ["Master bedroom", "Master bath", "Walk-in closet", "Bedroom 2", "Bedroom 3", "Bedroom 4", "Bath", "Laundry", "Loft"]
+      },
+      "unit": null,
+      "confidence": 0.85,
+      "sourceRefs": [
+        {"documentId": "ladbs-sfd-sample", "page": 8, "region": "A-2.01 labeled first-level rooms and partitions"},
+        {"documentId": "ladbs-sfd-sample", "page": 9, "region": "A-2.02 labeled second-level rooms and partitions"}
+      ],
+      "derivation": "Room names are printed; simplified rectangular room zones and partition locations are traced for viewer testing and are not permit-grade wall coordinates."
+    },
+    "wallAssemblies": {
+      "state": "VERIFIED",
+      "value": {"exteriorStud": "2x6 wood stud", "interiorStud": "2x4 wood stud", "exteriorFinish": "cement plaster or specified veneer/siding"},
+      "unit": null,
+      "confidence": 1,
+      "sourceRefs": [{"documentId": "ladbs-sfd-sample", "page": 15, "region": "A-5.00 wall types and material layers"}],
+      "derivation": null
+    }
+  },
+  "parcel": {
+    "state": "UNVERIFIED",
+    "value": null,
+    "sourceRefs": [],
+    "notice": "The model is focused on the architectural floor plans and is not a legal parcel reconstruction."
+  },
+  "terrain": {"state": "UNVERIFIED", "value": null, "sourceRefs": []},
+  "systems": {"state": "UNVERIFIED", "value": null, "sourceRefs": []},
+  "mapRegistration": {"state": "UNVERIFIED", "value": null, "sourceRefs": []},
+  "geometry": {
+    "elements": [
+      {"id":"first-floor-plate","name":"First-floor plate","type":"face","buildStage":"slabs-flatwork","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 first-level exterior footprint"}],"factRefs":["mainFloorBounds","firstFloorArea"],"role":"concrete","geometry":{"points":[[0,0,0],[44.75,0,0],[44.75,35.7292,0],[0,35.7292,0]]}},
+      {"id":"garage-floor-plate","name":"Attached garage floor","type":"face","buildStage":"slabs-flatwork","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 attached garage footprint"}],"factRefs":["garageBounds","garageArea"],"role":"concrete","geometry":{"points":[[-12.75,17.1146,0],[8.1146,17.1146,0],[8.1146,35.7292,0],[-12.75,35.7292,0]]}},
+      {"id":"second-floor-plate","name":"Second-floor structure","type":"face","buildStage":"floor-structure","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 second-level exterior footprint"}],"factRefs":["secondFloorBounds","secondFloorArea","levelElevations"],"role":"wood","geometry":{"points":[[0,0,10.6563],[44.7396,0,10.6563],[44.7396,35.8021,10.6563],[0,35.8021,10.6563]]}},
+      {"id":"main-roof-plane","name":"Main roof reference plane","type":"face","buildStage":"roof-structure-envelope","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":10,"region":"A-2.03 roof plan"}],"factRefs":["secondFloorBounds","levelElevations"],"role":"envelope","geometry":{"points":[[-0.5,-0.5,20.4583],[45.2396,-0.5,20.4583],[45.2396,36.3021,20.4583],[-0.5,36.3021,20.4583]]}},
+      {"id":"garage-roof-plane","name":"Garage roof reference plane","type":"face","buildStage":"roof-structure-envelope","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":10,"region":"A-2.03 roof plan over garage"}],"factRefs":["garageBounds","levelElevations"],"role":"envelope","geometry":{"points":[[-13.25,16.6146,10.4375],[8.6146,16.6146,10.4375],[8.6146,36.2292,10.4375],[-13.25,36.2292,10.4375]]}},
+
+      {"id":"first-wall-south","name":"First-level south exterior wall","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 first-level south exterior wall"}],"factRefs":["mainFloorBounds","levelElevations","wallAssemblies"],"role":"wood","geometry":{"min":[0,0,0],"size":[44.75,0.5,10.6563]}},
+      {"id":"first-wall-north","name":"First-level north exterior wall","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 first-level north exterior wall"}],"factRefs":["mainFloorBounds","levelElevations","wallAssemblies"],"role":"wood","geometry":{"min":[0,35.2292,0],"size":[44.75,0.5,10.6563]}},
+      {"id":"first-wall-west","name":"First-level west exterior wall","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 first-level west exterior wall"}],"factRefs":["mainFloorBounds","levelElevations","wallAssemblies"],"role":"wood","geometry":{"min":[0,0.5,0],"size":[0.5,34.7292,10.6563]}},
+      {"id":"first-wall-east","name":"First-level east exterior wall","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 first-level east exterior wall"}],"factRefs":["mainFloorBounds","levelElevations","wallAssemblies"],"role":"wood","geometry":{"min":[44.25,0.5,0],"size":[0.5,34.7292,10.6563]}},
+
+      {"id":"garage-wall-south","name":"Garage south wall","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 attached garage walls"}],"factRefs":["garageBounds","levelElevations","wallAssemblies"],"role":"wood","geometry":{"min":[-12.75,17.1146,0],"size":[20.8646,0.5,10.4375]}},
+      {"id":"garage-wall-north","name":"Garage north wall","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 attached garage walls"}],"factRefs":["garageBounds","levelElevations","wallAssemblies"],"role":"wood","geometry":{"min":[-12.75,35.2292,0],"size":[20.8646,0.5,10.4375]}},
+      {"id":"garage-wall-west","name":"Garage west wall","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 attached garage walls"}],"factRefs":["garageBounds","levelElevations","wallAssemblies"],"role":"wood","geometry":{"min":[-12.75,17.6146,0],"size":[0.5,17.6146,10.4375]}},
+      {"id":"garage-wall-east","name":"Garage separation wall","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 one-hour garage separation"}],"factRefs":["garageBounds","levelElevations","wallAssemblies"],"role":"wood","geometry":{"min":[7.6146,17.6146,0],"size":[0.5,17.6146,10.4375]}},
+
+      {"id":"second-wall-south","name":"Second-level south exterior wall","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 second-level south exterior wall"}],"factRefs":["secondFloorBounds","levelElevations","wallAssemblies"],"role":"wood","geometry":{"min":[0,0,10.6563],"size":[44.7396,0.5,9.802]}},
+      {"id":"second-wall-north","name":"Second-level north exterior wall","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 second-level north exterior wall"}],"factRefs":["secondFloorBounds","levelElevations","wallAssemblies"],"role":"wood","geometry":{"min":[0,35.3021,10.6563],"size":[44.7396,0.5,9.802]}},
+      {"id":"second-wall-west","name":"Second-level west exterior wall","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 second-level west exterior wall"}],"factRefs":["secondFloorBounds","levelElevations","wallAssemblies"],"role":"wood","geometry":{"min":[0,0.5,10.6563],"size":[0.5,34.8021,9.802]}},
+      {"id":"second-wall-east","name":"Second-level east exterior wall","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 second-level east exterior wall"}],"factRefs":["secondFloorBounds","levelElevations","wallAssemblies"],"role":"wood","geometry":{"min":[44.2396,0.5,10.6563],"size":[0.5,34.8021,9.802]}},
+
+      {"id":"first-partition-a","name":"Living and stair partition","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 living room and stair partitions"}],"factRefs":["roomLayout","wallAssemblies"],"role":"wood","geometry":{"min":[14.75,0.5,0],"size":[0.35,24.5,10.6563]}},
+      {"id":"first-partition-b","name":"Great room and service partition","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 great room and service partitions"}],"factRefs":["roomLayout","wallAssemblies"],"role":"wood","geometry":{"min":[23.75,0.5,0],"size":[0.35,24.5,10.6563]}},
+      {"id":"first-partition-c","name":"First-level north-south room divider","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 kitchen, dining, great room partition alignment"}],"factRefs":["roomLayout","wallAssemblies"],"role":"wood","geometry":{"min":[33.75,16,0],"size":[0.35,19.2292,10.6563]}},
+      {"id":"first-partition-d","name":"First-level front-rear divider","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 living, great, dining room partitions"}],"factRefs":["roomLayout","wallAssemblies"],"role":"wood","geometry":{"min":[0.5,15.75,0],"size":[43.75,0.35,10.6563]}},
+      {"id":"first-partition-e","name":"Kitchen and dining partition","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 kitchen and dining room relationship"}],"factRefs":["roomLayout","wallAssemblies"],"role":"wood","geometry":{"min":[15.1,24.75,0],"size":[29.15,0.35,10.6563]}},
+      {"id":"first-partition-f","name":"Half bath enclosure","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 half-bath enclosure beside stair"}],"factRefs":["roomLayout","wallAssemblies"],"role":"wood","geometry":{"min":[15.1,8,0],"size":[8.65,0.35,10.6563]}},
+
+      {"id":"second-partition-a","name":"Bedroom 3 and loft partition","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 bedroom 3 and loft partitions"}],"factRefs":["roomLayout","wallAssemblies"],"role":"wood","geometry":{"min":[11.75,0.5,10.6563],"size":[0.35,34.8021,9.802]}},
+      {"id":"second-partition-b","name":"Master suite partition","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 master suite partitions"}],"factRefs":["roomLayout","wallAssemblies"],"role":"wood","geometry":{"min":[21.75,13.75,10.6563],"size":[0.35,21.5521,9.802]}},
+      {"id":"second-partition-c","name":"Bedroom 2 and bath partition","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 bedroom 2 and bath partitions"}],"factRefs":["roomLayout","wallAssemblies"],"role":"wood","geometry":{"min":[29.75,0.5,10.6563],"size":[0.35,13.25,9.802]}},
+      {"id":"second-partition-d","name":"Second-level lower cross partition","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 bedroom, bath, stair cross partitions"}],"factRefs":["roomLayout","wallAssemblies"],"role":"wood","geometry":{"min":[0.5,13.75,10.6563],"size":[43.7396,0.35,9.802]}},
+      {"id":"second-partition-e","name":"Second-level upper cross partition","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 bedroom 4, master bath, and master bedroom partitions"}],"factRefs":["roomLayout","wallAssemblies"],"role":"wood","geometry":{"min":[0.5,21.75,10.6563],"size":[43.7396,0.35,9.802]}},
+      {"id":"second-partition-f","name":"Laundry and walk-in partition","type":"box","buildStage":"wall-framing-sheathing","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 laundry and walk-in closet partitions"}],"factRefs":["roomLayout","wallAssemblies"],"role":"wood","geometry":{"min":[17.75,14.1,10.6563],"size":[0.35,7.65,9.802]}},
+
+      {"id":"room-living","name":"Living room zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 LIVING RM label and surrounding walls"}],"factRefs":["roomLayout","firstFloorArea"],"role":"finish","geometry":{"points":[[0.7,0.7,0.05],[14.55,0.7,0.05],[14.55,15.55,0.05],[0.7,15.55,0.05]]}},
+      {"id":"room-great","name":"Great room zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 GREAT ROOM label and surrounding walls"}],"factRefs":["roomLayout","firstFloorArea"],"role":"finish","geometry":{"points":[[24.1,0.7,0.05],[44.05,0.7,0.05],[44.05,15.55,0.05],[24.1,15.55,0.05]]}},
+      {"id":"room-half-bath","name":"Half bath zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 half-bath fixtures and enclosure"}],"factRefs":["roomLayout","firstFloorArea"],"role":"finish","geometry":{"points":[[15.3,8.4,0.05],[23.55,8.4,0.05],[23.55,15.55,0.05],[15.3,15.55,0.05]]}},
+      {"id":"room-dining","name":"Dining room zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 DINING RM label and surrounding walls"}],"factRefs":["roomLayout","firstFloorArea"],"role":"finish","geometry":{"points":[[15.3,16.3,0.05],[33.55,16.3,0.05],[33.55,24.55,0.05],[15.3,24.55,0.05]]}},
+      {"id":"room-kitchen","name":"Kitchen zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 KITCHEN label, island, and surrounding walls"}],"factRefs":["roomLayout","firstFloorArea"],"role":"finish","geometry":{"points":[[15.3,25.3,0.05],[33.55,25.3,0.05],[33.55,35.02,0.05],[15.3,35.02,0.05]]}},
+      {"id":"room-nook","name":"Nook zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 NOOK label and surrounding walls"}],"factRefs":["roomLayout","firstFloorArea"],"role":"finish","geometry":{"points":[[34.3,25.3,0.05],[44.05,25.3,0.05],[44.05,35.02,0.05],[34.3,35.02,0.05]]}},
+      {"id":"room-covered-patio","name":"Covered patio zone","type":"face","buildStage":"slabs-flatwork","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 COVERED PATIO label and outline"}],"factRefs":["roomLayout","coveredPatioArea"],"role":"concrete","geometry":{"points":[[34.3,16.3,0.05],[44.05,16.3,0.05],[44.05,24.55,0.05],[34.3,24.55,0.05]]}},
+      {"id":"room-garage","name":"Garage zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":8,"region":"A-2.01 GARAGE label and outline"}],"factRefs":["roomLayout","garageArea"],"role":"finish","geometry":{"points":[[-12.05,17.8146,0.05],[7.4146,17.8146,0.05],[7.4146,35.0292,0.05],[-12.05,35.0292,0.05]]}},
+
+      {"id":"room-bedroom-3","name":"Bedroom 3 zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 BEDROOM 3 label and surrounding walls"}],"factRefs":["roomLayout","secondFloorArea"],"role":"finish","geometry":{"points":[[0.7,0.7,10.7063],[11.55,0.7,10.7063],[11.55,13.55,10.7063],[0.7,13.55,10.7063]]}},
+      {"id":"room-loft","name":"Loft zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 LOFT label and surrounding walls"}],"factRefs":["roomLayout","secondFloorArea"],"role":"finish","geometry":{"points":[[0.7,14.3,10.7063],[11.55,14.3,10.7063],[11.55,21.55,10.7063],[0.7,21.55,10.7063]]}},
+      {"id":"room-bedroom-4","name":"Bedroom 4 zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 BEDROOM 4 label and surrounding walls"}],"factRefs":["roomLayout","secondFloorArea"],"role":"finish","geometry":{"points":[[0.7,22.3,10.7063],[11.55,22.3,10.7063],[11.55,35.1,10.7063],[0.7,35.1,10.7063]]}},
+      {"id":"room-stair","name":"Stair and landing zone","type":"face","buildStage":"floor-structure","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 stair and landing outline"}],"factRefs":["roomLayout","secondFloorArea"],"role":"wood","geometry":{"points":[[12.3,0.7,10.7063],[21.55,0.7,10.7063],[21.55,13.55,10.7063],[12.3,13.55,10.7063]]}},
+      {"id":"room-laundry","name":"Laundry zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 LAUNDRY label and enclosure"}],"factRefs":["roomLayout","secondFloorArea"],"role":"finish","geometry":{"points":[[12.3,14.3,10.7063],[17.55,14.3,10.7063],[17.55,21.55,10.7063],[12.3,21.55,10.7063]]}},
+      {"id":"room-master-bath","name":"Master bath zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 M. BATH label, fixtures, and enclosure"}],"factRefs":["roomLayout","secondFloorArea"],"role":"finish","geometry":{"points":[[12.3,22.3,10.7063],[21.55,22.3,10.7063],[21.55,35.1,10.7063],[12.3,35.1,10.7063]]}},
+      {"id":"room-bath","name":"Second-floor bath zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 BATH label, fixtures, and enclosure"}],"factRefs":["roomLayout","secondFloorArea"],"role":"finish","geometry":{"points":[[22.3,0.7,10.7063],[29.55,0.7,10.7063],[29.55,13.55,10.7063],[22.3,13.55,10.7063]]}},
+      {"id":"room-walk-in","name":"Walk-in closet zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 WALK-IN label and enclosure"}],"factRefs":["roomLayout","secondFloorArea"],"role":"finish","geometry":{"points":[[22.3,14.3,10.7063],[33.55,14.3,10.7063],[33.55,21.55,10.7063],[22.3,21.55,10.7063]]}},
+      {"id":"room-bedroom-2","name":"Bedroom 2 zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 BEDROOM 2 label and surrounding walls"}],"factRefs":["roomLayout","secondFloorArea"],"role":"finish","geometry":{"points":[[30.3,0.7,10.7063],[44.04,0.7,10.7063],[44.04,13.55,10.7063],[30.3,13.55,10.7063]]}},
+      {"id":"room-master-bedroom","name":"Master bedroom zone","type":"face","buildStage":"finishes-closeout","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":9,"region":"A-2.02 MASTER BEDROOM label and surrounding walls"}],"factRefs":["roomLayout","secondFloorArea"],"role":"finish","geometry":{"points":[[22.3,22.3,10.7063],[44.04,22.3,10.7063],[44.04,35.1,10.7063],[22.3,35.1,10.7063]]}},
+
+      {"id":"first-level-marker","name":"First-level elevation marker","type":"line","buildStage":"site-controls","state":"VERIFIED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":11,"region":"A-3.01 section: FIRST LEVEL 0 feet 0 inches"}],"factRefs":["levelElevations"],"role":"steel","geometry":{"points":[[-15,-2,0],[47,-2,0]]}},
+      {"id":"second-level-marker","name":"Second-level elevation marker","type":"line","buildStage":"floor-structure","state":"VERIFIED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":11,"region":"A-3.01 section: SECOND LEVEL 10 feet 7-7/8 inches"}],"factRefs":["levelElevations"],"role":"steel","geometry":{"points":[[-15,-2,10.6563],[47,-2,10.6563]]}},
+      {"id":"roof-level-marker","name":"Roof elevation marker","type":"line","buildStage":"roof-structure-envelope","state":"VERIFIED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":11,"region":"A-3.01 section: ROOF 20 feet 5-1/2 inches"}],"factRefs":["levelElevations"],"role":"steel","geometry":{"points":[[-15,-2,20.4583],[47,-2,20.4583]]}}
+    ]
+  },
+  "takeoff": {
+    "items": [
+      {"id":"conditioned-floor-area","name":"Total conditioned floor area","quantity":2645,"unit":"sq ft","state":"INFERRED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":2,"region":"first-floor and second-floor area summary"}],"derivation":"1,200 sq ft first floor + 1,445 sq ft second floor = 2,645 sq ft."},
+      {"id":"garage-area","name":"Garage floor area","quantity":451,"unit":"sq ft","state":"VERIFIED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":2,"region":"GARAGE 451 SF"}],"derivation":null},
+      {"id":"covered-patio-area","name":"Covered patio area","quantity":146,"unit":"sq ft","state":"VERIFIED","sourceRefs":[{"documentId":"ladbs-sfd-sample","page":2,"region":"PATIO 146 SF"}],"derivation":null}
+    ]
+  },
+  "unresolved": [
+    {"id":"sample-only","label":"Real project identity","state":"UNVERIFIED","reason":"The source is an LADBS sample construction-document set with placeholder owner and address information."},
+    {"id":"permit-use","label":"Permit or construction use","state":"UNVERIFIED","reason":"Simplified viewer geometry is for Assistify testing only and is not a substitute for the signed plan sheets."},
+    {"id":"precise-openings","label":"Permit-grade doors, windows, and openings","state":"UNVERIFIED","reason":"Room zones and walls are simplified; exact opening sizes and offsets remain in the source sheets and are not modeled here."},
+    {"id":"structure","label":"Structural framing and foundation design","state":"UNVERIFIED","reason":"The downloaded sample is architectural; structural calculations and a complete structural drawing set are not represented in this model."},
+    {"id":"terrain","label":"Existing and proposed terrain","state":"UNVERIFIED","reason":"Floor-plan mode does not reconstruct grading or survey elevations."},
+    {"id":"utilities","label":"Routed MEP systems","state":"UNVERIFIED","reason":"Fixture symbols and notes appear in the plans, but complete routed mechanical, electrical, and plumbing systems are not modeled."},
+    {"id":"map-registration","label":"Geographic map registration","state":"UNVERIFIED","reason":"The sample project uses placeholder address information and supplies no trustworthy geographic control points."}
+  ]
+}

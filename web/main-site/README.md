@@ -62,11 +62,12 @@ hop into the now-admin-only estimator is replaced, by
 `toast("The full priced takeoff opens in the Builder Assist admin workspace — your account manager sends it back priced.")`.
 Nothing dead-ends into the admin sign-in screen from a signed-in member view.
 
-### 2. New admin tab: the 3D blueprint viewer at `#/admin-portal/model`
+### 2. Admin Assistify 3D tab at `#/admin-portal/model`
 
-`web/blueprint-3d/index.html` (7-stage Van Horn Residence construction-sequence
-model, hand-written Canvas 3D, no libraries) is inlined into this page. See
-*How the 3D tab is mounted* below.
+`web/blueprint-3d/index.html` is the shared project-specific, twelve-stage
+Canvas viewer. The portal embeds that shared entry point and does not keep a
+second generated engine or permanent sample property. See *How the 3D tab is
+mounted* below.
 
 ### 3. Defect D1 — horizontal overflow at 390px (fixed)
 
@@ -128,70 +129,24 @@ Credentials (prototype, client-side only): admin `TylerSchopper1` / `Tyler1` →
 
 ---
 
-## How the 3D tab is mounted and namespaced
+## How the 3D tab is mounted
 
-`web/blueprint-3d/index.html` was split into three pieces and re-inlined. The
-transform is scripted, not hand-typed, so it can be re-run when the viewer
-changes — `web/main-site/build-bp3d.py` emits the three namespaced fragments
-(`bp3d.css`, `bp3d.markup.html`, `bp3d.js`) that are pasted into this page. Its
-rules are:
+The admin route embeds `../blueprint-3d/index.html` in an iframe. This keeps
+CSS, element IDs, camera state, and accessibility semantics isolated while both
+the standalone and portal routes execute the same `engine.js` and validated
+project-model contract. There is no generated second renderer or copied model
+data in `main-site/index.html`.
 
-**CSS.** Every selector is scoped under `#bp3dRoot` and every class carries a
-`bp-` prefix (`.hud` → `#bp3dRoot .bp-hud`). The viewer's `:root` token block
-becomes `#bp3dRoot{…}` so its ~25 custom properties are scoped rather than
-global; its two dark-scheme blocks become
-`:root:not([data-theme="light"]) #bp3dRoot{…}` and
-`:root[data-theme="dark"] #bp3dRoot{…}`, keeping the palette keyed on the
-document root while the tokens land on the viewer. `html,body{…}` is dropped and
-`body{…}` folds into `#bp3dRoot`. `<header>`/`<main>`/`<aside>` become `div`s
-(the tab already sits inside the admin portal's `<main>`), so `main{…}` becomes
-`#bp3dRoot .bp-main{…}` with an embedded height of `min(78vh,760px)` instead of
-`calc(100vh - 53px)`.
+`web/main-site/build-bp3d.py` is a deterministic synchronization and migration
+step. It verifies that all shared viewer assets exist, removes the legacy
+namespaced engine/data block if encountered, replaces the old tab markup with
+the shared iframe, and leaves an explicitly empty `window.__TAKEOFF` rather
+than a permanent property takeoff.
 
-Only four class names actually collided with the main site (`.eyebrow`, `.field`,
-`.num`, `.steps`) — the prefix covers those and everything else; the `#bp3dRoot`
-id also outranks the site's bare `button, input, select, textarea` rule, so
-nothing leaks in either direction.
-
-**IDs.** All 25 element ids are prefixed (`#view` → `#bp3d-view`,
-`#stage` → `#bp3d-stage`, …), and every `document.getElementById('x')` became
-`gid('x')` = `root.querySelector('#bp3d-'+x)`, so the viewer only ever reaches
-inside its own subtree.
-
-**JS.** One global: `window.__BP3D`, an IIFE exposing `mount(root)`. Its takeoff
-data (`const TAKEOFF`, previously a page global) lives inside that closure. The
-viewer's own `<script>` body became the body of `mount`, so each mount is fresh
-state. `mount` returns `{ destroy() }`.
-
-**Lifecycle.** In `show()`:
-
-```js
-function show(view, sub){
-  currentView=view;
-  unmountBp3d();          // cancel the rAF loop BEFORE the canvas is detached
-  …
-  app.innerHTML=html;
-  …
-  if(view==="admin-portal" && sub==="model") mountBp3d();
-}
-```
-
-The canvas sizes to its container via `canvas.parentElement.getBoundingClientRect()`,
-so it is only ever initialised once the tab is in the live, visible DOM — never
-while `display:none`. A `ResizeObserver` on the container re-runs `resize()` (its
-first delivery also corrects any first-frame measurement). `destroy()` sets a
-`destroyed` flag the loop checks, `cancelAnimationFrame`s the pending frame,
-clears the "Run sequence" `setInterval`, disconnects the `ResizeObserver` and
-removes the `resize` listener.
-
-Measured: **60 rAF callbacks/second while the tab is open, 0 after leaving it**;
-re-entering the tab twice still yields a single loop (60/s, not 120/s); leaving
-mid-"Run sequence" produces no errors. Confirmed by screenshot that the model
-actually draws inside the admin portal at 1440px and 390px, light and dark.
-
-The viewer's takeoff data is untouched — 7 stages, the same line items,
-derivations and model checks, and its own `localStorage` keys (`bp3d.stage`,
-`bp3d.dims`, both already `try`/`catch`-wrapped).
+The shared viewer owns its own mount/destroy lifecycle, dirty-frame rendering,
+`ResizeObserver`, reduced-motion listener, and project-scoped versioned
+prototype storage. The portal's `mountBp3d()` only verifies the iframe title;
+route changes remove the iframe naturally.
 
 ---
 
