@@ -1,12 +1,20 @@
 #!/usr/bin/env node
 import { createRequire } from 'node:module';
+import { execSync } from 'node:child_process';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const req=createRequire(import.meta.url);
-function loadPlaywright(){for(const name of ['playwright','playwright-core']){try{return req(name);}catch{}}throw new Error('playwright or playwright-core is required');}
+function loadPlaywright(){
+  const names=['playwright','playwright-core'];
+  // Playwright may only be installed globally (as in the Claude Code sandbox),
+  // where a bare require from this file cannot see it.
+  try{ const root=execSync('npm root -g',{encoding:'utf8'}).trim(); names.push(root+'/playwright', root+'/playwright-core'); }catch{}
+  for(const name of names){try{return req(name);}catch{}}
+  throw new Error('playwright or playwright-core is required; tried: '+names.join(', '));
+}
 const {chromium}=loadPlaywright();
 const repo=resolve(fileURLToPath(new URL('..',import.meta.url)));
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.css':'text/css; charset=utf-8','.pdf':'application/pdf'};
