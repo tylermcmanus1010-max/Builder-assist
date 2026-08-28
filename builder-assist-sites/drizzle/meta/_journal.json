@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1787807189169,
+      "tag": "0000_typical_fenris",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1787818633081,
+      "tag": "0001_whole_azazel",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787820179443,
+      "tag": "0002_dapper_freak",
+      "breakpoints": true
+    }
+  ]
+}

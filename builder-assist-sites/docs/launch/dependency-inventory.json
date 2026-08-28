@@ -1,0 +1,27 @@
+{
+  "audited_at": "2026-08-27T09:32:00Z",
+  "audit_command": "npm audit --audit-level=moderate",
+  "audit_result": "0 known vulnerabilities",
+  "lockfile": "package-lock.json",
+  "runtime": "Node >=22.13.0; Cloudflare Workers via Sites",
+  "dependencies": [
+    {"name":"Sites hosting","version":"managed","purpose":"authenticated deployment and routing","production_configuration":"configured, deployment pending","credentials":"platform-managed","failure_impact":"application unavailable","monitoring":"site status plus /api/health; alerts unverified","fallback":"rollback to previous Site version","status":"PARTIALLY VERIFIED"},
+    {"name":"Cloudflare D1","version":"managed","purpose":"workspace, project, workflow, estimate and upload state","production_configuration":"DB binding declared","credentials":"platform-managed","failure_impact":"read/write workflows unavailable","monitoring":"/api/health readiness probe; external alert unverified","fallback":"fail closed and preserve R2 cleanup intent","status":"LOCAL BUILD VERIFIED; LIVE WRITE UNVERIFIED"},
+    {"name":"Cloudflare R2","version":"managed","purpose":"private plan and evidence bytes","production_configuration":"BUCKET binding declared","credentials":"platform-managed","failure_impact":"uploads/downloads unavailable","monitoring":"/api/health head probe; external alert unverified","fallback":"reject upload without false success; compensation cleanup","status":"LOCAL BUILD VERIFIED; LIVE FAULT DRILL UNVERIFIED"},
+    {"name":"next","version":"16.3.3","purpose":"App Router and API conventions","timeout_retry":"handled at application workflow boundaries","failure_impact":"application routing/rendering failure","monitoring":"route error boundary and server logs","fallback":"version rollback","status":"BUILD VERIFIED"},
+    {"name":"react/react-dom/react-server-dom-webpack","version":"19.2.8","purpose":"interactive UI and RSC runtime","timeout_retry":"not applicable","failure_impact":"workspace render failure","monitoring":"route error boundary","fallback":"version rollback","status":"BUILD VERIFIED"},
+    {"name":"vinext","version":"1.0.0-beta.8","purpose":"Next-compatible Cloudflare build/runtime","timeout_retry":"not applicable","failure_impact":"build or runtime failure","monitoring":"build and Site status","fallback":"previous Site version","status":"BUILD + TWO LOCAL CLOUDFLARE-RUNTIME PASSES; PLAIN NODE INCOMPATIBLE; HOSTED UNVERIFIED"},
+    {"name":"vite","version":"8.2.2","purpose":"production bundling","timeout_retry":"bounded build script","failure_impact":"release cannot be produced","monitoring":"build exit code","fallback":"previous lockfile/release","status":"BUILD VERIFIED"},
+    {"name":"three","version":"0.180.0","purpose":"true interactive 3D geometry, cameras and raycasting","timeout_retry":"lazy engine retry UI","failure_impact":"3D unavailable; verification table remains available","monitoring":"WebGL context handlers and user-visible status","fallback":"structured nonvisual verification register","status":"SOURCE/BUILD VERIFIED; DEVICE RENDER UNVERIFIED"},
+    {"name":"drizzle-orm","version":"0.45.2","purpose":"D1 schema and queries","timeout_retry":"upload idempotency plus safe user retry","failure_impact":"persistent workflows unavailable","monitoring":"API incident IDs and readiness probe","fallback":"fail closed","status":"BUILD/MIGRATION GENERATION VERIFIED"},
+    {"name":"lucide-react","version":"1.31.0","purpose":"accessible tool iconography","timeout_retry":"not applicable","failure_impact":"icons missing; text labels remain","monitoring":"build/render checks","fallback":"visible text labels","status":"BUILD VERIFIED"}
+  ],
+  "open_items": [
+    "External alert delivery is not configured or verified.",
+    "D1 and R2 timeout/rate-limit behavior has not been fault-injected in the hosted environment.",
+    "Provider credential rotation and backup restore require Sites operator access.",
+    "License/legal review is not a substitute for the package vulnerability audit.",
+    "The beta Vinext runtime is a release risk until hosted smoke tests and rollback are verified.",
+    "Plain Node production start cannot load the Cloudflare Workers module. The supported local Cloudflare/Vite runtime passes on loopback, but hosted route behavior remains unverified."
+  ]
+}
