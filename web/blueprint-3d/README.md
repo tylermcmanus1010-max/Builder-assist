@@ -4,8 +4,11 @@ The completed approved-plan test model is available as
 `approvedplans-4752-25-assistify-model.json`. When the repository is served,
 choose **Load 4752-25 approved plan** to fetch, validate, and persist it in one
 step. **Import project model** remains available for a downloaded or modified
-copy. Use the **Plan note register** to inspect or filter all extracted plan
-notes.
+copy. **Plan intelligence** reports sheet-by-sheet coverage, separates the
+approved set into civil, architectural, MEP, electrical, and structural work,
+and shows which sheets actually support 3D. Use the **Plan note & detail
+register** to filter extracted requirements, callouts, dimensions, schedules,
+calculations, and drawing text by sheet, discipline, or processing status.
 
 ## PDF import
 
@@ -20,6 +23,13 @@ The exact `66thST4752-25_APPROVEDPlans_639076997322694800.pdf` file is matched
 by SHA-256 to its committed reviewed model, so importing it restores the 30
 source-linked geometry elements and 1,547-note register. Renamed copies work;
 modified PDFs fall back to the generic review flow.
+
+For this reviewed set, all 18 sheets are indexed but only A103, A105, and A106
+currently cite physical 3D elements. Civil, ceiling/lighting, sections,
+plumbing, mechanical, gas, electrical, foundation, framing, schedules, and
+details remain visible as registered plan intelligence until their geometry is
+reviewed and reconstructed. Assistify labels that boundary instead of treating
+the floor-plan trace as a complete model.
 
 PDF.js 5.6.205 is vendored under `vendor/pdfjs/` with its Apache 2.0 license.
 
