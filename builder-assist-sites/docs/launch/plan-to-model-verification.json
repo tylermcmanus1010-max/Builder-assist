@@ -1,0 +1,16 @@
+{
+  "project": "Swenka Residence",
+  "model_units": "US survey feet",
+  "status": "PROVISIONAL — explicit control values pass; irregular footprint, parcel, frontage, terrain TIN and detailed systems remain unverified",
+  "checks": [
+    {"element":"Architectural plan control envelope","dimension_or_elevation":"Width × depth","source_sheet":"A103","source_value":"130'-6\" × 87'-6\"","model_value":"130'-6\" × 87'-6\"","difference":"0 in at explicit control axes","source_precision":"Written dimensions","result":"PASS","resolution":"Calibration axes stored separately from the irregular footprint."},
+    {"element":"Lowest floor","dimension_or_elevation":"Elevation","source_sheet":"Civil grading & drainage plan","source_value":"1391.00 ft NAVD88","model_value":"1391.00 ft","difference":"0.00 ft","source_precision":"0.01 ft callout","result":"PASS","resolution":"Model datum."},
+    {"element":"Building pad","dimension_or_elevation":"Elevation","source_sheet":"Civil grading & drainage plan","source_value":"1390.33 ft","model_value":"1390.33 ft","difference":"0.00 ft","source_precision":"0.01 ft callout","result":"PASS","resolution":"Proposed-grade datum."},
+    {"element":"Low ceiling","dimension_or_elevation":"Height above FFE","source_sheet":"A107","source_value":"10'-0\"","model_value":"10'-0\"","difference":"0 in","source_precision":"Written elevation","result":"PASS","resolution":"Low wall-zone control."},
+    {"element":"High ceiling","dimension_or_elevation":"Height above FFE","source_sheet":"A107","source_value":"12'-0\"","model_value":"12'-0\"","difference":"0 in","source_precision":"Written elevation","result":"PASS","resolution":"High wall-zone control."},
+    {"element":"Parapet","dimension_or_elevation":"Height above FFE","source_sheet":"A107","source_value":"14'-0\"","model_value":"14'-0\"","difference":"0 in","source_precision":"Written elevation","result":"PASS","resolution":"Roof massing control."},
+    {"element":"Irregular finished footprint","dimension_or_elevation":"Plan geometry","source_sheet":"A103 / A102","source_value":"Controlling linework","model_value":"Scaled simplified geometry","difference":"Not yet measured object-by-object","source_precision":"Scaled","result":"UNVERIFIED","resolution":"Requires calibrated vector digitization or source CAD."},
+    {"element":"Parcel boundary and frontage","dimension_or_elevation":"Bearings, lengths and ROW intersection","source_sheet":"Recorded plat / authoritative GIS","source_value":"Not retrieved","model_value":"Plan-scaled visual diagram","difference":"Not comparable","source_precision":"Unverified","result":"UNVERIFIED","resolution":"Retrieve authoritative geometry and reconcile APN/lot-area conflicts."},
+    {"element":"Detailed utility routing","dimension_or_elevation":"Horizontal/vertical routes","source_sheet":"Civil / A108 / A109 / A110 / E002","source_value":"Partial/schematic","model_value":"Coordination zones","difference":"Not comparable","source_precision":"Inferred","result":"UNVERIFIED","resolution":"Do not use for layout; obtain coordinated utility/MEP model or field-verified routing."}
+  ]
+}

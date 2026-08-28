@@ -1,5 +1,13 @@
 # Builder Assist
 
+## Current full-stack application
+
+The current Builder Assist Sites application and its complete launch evidence are
+in [`builder-assist-sites/`](builder-assist-sites/). Start with
+[`CLAUDE_CODE_HANDOFF.md`](CLAUDE_CODE_HANDOFF.md) before making changes. The
+older artifact-verification utilities documented below remain preserved for
+historical and regression work.
+
 Verification tooling for the Builder Assist artifact suite.
 
 The Builder Assist app surfaces are published as claude.ai Artifacts rather than

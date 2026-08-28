@@ -1,0 +1,24 @@
+{
+  "updated_at": "2026-08-27T09:32:00Z",
+  "items": [
+    {"system":"Public/static application shell","criticality":"P1","status":"implemented","test":"build + rendered-html tests pass","recovery":"route error boundary","limitation":"rendered browser inspection pending"},
+    {"system":"Authenticated project API GET/POST","criticality":"P0","status":"implemented","test":"source security tests pass","recovery":"safe incident ID and retry","limitation":"hosted boundary test pending"},
+    {"system":"Workspace/project ownership boundary","criticality":"P0","status":"implemented server-side","test":"source regression passes","recovery":"404/401 fail closed","limitation":"multi-account live test pending"},
+    {"system":"Single multi-document uploader","criticality":"P0","status":"implemented","test":"validation/idempotency tests plus two real 3.3 MB local upload/replay/reopen passes","recovery":"batch cleanup and safe retry","limitation":"hosted R2/D1 partial-failure and maximum-size drills pending"},
+    {"system":"Project/file D1 persistence","criticality":"P0","status":"implemented","test":"additive migration/static query tests pass","recovery":"stale batch reconciliation","limitation":"refresh/reopen live write pending"},
+    {"system":"Private R2 plan storage/download","criticality":"P0","status":"implemented","test":"signature/key tests pass","recovery":"compensation cleanup","limitation":"live upload/download pending"},
+    {"system":"Buildify material estimate/comparison/finishes","criticality":"P1","status":"implemented","test":"behavioral source tests pass; estimate recalculation is one D1 transactional batch","recovery":"retryable API errors","limitation":"catalog data is internal rate-book data, not live vendor quotes; hosted transaction fault injection pending"},
+    {"system":"Assistify true 3D viewer","criticality":"P1","status":"implemented as provisional twin","test":"stage/object/build tests pass","recovery":"retry plus nonvisual verification","limitation":"device rendering and exact footprint verification pending"},
+    {"system":"12 construction stages","criticality":"P1","status":"implemented","test":"exact count and object visibility tests pass","recovery":"restart/previous/next and persistent preference","limitation":"rendered playback inspection pending"},
+    {"system":"12 Assistify tools","criticality":"P1","status":"implemented","test":"exact count/static behavior tests pass","recovery":"Escape/cancel/reset/retry","limitation":"viewport/touch matrix not rendered"},
+    {"system":"Parcel/frontage/adjacency/topography","criticality":"P1","status":"partial; plan-sourced and visibly unresolved","test":"evidence-conflict tests pass","recovery":"field-use gate closed","limitation":"authoritative parcel reconciliation blocked"},
+    {"system":"Plan sheet register","criticality":"P1","status":"implemented for all 18 sheets","test":"18/18 page register passes","recovery":"ambiguities retained","limitation":"official parcel source not part of supplied plan"},
+    {"system":"Plan-to-model verification","criticality":"P1","status":"6 explicit controls pass; 3 items unverified","test":"matrix assertions pass","recovery":"unknown geometry excluded/labeled","limitation":"irregular footprint/parcel relationship open"},
+    {"system":"Growify records","criticality":"P2","status":"local persisted workflows implemented","test":"shared project source tests pass","recovery":"API error state","limitation":"email/SMS/calendar integrations are not connected and are not claimed operational"},
+    {"system":"Readiness endpoint","criticality":"P1","status":"implemented","test":"missing-schema false-ready defect reproduced and fixed; two local D1/R2 runtime passes","recovery":"503 + retry-after","limitation":"hosted result and external alerting unverified"},
+    {"system":"Deployment/rollback","criticality":"P1","status":"pending candidate checkpoint","test":"previous Site exists; two supported local Cloudflare-runtime passes","recovery":"version rollback procedure documented","limitation":"candidate hosted smoke and rollback rehearsal pending; plain Node is not a compatible Workers runtime"},
+    {"system":"Monitoring/alerts","criticality":"P1","status":"partial logs/health only","test":"not performed","recovery":"operator runbook","limitation":"no verified alert destination"},
+    {"system":"Payments/billing","criticality":"not applicable","status":"excluded from launch scope","test":"not applicable","recovery":"not applicable","limitation":"no charges are made"},
+    {"system":"External messaging/calendar","criticality":"not applicable to launch core","status":"deferred and not presented as connected","test":"not applicable","recovery":"calendar-ready persisted fields only","limitation":"requires user credentials and authorization"}
+  ]
+}

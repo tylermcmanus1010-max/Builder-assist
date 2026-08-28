@@ -1,0 +1,1893 @@
+{
+  "generated_at": "2026-08-27",
+  "language_note": "Patterns summarize qualifying evidence; counts are not population prevalence. Direct-user reports remain anecdotal unless a controlled study measured them.",
+  "user_delight_catalog": [
+    {
+      "rank": 1,
+      "pattern": "Fast time from first upload to a useful project view",
+      "source_ids": [
+        "S001",
+        "S011",
+        "S086",
+        "S097"
+      ],
+      "implication": "Make the controlled plan register and first model state the first successful outcome."
+    },
+    {
+      "rank": 2,
+      "pattern": "One project context shared across estimating, delivery and customer workflows",
+      "source_ids": [
+        "S012",
+        "S016",
+        "S220",
+        "S223"
+      ],
+      "implication": "Keep a persistent project rail and one server-side project identifier."
+    },
+    {
+      "rank": 3,
+      "pattern": "Field access on phones and tablets",
+      "source_ids": [
+        "S031",
+        "S052",
+        "S053",
+        "S055"
+      ],
+      "implication": "Use large reachable controls, internal scrolling and a compact mobile tool dock."
+    },
+    {
+      "rank": 4,
+      "pattern": "Visual understanding of construction intent",
+      "source_ids": [
+        "S088",
+        "S099",
+        "S161",
+        "S163"
+      ],
+      "implication": "Use inspectable 3D linked to plan evidence."
+    },
+    {
+      "rank": 5,
+      "pattern": "Quick search, filters and organization",
+      "source_ids": [
+        "S008",
+        "S019",
+        "S025",
+        "S229"
+      ],
+      "implication": "Keep projects, stages, layers and records easy to locate."
+    },
+    {
+      "rank": 6,
+      "pattern": "One multi-document plan-set upload",
+      "source_ids": [
+        "S094",
+        "S096",
+        "S098",
+        "S110"
+      ],
+      "implication": "Accept related sheets together and report one atomic project outcome."
+    },
+    {
+      "rank": 7,
+      "pattern": "Plan viewing and markup near field records",
+      "source_ids": [
+        "S037",
+        "S040",
+        "S111",
+        "S113"
+      ],
+      "implication": "Keep source sheets reachable from selected objects and workflow records."
+    },
+    {
+      "rank": 8,
+      "pattern": "Reliable measurement with unit feedback",
+      "source_ids": [
+        "S038",
+        "S041",
+        "S113"
+      ],
+      "implication": "Always show units and distinguish model measurements from written controls."
+    },
+    {
+      "rank": 9,
+      "pattern": "Useful interrupted/offline behavior",
+      "source_ids": [
+        "S107",
+        "S108",
+        "S120"
+      ],
+      "implication": "Preserve safe preferences and never report unsynced writes as saved."
+    },
+    {
+      "rank": 10,
+      "pattern": "Collaboration without losing responsibility",
+      "source_ids": [
+        "S087",
+        "S091",
+        "S217",
+        "S230"
+      ],
+      "implication": "Expose owner, status, due date and history."
+    },
+    {
+      "rank": 11,
+      "pattern": "Timely notifications tied to a clear action",
+      "source_ids": [
+        "S089",
+        "S222",
+        "S224"
+      ],
+      "implication": "Make alerts actionable and traceable to the project record."
+    },
+    {
+      "rank": 12,
+      "pattern": "Integrations that reduce re-entry",
+      "source_ids": [
+        "S090",
+        "S228",
+        "S230"
+      ],
+      "implication": "Integrate only when failure and ownership are visible."
+    },
+    {
+      "rank": 13,
+      "pattern": "Reusable project templates",
+      "source_ids": [
+        "S014",
+        "S026",
+        "S219"
+      ],
+      "implication": "Keep construction-stage defaults editable without cloning unrelated data."
+    },
+    {
+      "rank": 14,
+      "pattern": "Construction scheduling connected to work",
+      "source_ids": [
+        "S016",
+        "S162",
+        "S163",
+        "S241"
+      ],
+      "implication": "Link visible stages to actual objects and source tasks."
+    },
+    {
+      "rank": 15,
+      "pattern": "Photo evidence organized by place and purpose",
+      "source_ids": [
+        "S018",
+        "S091",
+        "S223"
+      ],
+      "implication": "Persist image evidence on the owning project/record."
+    },
+    {
+      "rank": 16,
+      "pattern": "Daily field records that are quick to complete",
+      "source_ids": [
+        "S017",
+        "S022",
+        "S087"
+      ],
+      "implication": "Use short forms, sensible defaults and a durable audit trail."
+    },
+    {
+      "rank": 17,
+      "pattern": "Undo, retry and recovery instead of punishment",
+      "source_ids": [
+        "S120",
+        "S155",
+        "S156",
+        "S184",
+        "S186"
+      ],
+      "implication": "Preserve work, use idempotency and explain the safe next action."
+    },
+    {
+      "rank": 18,
+      "pattern": "Revision history and clear controlling plans",
+      "source_ids": [
+        "S056",
+        "S103",
+        "S111"
+      ],
+      "implication": "Inventory every sheet, revision and superseded state."
+    },
+    {
+      "rank": 19,
+      "pattern": "Export and data ownership",
+      "source_ids": [
+        "S006",
+        "S021",
+        "S228"
+      ],
+      "implication": "Keep source files and structured evidence portable."
+    },
+    {
+      "rank": 20,
+      "pattern": "Source traceability for model claims",
+      "source_ids": [
+        "S076",
+        "S080",
+        "S161",
+        "S165"
+      ],
+      "implication": "Attach source sheet/detail and evidence state to significant objects."
+    },
+    {
+      "rank": 21,
+      "pattern": "Transparent processing and save status",
+      "source_ids": [
+        "S045",
+        "S048",
+        "S170",
+        "S200"
+      ],
+      "implication": "Use honest loading, success and error states with incident IDs."
+    },
+    {
+      "rank": 22,
+      "pattern": "Responsive layouts that keep controls visible",
+      "source_ids": [
+        "S121",
+        "S137",
+        "S139",
+        "S198"
+      ],
+      "implication": "Bind the workspace to the viewport and scroll only intentional panels."
+    },
+    {
+      "rank": 23,
+      "pattern": "Keyboard-operable alternatives",
+      "source_ids": [
+        "S136",
+        "S138",
+        "S142",
+        "S144"
+      ],
+      "implication": "Provide semantic tool buttons, focus containment and a nonvisual object register."
+    },
+    {
+      "rank": 24,
+      "pattern": "Layer isolation for trade-specific work",
+      "source_ids": [
+        "S032",
+        "S044",
+        "S050",
+        "S114"
+      ],
+      "implication": "Expose synchronized layers and an underground isolation mode."
+    },
+    {
+      "rank": 25,
+      "pattern": "Section and clipping inspection",
+      "source_ids": [
+        "S114",
+        "S150",
+        "S151",
+        "S154"
+      ],
+      "implication": "Make cutaway/section controls stable and resettable."
+    },
+    {
+      "rank": 26,
+      "pattern": "4D sequencing that explains build order",
+      "source_ids": [
+        "S162",
+        "S163",
+        "S241",
+        "S242"
+      ],
+      "implication": "Use exactly 12 object-driven stages with cumulative/current modes."
+    },
+    {
+      "rank": 27,
+      "pattern": "Authoritative parcel context",
+      "source_ids": [
+        "S115",
+        "S116",
+        "S117",
+        "S118"
+      ],
+      "implication": "Record agency, record, retrieval date, CRS and confidence."
+    },
+    {
+      "rank": 28,
+      "pattern": "Terrain and grade context",
+      "source_ids": [
+        "S212",
+        "S243",
+        "S245"
+      ],
+      "implication": "Show existing/proposed grades without undisclosed exaggeration."
+    },
+    {
+      "rank": 29,
+      "pattern": "Professional presentation that remains technically honest",
+      "source_ids": [
+        "S092",
+        "S099",
+        "S236",
+        "S240"
+      ],
+      "implication": "Pair realistic/technical views with visible uncertainty."
+    },
+    {
+      "rank": 30,
+      "pattern": "AI assistance that accelerates review without replacing judgment",
+      "source_ids": [
+        "S076",
+        "S077",
+        "S080",
+        "S084"
+      ],
+      "implication": "Keep AI output reviewable, source-linked and explicitly non-authoritative."
+    }
+  ],
+  "user_pain_catalog": [
+    {
+      "rank": 1,
+      "pattern": "Slow, complex onboarding before a first useful result",
+      "source_ids": [
+        "S001",
+        "S009",
+        "S086"
+      ],
+      "implication": "Minimize setup and show a controlled result early."
+    },
+    {
+      "rank": 2,
+      "pattern": "Too many menus and modules with unclear starting points",
+      "source_ids": [
+        "S005",
+        "S013",
+        "S025"
+      ],
+      "implication": "Use progressive disclosure and task-oriented labels."
+    },
+    {
+      "rank": 3,
+      "pattern": "Decorative dashboards whose controls do not complete work",
+      "source_ids": [
+        "S004",
+        "S012",
+        "S023"
+      ],
+      "implication": "Remove dead controls and test every visible action."
+    },
+    {
+      "rank": 4,
+      "pattern": "Mobile model viewer loads blank",
+      "source_ids": [
+        "S031",
+        "S052",
+        "S053"
+      ],
+      "implication": "Provide loading/failure states and a nonvisual fallback."
+    },
+    {
+      "rank": 5,
+      "pattern": "Large models run slowly or freeze",
+      "source_ids": [
+        "S042",
+        "S047",
+        "S054",
+        "S191"
+      ],
+      "implication": "Cap DPR/geometry and release GPU resources."
+    },
+    {
+      "rank": 6,
+      "pattern": "Viewer loses the model or traps the camera",
+      "source_ids": [
+        "S033",
+        "S044",
+        "S050"
+      ],
+      "implication": "Provide stable fit/reset and bounded controls."
+    },
+    {
+      "rank": 7,
+      "pattern": "Uploads fail without explaining which file caused it",
+      "source_ids": [
+        "S048",
+        "S094",
+        "S098",
+        "S166"
+      ],
+      "implication": "Validate per file and return an actionable message."
+    },
+    {
+      "rank": 8,
+      "pattern": "Refresh loses upload or viewer progress",
+      "source_ids": [
+        "S056",
+        "S107",
+        "S120"
+      ],
+      "implication": "Persist critical state and keep retries idempotent."
+    },
+    {
+      "rank": 9,
+      "pattern": "Duplicate clicks create duplicate projects or side effects",
+      "source_ids": [
+        "S184",
+        "S186",
+        "S187"
+      ],
+      "implication": "Use server-side idempotency keys."
+    },
+    {
+      "rank": 10,
+      "pattern": "Silent sync conflicts overwrite newer work",
+      "source_ids": [
+        "S108",
+        "S185",
+        "S204"
+      ],
+      "implication": "Detect conflicts and never silently overwrite."
+    },
+    {
+      "rank": 11,
+      "pattern": "Plan revisions are hard to identify",
+      "source_ids": [
+        "S056",
+        "S103",
+        "S111"
+      ],
+      "implication": "Show revision, approval and superseded status."
+    },
+    {
+      "rank": 12,
+      "pattern": "Missing sheet inventory hides scope",
+      "source_ids": [
+        "S076",
+        "S083",
+        "S097"
+      ],
+      "implication": "Register every supplied sheet before modeling."
+    },
+    {
+      "rank": 13,
+      "pattern": "One-click AI quantities look precise but are wrong",
+      "source_ids": [
+        "S076",
+        "S077",
+        "S080",
+        "S084"
+      ],
+      "implication": "Require human verification and written-dimension controls."
+    },
+    {
+      "rank": 14,
+      "pattern": "Model geometry is not traceable to drawings",
+      "source_ids": [
+        "S081",
+        "S088",
+        "S161"
+      ],
+      "implication": "Store object provenance and ambiguity."
+    },
+    {
+      "rank": 15,
+      "pattern": "Inferred geometry looks identical to verified geometry",
+      "source_ids": [
+        "S082",
+        "S165",
+        "S236"
+      ],
+      "implication": "Use visible and textual evidence states."
+    },
+    {
+      "rank": 16,
+      "pattern": "4D sequence is an animation with no task/object linkage",
+      "source_ids": [
+        "S162",
+        "S163",
+        "S241"
+      ],
+      "implication": "Drive visibility from stage metadata."
+    },
+    {
+      "rank": 17,
+      "pattern": "Underground systems are hidden by terrain/building",
+      "source_ids": [
+        "S099",
+        "S114",
+        "S245"
+      ],
+      "implication": "Provide x-ray, cutaway and underground-only modes."
+    },
+    {
+      "rank": 18,
+      "pattern": "Detailed utility routes are invented where plans are schematic",
+      "source_ids": [
+        "S076",
+        "S080",
+        "S164"
+      ],
+      "implication": "Represent zones or mark not shown."
+    },
+    {
+      "rank": 19,
+      "pattern": "GIS boundaries are treated as survey accuracy",
+      "source_ids": [
+        "S115",
+        "S116",
+        "S118"
+      ],
+      "implication": "Display agency caveats and keep legal-layout gate closed."
+    },
+    {
+      "rank": 20,
+      "pattern": "Parcel IDs and lot areas conflict across sources",
+      "source_ids": [
+        "S115",
+        "S117",
+        "S243"
+      ],
+      "implication": "Show the conflict until authoritative reconciliation."
+    },
+    {
+      "rank": 21,
+      "pattern": "Road frontage is confused with pavement or ROW",
+      "source_ids": [
+        "S116",
+        "S118",
+        "S243"
+      ],
+      "implication": "Model distinct line types and verify the frontage intersection."
+    },
+    {
+      "rank": 22,
+      "pattern": "Adjacent owner names substitute for parcel IDs",
+      "source_ids": [
+        "S115",
+        "S117"
+      ],
+      "implication": "Use sourced APNs or 'Parcel ID unavailable'."
+    },
+    {
+      "rank": 23,
+      "pattern": "Terrain exaggeration is undisclosed",
+      "source_ids": [
+        "S212",
+        "S243"
+      ],
+      "implication": "Default true scale and label any exaggeration."
+    },
+    {
+      "rank": 24,
+      "pattern": "Section/clipping controls are difficult to reset",
+      "source_ids": [
+        "S114",
+        "S150",
+        "S154"
+      ],
+      "implication": "Provide a stable reset path."
+    },
+    {
+      "rank": 25,
+      "pattern": "Floating panels become lost offscreen",
+      "source_ids": [
+        "S121",
+        "S137",
+        "S194"
+      ],
+      "implication": "Dock/clamp panels and provide Reset Layout."
+    },
+    {
+      "rank": 26,
+      "pattern": "Nested scrolling traps users",
+      "source_ids": [
+        "S139",
+        "S140",
+        "S198"
+      ],
+      "implication": "Keep page scrolling disabled and panel scrolling intentional."
+    },
+    {
+      "rank": 27,
+      "pattern": "Controls run offscreen at high zoom",
+      "source_ids": [
+        "S137",
+        "S139",
+        "S140"
+      ],
+      "implication": "Reflow the shell and use scrollable tool rails."
+    },
+    {
+      "rank": 28,
+      "pattern": "Tiny touch targets fail in field use",
+      "source_ids": [
+        "S052",
+        "S055",
+        "S147"
+      ],
+      "implication": "Use reachable, labeled touch controls."
+    },
+    {
+      "rank": 29,
+      "pattern": "Keyboard focus disappears or escapes dialogs",
+      "source_ids": [
+        "S138",
+        "S142",
+        "S148"
+      ],
+      "implication": "Use visible focus and focus containment."
+    },
+    {
+      "rank": 30,
+      "pattern": "Canvas-only data excludes screen-reader users",
+      "source_ids": [
+        "S136",
+        "S144",
+        "S149"
+      ],
+      "implication": "Provide a structured object/provenance table."
+    },
+    {
+      "rank": 31,
+      "pattern": "Color alone communicates verification",
+      "source_ids": [
+        "S140",
+        "S143",
+        "S160"
+      ],
+      "implication": "Pair color with explicit status text."
+    },
+    {
+      "rank": 32,
+      "pattern": "Error messages expose internals or offer no recovery",
+      "source_ids": [
+        "S155",
+        "S156",
+        "S170"
+      ],
+      "implication": "Use safe copy, incident IDs and retry guidance."
+    },
+    {
+      "rank": 33,
+      "pattern": "False success is shown before storage commits",
+      "source_ids": [
+        "S170",
+        "S184",
+        "S201"
+      ],
+      "implication": "Confirm D1/R2 persistence first."
+    },
+    {
+      "rank": 34,
+      "pattern": "Authentication fallback merges unrelated customers",
+      "source_ids": [
+        "S168",
+        "S173",
+        "S175"
+      ],
+      "implication": "Fail closed without identity."
+    },
+    {
+      "rank": 35,
+      "pattern": "Client-only authorization permits direct-object access",
+      "source_ids": [
+        "S168",
+        "S174",
+        "S175"
+      ],
+      "implication": "Enforce workspace ownership in every server query."
+    },
+    {
+      "rank": 36,
+      "pattern": "Cross-site mutation requests are accepted",
+      "source_ids": [
+        "S167",
+        "S169"
+      ],
+      "implication": "Verify same-origin intent."
+    },
+    {
+      "rank": 37,
+      "pattern": "Uploaded file type is trusted from its extension",
+      "source_ids": [
+        "S166",
+        "S171"
+      ],
+      "implication": "Validate MIME, extension and signature."
+    },
+    {
+      "rank": 38,
+      "pattern": "Predictable storage keys expose private plans",
+      "source_ids": [
+        "S166",
+        "S174"
+      ],
+      "implication": "Use opaque workspace/project/file keys."
+    },
+    {
+      "rank": 39,
+      "pattern": "Partial R2/D1 writes leave orphan projects",
+      "source_ids": [
+        "S119",
+        "S201",
+        "S204"
+      ],
+      "implication": "Use compensation, transaction boundaries and reconciliation."
+    },
+    {
+      "rank": 40,
+      "pattern": "Failures cannot be correlated by operators",
+      "source_ids": [
+        "S169",
+        "S214",
+        "S215"
+      ],
+      "implication": "Emit privacy-safe incident IDs and structured context."
+    },
+    {
+      "rank": 41,
+      "pattern": "Logs collect plan contents or private values",
+      "source_ids": [
+        "S171",
+        "S173",
+        "S214"
+      ],
+      "implication": "Log identifiers and failure class, not document content."
+    },
+    {
+      "rank": 42,
+      "pattern": "Integration failures disappear",
+      "source_ids": [
+        "S089",
+        "S169",
+        "S222"
+      ],
+      "implication": "Surface integration state and retry ownership."
+    },
+    {
+      "rank": 43,
+      "pattern": "Notification noise obscures critical actions",
+      "source_ids": [
+        "S089",
+        "S224"
+      ],
+      "implication": "Tie notifications to severity and next action."
+    },
+    {
+      "rank": 44,
+      "pattern": "Pricing limits or fees surprise users",
+      "source_ids": [
+        "S006",
+        "S010",
+        "S021"
+      ],
+      "implication": "State scope/limits before the user commits time."
+    },
+    {
+      "rank": 45,
+      "pattern": "Exports are incomplete or trap data",
+      "source_ids": [
+        "S006",
+        "S021",
+        "S228"
+      ],
+      "implication": "Provide documented portable outputs."
+    },
+    {
+      "rank": 46,
+      "pattern": "Templates carry stale data into a new project",
+      "source_ids": [
+        "S014",
+        "S103",
+        "S202"
+      ],
+      "implication": "Separate reusable structure from project evidence."
+    },
+    {
+      "rank": 47,
+      "pattern": "Team permissions are unclear",
+      "source_ids": [
+        "S087",
+        "S173",
+        "S217"
+      ],
+      "implication": "Show role and scope; default secondary viewers to least privilege."
+    },
+    {
+      "rank": 48,
+      "pattern": "No rollback exists after a bad release",
+      "source_ids": [
+        "S179",
+        "S180",
+        "S188"
+      ],
+      "implication": "Maintain immutable versions and exact rollback steps."
+    },
+    {
+      "rank": 49,
+      "pattern": "Health checks report app uptime while dependencies fail",
+      "source_ids": [
+        "S178",
+        "S182",
+        "S209"
+      ],
+      "implication": "Check critical dependency health."
+    },
+    {
+      "rank": 50,
+      "pattern": "A passing build is mistaken for a passing user journey",
+      "source_ids": [
+        "S086",
+        "S191",
+        "S200"
+      ],
+      "implication": "Require rendered critical-path and failure passes."
+    }
+  ],
+  "trust_killer_catalog": [
+    {
+      "rank": 1,
+      "pattern": "Invented plan, parcel, utility or dimensional data",
+      "source_ids": [
+        "S076",
+        "S080",
+        "S115"
+      ],
+      "implication": "Block field use and label unresolved."
+    },
+    {
+      "rank": 2,
+      "pattern": "False success after a failed or partial save",
+      "source_ids": [
+        "S170",
+        "S184",
+        "S201"
+      ],
+      "implication": "Never announce completion before persistence."
+    },
+    {
+      "rank": 3,
+      "pattern": "Cross-customer access or fallback identity",
+      "source_ids": [
+        "S168",
+        "S173",
+        "S175"
+      ],
+      "implication": "Fail closed and isolate every query."
+    },
+    {
+      "rank": 4,
+      "pattern": "A 2.5D preview labeled a digital twin",
+      "source_ids": [
+        "S161",
+        "S163",
+        "S241"
+      ],
+      "implication": "Use real 3D and honest maturity labels."
+    },
+    {
+      "rank": 5,
+      "pattern": "Legal-survey language applied to GIS reference data",
+      "source_ids": [
+        "S115",
+        "S116",
+        "S118"
+      ],
+      "implication": "Preserve agency accuracy caveats."
+    },
+    {
+      "rank": 6,
+      "pattern": "Unexplained AI certainty",
+      "source_ids": [
+        "S076",
+        "S077",
+        "S084"
+      ],
+      "implication": "Show evidence and human-review gates."
+    },
+    {
+      "rank": 7,
+      "pattern": "Plans uploaded but missing after refresh",
+      "source_ids": [
+        "S048",
+        "S056",
+        "S120"
+      ],
+      "implication": "Verify storage and provide retry/recovery."
+    },
+    {
+      "rank": 8,
+      "pattern": "Duplicate house/project creation",
+      "source_ids": [
+        "S184",
+        "S186",
+        "S187"
+      ],
+      "implication": "Use idempotency."
+    },
+    {
+      "rank": 9,
+      "pattern": "Unannounced revision mismatch",
+      "source_ids": [
+        "S056",
+        "S103",
+        "S111"
+      ],
+      "implication": "Expose controlling revision."
+    },
+    {
+      "rank": 10,
+      "pattern": "Viewer controls that do nothing",
+      "source_ids": [
+        "S031",
+        "S043",
+        "S045"
+      ],
+      "implication": "Remove or implement every control."
+    },
+    {
+      "rank": 11,
+      "pattern": "Critical tools hidden offscreen",
+      "source_ids": [
+        "S137",
+        "S139",
+        "S194"
+      ],
+      "implication": "Viewport-bound layout and reset."
+    },
+    {
+      "rank": 12,
+      "pattern": "Errors that blame the user but offer no recovery",
+      "source_ids": [
+        "S155",
+        "S156",
+        "S200"
+      ],
+      "implication": "Explain failure and safe next step."
+    },
+    {
+      "rank": 13,
+      "pattern": "Sensitive plan data in logs or predictable URLs",
+      "source_ids": [
+        "S166",
+        "S171",
+        "S174"
+      ],
+      "implication": "Minimize and protect identifiers."
+    },
+    {
+      "rank": 14,
+      "pattern": "Permissions that exist only in the interface",
+      "source_ids": [
+        "S168",
+        "S174",
+        "S175"
+      ],
+      "implication": "Server enforcement."
+    },
+    {
+      "rank": 15,
+      "pattern": "Parcel/APN conflict silently resolved by assumption",
+      "source_ids": [
+        "S115",
+        "S117"
+      ],
+      "implication": "Display conflict pending authority."
+    },
+    {
+      "rank": 16,
+      "pattern": "Detailed MEP routing invented from schematic plans",
+      "source_ids": [
+        "S076",
+        "S080",
+        "S164"
+      ],
+      "implication": "Use zones/not shown."
+    },
+    {
+      "rank": 17,
+      "pattern": "No way to recover a lost camera or layout",
+      "source_ids": [
+        "S033",
+        "S044",
+        "S121"
+      ],
+      "implication": "Stable reset."
+    },
+    {
+      "rank": 18,
+      "pattern": "Unmonitored production failure",
+      "source_ids": [
+        "S169",
+        "S179",
+        "S214"
+      ],
+      "implication": "Logs, health and alert ownership."
+    },
+    {
+      "rank": 19,
+      "pattern": "No credible rollback after release",
+      "source_ids": [
+        "S179",
+        "S180",
+        "S188"
+      ],
+      "implication": "Immutable version and rehearsal."
+    },
+    {
+      "rank": 20,
+      "pattern": "Affiliate/vendor claims presented as independent user truth",
+      "source_ids": [
+        "S216",
+        "S227",
+        "S250"
+      ],
+      "implication": "Record bias and corroborate."
+    }
+  ],
+  "abandonment_trigger_catalog": [
+    {
+      "rank": 1,
+      "pattern": "Slow, complex onboarding before a first useful result",
+      "source_ids": [
+        "S001",
+        "S009",
+        "S086"
+      ],
+      "implication": "Minimize setup and show a controlled result early."
+    },
+    {
+      "rank": 2,
+      "pattern": "Too many menus and modules with unclear starting points",
+      "source_ids": [
+        "S005",
+        "S013",
+        "S025"
+      ],
+      "implication": "Use progressive disclosure and task-oriented labels."
+    },
+    {
+      "rank": 3,
+      "pattern": "Decorative dashboards whose controls do not complete work",
+      "source_ids": [
+        "S004",
+        "S012",
+        "S023"
+      ],
+      "implication": "Remove dead controls and test every visible action."
+    },
+    {
+      "rank": 4,
+      "pattern": "Mobile model viewer loads blank",
+      "source_ids": [
+        "S031",
+        "S052",
+        "S053"
+      ],
+      "implication": "Provide loading/failure states and a nonvisual fallback."
+    },
+    {
+      "rank": 7,
+      "pattern": "Uploads fail without explaining which file caused it",
+      "source_ids": [
+        "S048",
+        "S094",
+        "S098",
+        "S166"
+      ],
+      "implication": "Validate per file and return an actionable message."
+    },
+    {
+      "rank": 8,
+      "pattern": "Refresh loses upload or viewer progress",
+      "source_ids": [
+        "S056",
+        "S107",
+        "S120"
+      ],
+      "implication": "Persist critical state and keep retries idempotent."
+    },
+    {
+      "rank": 12,
+      "pattern": "Missing sheet inventory hides scope",
+      "source_ids": [
+        "S076",
+        "S083",
+        "S097"
+      ],
+      "implication": "Register every supplied sheet before modeling."
+    },
+    {
+      "rank": 13,
+      "pattern": "One-click AI quantities look precise but are wrong",
+      "source_ids": [
+        "S076",
+        "S077",
+        "S080",
+        "S084"
+      ],
+      "implication": "Require human verification and written-dimension controls."
+    },
+    {
+      "rank": 25,
+      "pattern": "Floating panels become lost offscreen",
+      "source_ids": [
+        "S121",
+        "S137",
+        "S194"
+      ],
+      "implication": "Dock/clamp panels and provide Reset Layout."
+    },
+    {
+      "rank": 26,
+      "pattern": "Nested scrolling traps users",
+      "source_ids": [
+        "S139",
+        "S140",
+        "S198"
+      ],
+      "implication": "Keep page scrolling disabled and panel scrolling intentional."
+    },
+    {
+      "rank": 27,
+      "pattern": "Controls run offscreen at high zoom",
+      "source_ids": [
+        "S137",
+        "S139",
+        "S140"
+      ],
+      "implication": "Reflow the shell and use scrollable tool rails."
+    },
+    {
+      "rank": 32,
+      "pattern": "Error messages expose internals or offer no recovery",
+      "source_ids": [
+        "S155",
+        "S156",
+        "S170"
+      ],
+      "implication": "Use safe copy, incident IDs and retry guidance."
+    },
+    {
+      "rank": 33,
+      "pattern": "False success is shown before storage commits",
+      "source_ids": [
+        "S170",
+        "S184",
+        "S201"
+      ],
+      "implication": "Confirm D1/R2 persistence first."
+    },
+    {
+      "rank": 43,
+      "pattern": "Notification noise obscures critical actions",
+      "source_ids": [
+        "S089",
+        "S224"
+      ],
+      "implication": "Tie notifications to severity and next action."
+    },
+    {
+      "rank": 44,
+      "pattern": "Pricing limits or fees surprise users",
+      "source_ids": [
+        "S006",
+        "S010",
+        "S021"
+      ],
+      "implication": "State scope/limits before the user commits time."
+    }
+  ],
+  "accessibility_risk_catalog": [
+    {
+      "rank": 27,
+      "pattern": "Controls run offscreen at high zoom",
+      "source_ids": [
+        "S137",
+        "S139",
+        "S140"
+      ],
+      "implication": "Reflow the shell and use scrollable tool rails."
+    },
+    {
+      "rank": 28,
+      "pattern": "Tiny touch targets fail in field use",
+      "source_ids": [
+        "S052",
+        "S055",
+        "S147"
+      ],
+      "implication": "Use reachable, labeled touch controls."
+    },
+    {
+      "rank": 29,
+      "pattern": "Keyboard focus disappears or escapes dialogs",
+      "source_ids": [
+        "S138",
+        "S142",
+        "S148"
+      ],
+      "implication": "Use visible focus and focus containment."
+    },
+    {
+      "rank": 30,
+      "pattern": "Canvas-only data excludes screen-reader users",
+      "source_ids": [
+        "S136",
+        "S144",
+        "S149"
+      ],
+      "implication": "Provide a structured object/provenance table."
+    },
+    {
+      "rank": 31,
+      "pattern": "Color alone communicates verification",
+      "source_ids": [
+        "S140",
+        "S143",
+        "S160"
+      ],
+      "implication": "Pair color with explicit status text."
+    }
+  ],
+  "mobile_risk_catalog": [
+    {
+      "rank": 4,
+      "pattern": "Mobile model viewer loads blank",
+      "source_ids": [
+        "S031",
+        "S052",
+        "S053"
+      ],
+      "implication": "Provide loading/failure states and a nonvisual fallback."
+    },
+    {
+      "rank": 5,
+      "pattern": "Large models run slowly or freeze",
+      "source_ids": [
+        "S042",
+        "S047",
+        "S054",
+        "S191"
+      ],
+      "implication": "Cap DPR/geometry and release GPU resources."
+    },
+    {
+      "rank": 25,
+      "pattern": "Floating panels become lost offscreen",
+      "source_ids": [
+        "S121",
+        "S137",
+        "S194"
+      ],
+      "implication": "Dock/clamp panels and provide Reset Layout."
+    },
+    {
+      "rank": 26,
+      "pattern": "Nested scrolling traps users",
+      "source_ids": [
+        "S139",
+        "S140",
+        "S198"
+      ],
+      "implication": "Keep page scrolling disabled and panel scrolling intentional."
+    },
+    {
+      "rank": 27,
+      "pattern": "Controls run offscreen at high zoom",
+      "source_ids": [
+        "S137",
+        "S139",
+        "S140"
+      ],
+      "implication": "Reflow the shell and use scrollable tool rails."
+    },
+    {
+      "rank": 28,
+      "pattern": "Tiny touch targets fail in field use",
+      "source_ids": [
+        "S052",
+        "S055",
+        "S147"
+      ],
+      "implication": "Use reachable, labeled touch controls."
+    }
+  ],
+  "operational_risk_catalog": [
+    {
+      "rank": 32,
+      "pattern": "Error messages expose internals or offer no recovery",
+      "source_ids": [
+        "S155",
+        "S156",
+        "S170"
+      ],
+      "implication": "Use safe copy, incident IDs and retry guidance."
+    },
+    {
+      "rank": 33,
+      "pattern": "False success is shown before storage commits",
+      "source_ids": [
+        "S170",
+        "S184",
+        "S201"
+      ],
+      "implication": "Confirm D1/R2 persistence first."
+    },
+    {
+      "rank": 34,
+      "pattern": "Authentication fallback merges unrelated customers",
+      "source_ids": [
+        "S168",
+        "S173",
+        "S175"
+      ],
+      "implication": "Fail closed without identity."
+    },
+    {
+      "rank": 35,
+      "pattern": "Client-only authorization permits direct-object access",
+      "source_ids": [
+        "S168",
+        "S174",
+        "S175"
+      ],
+      "implication": "Enforce workspace ownership in every server query."
+    },
+    {
+      "rank": 36,
+      "pattern": "Cross-site mutation requests are accepted",
+      "source_ids": [
+        "S167",
+        "S169"
+      ],
+      "implication": "Verify same-origin intent."
+    },
+    {
+      "rank": 37,
+      "pattern": "Uploaded file type is trusted from its extension",
+      "source_ids": [
+        "S166",
+        "S171"
+      ],
+      "implication": "Validate MIME, extension and signature."
+    },
+    {
+      "rank": 38,
+      "pattern": "Predictable storage keys expose private plans",
+      "source_ids": [
+        "S166",
+        "S174"
+      ],
+      "implication": "Use opaque workspace/project/file keys."
+    },
+    {
+      "rank": 39,
+      "pattern": "Partial R2/D1 writes leave orphan projects",
+      "source_ids": [
+        "S119",
+        "S201",
+        "S204"
+      ],
+      "implication": "Use compensation, transaction boundaries and reconciliation."
+    },
+    {
+      "rank": 40,
+      "pattern": "Failures cannot be correlated by operators",
+      "source_ids": [
+        "S169",
+        "S214",
+        "S215"
+      ],
+      "implication": "Emit privacy-safe incident IDs and structured context."
+    },
+    {
+      "rank": 41,
+      "pattern": "Logs collect plan contents or private values",
+      "source_ids": [
+        "S171",
+        "S173",
+        "S214"
+      ],
+      "implication": "Log identifiers and failure class, not document content."
+    },
+    {
+      "rank": 42,
+      "pattern": "Integration failures disappear",
+      "source_ids": [
+        "S089",
+        "S169",
+        "S222"
+      ],
+      "implication": "Surface integration state and retry ownership."
+    },
+    {
+      "rank": 43,
+      "pattern": "Notification noise obscures critical actions",
+      "source_ids": [
+        "S089",
+        "S224"
+      ],
+      "implication": "Tie notifications to severity and next action."
+    },
+    {
+      "rank": 44,
+      "pattern": "Pricing limits or fees surprise users",
+      "source_ids": [
+        "S006",
+        "S010",
+        "S021"
+      ],
+      "implication": "State scope/limits before the user commits time."
+    },
+    {
+      "rank": 45,
+      "pattern": "Exports are incomplete or trap data",
+      "source_ids": [
+        "S006",
+        "S021",
+        "S228"
+      ],
+      "implication": "Provide documented portable outputs."
+    },
+    {
+      "rank": 46,
+      "pattern": "Templates carry stale data into a new project",
+      "source_ids": [
+        "S014",
+        "S103",
+        "S202"
+      ],
+      "implication": "Separate reusable structure from project evidence."
+    },
+    {
+      "rank": 47,
+      "pattern": "Team permissions are unclear",
+      "source_ids": [
+        "S087",
+        "S173",
+        "S217"
+      ],
+      "implication": "Show role and scope; default secondary viewers to least privilege."
+    },
+    {
+      "rank": 48,
+      "pattern": "No rollback exists after a bad release",
+      "source_ids": [
+        "S179",
+        "S180",
+        "S188"
+      ],
+      "implication": "Maintain immutable versions and exact rollback steps."
+    },
+    {
+      "rank": 49,
+      "pattern": "Health checks report app uptime while dependencies fail",
+      "source_ids": [
+        "S178",
+        "S182",
+        "S209"
+      ],
+      "implication": "Check critical dependency health."
+    },
+    {
+      "rank": 50,
+      "pattern": "A passing build is mistaken for a passing user journey",
+      "source_ids": [
+        "S086",
+        "S191",
+        "S200"
+      ],
+      "implication": "Require rendered critical-path and failure passes."
+    }
+  ],
+  "builder_assist_must_not_rules": [
+    {
+      "rank": 1,
+      "rule": "Create a project row before an upload can be safely completed",
+      "source_ids": [
+        "S166"
+      ],
+      "verification": "Upload/auth/recovery test"
+    },
+    {
+      "rank": 2,
+      "rule": "Treat a retry as a new upload intent",
+      "source_ids": [
+        "S184"
+      ],
+      "verification": "Upload/auth/recovery test"
+    },
+    {
+      "rank": 3,
+      "rule": "Trust extension or browser MIME alone",
+      "source_ids": [
+        "S171"
+      ],
+      "verification": "Upload/auth/recovery test"
+    },
+    {
+      "rank": 4,
+      "rule": "Expose R2 keys to the client",
+      "source_ids": [
+        "S174"
+      ],
+      "verification": "Upload/auth/recovery test"
+    },
+    {
+      "rank": 5,
+      "rule": "Use a shared fallback account",
+      "source_ids": [
+        "S168"
+      ],
+      "verification": "Upload/auth/recovery test"
+    },
+    {
+      "rank": 6,
+      "rule": "Authorize a project from client state",
+      "source_ids": [
+        "S175"
+      ],
+      "verification": "Upload/auth/recovery test"
+    },
+    {
+      "rank": 7,
+      "rule": "Return raw exceptions",
+      "source_ids": [
+        "S170"
+      ],
+      "verification": "Upload/auth/recovery test"
+    },
+    {
+      "rank": 8,
+      "rule": "Report success before D1/R2 commit",
+      "source_ids": [
+        "S201"
+      ],
+      "verification": "Upload/auth/recovery test"
+    },
+    {
+      "rank": 9,
+      "rule": "Delete unrelated project data during cleanup",
+      "source_ids": [
+        "S204"
+      ],
+      "verification": "Upload/auth/recovery test"
+    },
+    {
+      "rank": 10,
+      "rule": "Leave an upload batch permanently processing without operator visibility",
+      "source_ids": [
+        "S169"
+      ],
+      "verification": "Upload/auth/recovery test"
+    },
+    {
+      "rank": 11,
+      "rule": "Call a 2.5D canvas a digital twin",
+      "source_ids": [
+        "S161"
+      ],
+      "verification": "Parcel evidence audit"
+    },
+    {
+      "rank": 12,
+      "rule": "Render one project’s geometry for another house",
+      "source_ids": [
+        "S088"
+      ],
+      "verification": "Parcel evidence audit"
+    },
+    {
+      "rank": 13,
+      "rule": "Invent a parcel ID",
+      "source_ids": [
+        "S115"
+      ],
+      "verification": "Parcel evidence audit"
+    },
+    {
+      "rank": 14,
+      "rule": "Invent boundary dimensions or bearings",
+      "source_ids": [
+        "S116"
+      ],
+      "verification": "Parcel evidence audit"
+    },
+    {
+      "rank": 15,
+      "rule": "Invent frontage length",
+      "source_ids": [
+        "S118"
+      ],
+      "verification": "Parcel evidence audit"
+    },
+    {
+      "rank": 16,
+      "rule": "Confuse pavement, centerline, ROW and frontage",
+      "source_ids": [
+        "S117"
+      ],
+      "verification": "Parcel evidence audit"
+    },
+    {
+      "rank": 17,
+      "rule": "Substitute owner names for adjacent APNs",
+      "source_ids": [
+        "S164"
+      ],
+      "verification": "Parcel evidence audit"
+    },
+    {
+      "rank": 18,
+      "rule": "Call GIS reference geometry survey-accurate",
+      "source_ids": [
+        "S076"
+      ],
+      "verification": "Parcel evidence audit"
+    },
+    {
+      "rank": 19,
+      "rule": "Silently choose between conflicting APNs",
+      "source_ids": [
+        "S080"
+      ],
+      "verification": "Parcel evidence audit"
+    },
+    {
+      "rank": 20,
+      "rule": "Silently choose between conflicting lot areas",
+      "source_ids": [
+        "S165"
+      ],
+      "verification": "Parcel evidence audit"
+    },
+    {
+      "rank": 21,
+      "rule": "Generate detailed MEP routing absent from plans",
+      "source_ids": [
+        "S083"
+      ],
+      "verification": "Plan/model manifest audit"
+    },
+    {
+      "rank": 22,
+      "rule": "Make assumed geometry look verified",
+      "source_ids": [
+        "S103"
+      ],
+      "verification": "Plan/model manifest audit"
+    },
+    {
+      "rank": 23,
+      "rule": "Hide unresolved values",
+      "source_ids": [
+        "S033"
+      ],
+      "verification": "Plan/model manifest audit"
+    },
+    {
+      "rank": 24,
+      "rule": "Scale from pixels when written dimensions control",
+      "source_ids": [
+        "S163"
+      ],
+      "verification": "Plan/model manifest audit"
+    },
+    {
+      "rank": 25,
+      "rule": "Claim precision beyond the source",
+      "source_ids": [
+        "S162"
+      ],
+      "verification": "Plan/model manifest audit"
+    },
+    {
+      "rank": 26,
+      "rule": "Build from floor plans alone",
+      "source_ids": [
+        "S137"
+      ],
+      "verification": "Plan/model manifest audit"
+    },
+    {
+      "rank": 27,
+      "rule": "Ignore superseded or controlling revisions",
+      "source_ids": [
+        "S139"
+      ],
+      "verification": "Plan/model manifest audit"
+    },
+    {
+      "rank": 28,
+      "rule": "Reset the camera during stage changes",
+      "source_ids": [
+        "S140"
+      ],
+      "verification": "Plan/model manifest audit"
+    },
+    {
+      "rank": 29,
+      "rule": "Make stages decorative slides",
+      "source_ids": [
+        "S136"
+      ],
+      "verification": "Plan/model manifest audit"
+    },
+    {
+      "rank": 30,
+      "rule": "Prevent returning to an earlier stage",
+      "source_ids": [
+        "S142"
+      ],
+      "verification": "Plan/model manifest audit"
+    },
+    {
+      "rank": 31,
+      "rule": "Allow tools to leave the viewport",
+      "source_ids": [
+        "S147"
+      ],
+      "verification": "Viewport/keyboard audit"
+    },
+    {
+      "rank": 32,
+      "rule": "Create nested page scroll traps",
+      "source_ids": [
+        "S121"
+      ],
+      "verification": "Viewport/keyboard audit"
+    },
+    {
+      "rank": 33,
+      "rule": "Hide tools at 200% zoom",
+      "source_ids": [
+        "S155"
+      ],
+      "verification": "Viewport/keyboard audit"
+    },
+    {
+      "rank": 34,
+      "rule": "Use color as the only evidence cue",
+      "source_ids": [
+        "S108"
+      ],
+      "verification": "Viewport/keyboard audit"
+    },
+    {
+      "rank": 35,
+      "rule": "Offer canvas-only information",
+      "source_ids": [
+        "S186"
+      ],
+      "verification": "Viewport/keyboard audit"
+    },
+    {
+      "rank": 36,
+      "rule": "Trap keyboard focus outside a dialog",
+      "source_ids": [
+        "S214"
+      ],
+      "verification": "Viewport/keyboard audit"
+    },
+    {
+      "rank": 37,
+      "rule": "Use tiny unlabeled touch targets",
+      "source_ids": [
+        "S179"
+      ],
+      "verification": "Viewport/keyboard audit"
+    },
+    {
+      "rank": 38,
+      "rule": "Lose panels permanently offscreen",
+      "source_ids": [
+        "S178"
+      ],
+      "verification": "Viewport/keyboard audit"
+    },
+    {
+      "rank": 39,
+      "rule": "Omit Escape/cancel behavior",
+      "source_ids": [
+        "S188"
+      ],
+      "verification": "Viewport/keyboard audit"
+    },
+    {
+      "rank": 40,
+      "rule": "Remove reset layout or fit-to-view recovery",
+      "source_ids": [
+        "S191"
+      ],
+      "verification": "Viewport/keyboard audit"
+    },
+    {
+      "rank": 41,
+      "rule": "Silence failed network requests",
+      "source_ids": [
+        "S166"
+      ],
+      "verification": "Release/operations gate"
+    },
+    {
+      "rank": 42,
+      "rule": "Overwrite newer multi-tab state silently",
+      "source_ids": [
+        "S184"
+      ],
+      "verification": "Release/operations gate"
+    },
+    {
+      "rank": 43,
+      "rule": "Queue external side effects without idempotency",
+      "source_ids": [
+        "S171"
+      ],
+      "verification": "Release/operations gate"
+    },
+    {
+      "rank": 44,
+      "rule": "Log private plan content",
+      "source_ids": [
+        "S174"
+      ],
+      "verification": "Release/operations gate"
+    },
+    {
+      "rank": 45,
+      "rule": "Hide integration failure",
+      "source_ids": [
+        "S168"
+      ],
+      "verification": "Release/operations gate"
+    },
+    {
+      "rank": 46,
+      "rule": "Rely on app-up health checks that ignore dependencies",
+      "source_ids": [
+        "S175"
+      ],
+      "verification": "Release/operations gate"
+    },
+    {
+      "rank": 47,
+      "rule": "Deploy a destructive migration without backup/rollback",
+      "source_ids": [
+        "S170"
+      ],
+      "verification": "Release/operations gate"
+    },
+    {
+      "rank": 48,
+      "rule": "Claim mobile support without rendering it",
+      "source_ids": [
+        "S201"
+      ],
+      "verification": "Release/operations gate"
+    },
+    {
+      "rank": 49,
+      "rule": "Claim accessibility without keyboard/semantic checks",
+      "source_ids": [
+        "S204"
+      ],
+      "verification": "Release/operations gate"
+    },
+    {
+      "rank": 50,
+      "rule": "Issue GO while any P0/P1 or research gate is open",
+      "source_ids": [
+        "S169"
+      ],
+      "verification": "Release/operations gate"
+    }
+  ],
+  "research_limitations": [
+    "Ninety-five qualifying sources have no retained exact publication/update date and are excluded from recency quotas.",
+    "Public reviews and community reports overrepresent motivated users and do not establish prevalence.",
+    "Vendor documentation verifies product behavior, not user sentiment or outcomes.",
+    "Commercial comparisons may contain affiliate incentives and receive reduced credibility scores.",
+    "No representative Builder Assist usability study was run in this environment; satisfaction remains unverified.",
+    "The official parcel record endpoint blocked full content retrieval, so parcel reconciliation remains a launch blocker."
+  ]
+}
