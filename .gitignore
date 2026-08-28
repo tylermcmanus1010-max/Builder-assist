@@ -2,3 +2,7 @@ node_modules/
 *.log
 .DS_Store
 out/
+
+# harness output when OUT_DIR is unset - multi-MB unwrapped copies
+*.unwrapped.html
+/report.json

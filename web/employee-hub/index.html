@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Builder Assist Employee Hub</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
@@ -273,10 +274,22 @@ var Store = (function () {
 })();
 
 /* ---------------- time helpers ---------------- */
+function addDays(t, n) {
+  // Calendar arithmetic, not fixed milliseconds: a DST week is 23 or 25 hours
+  // long, so t + n*DAY drifts off midnight and silently misfiles a whole day.
+  var d = new Date(t); d.setDate(d.getDate() + n); d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+function daysBetween(a, b) {
+  // Rounding absorbs the +/-1h DST skew; flooring a 23-hour day would lose one.
+  var x = new Date(a); x.setHours(0, 0, 0, 0);
+  var y = new Date(b); y.setHours(0, 0, 0, 0);
+  return Math.round((y.getTime() - x.getTime()) / DAY);
+}
 function mondayOf(t) {
   var d = new Date(t); d.setHours(0, 0, 0, 0);
   var dow = (d.getDay() + 6) % 7;           // Mon=0
-  return d.getTime() - dow * DAY;
+  return addDays(d.getTime(), -dow);
 }
 function dayStart(t) { var d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); }
 function breakMs(e, now) {
@@ -445,8 +458,8 @@ function openEntryFor(empId) {
   return null;
 }
 function weekRange(offset) {
-  var start = mondayOf(Date.now()) + offset * 7 * DAY;
-  return { start: start, end: start + 7 * DAY };
+  var start = addDays(mondayOf(Date.now()), offset * 7);
+  return { start: start, end: addDays(start, 7) };
 }
 function entriesInWeek(offset) {
   var r = weekRange(offset);
@@ -1089,7 +1102,7 @@ function renderMatrix() {
   var perEmp = {};
   list.forEach(function (e) {
     if (!countable(e, now)) return;
-    var d = Math.floor((dayStart(e.clockIn) - r.start) / DAY);
+    var d = daysBetween(r.start, e.clockIn);
     if (d < 0 || d > 6) return;
     var w = workedMs(e, now);
     var pe = perEmp[e.empId] || (perEmp[e.empId] = { jobs: {}, total: 0, perDay: [0,0,0,0,0,0,0] });
@@ -1407,7 +1420,7 @@ function buildCsv() {
       e.seeded ? 'yes' : ''
     ].map(csvEscape).join(','));
   });
-  return { name: 'timesheet-week-' + new Date(r.start).toISOString().slice(0, 10) + '.csv', text: rows.join('\n') };
+  return { name: 'timesheet-week-' + localDateKey(r.start) + '.csv', text: rows.join('\n') };
 }
 async function exportCsv() {
   var c = buildCsv();

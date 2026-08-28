@@ -444,7 +444,8 @@ if (!files.length) {
   process.exit(2);
 }
 
-const outDir = process.env.OUT_DIR || '.';
+// Defaulting to '.' dumped multi-MB unwrapped copies into the repo root.
+const outDir = process.env.OUT_DIR || join(tmpdir(), `verify-artifacts-${process.pid}`);
 await mkdir(outDir, { recursive: true });
 
 const browser = await chromium.launch({
