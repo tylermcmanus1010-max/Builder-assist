@@ -46,10 +46,12 @@
     <div class="actions">
       <button type="button" id="loadApprovedModel">Load 4752-25 approved plan</button>
       <button type="button" id="loadSampleModel">Load full floor-plan test model</button>
+      <label class="file-button">Import plan PDF<input id="pdfUpload" type="file" accept="application/pdf,.pdf"></label>
       <label class="file-button">Import project model<input id="modelUpload" type="file" accept="application/json,.json"></label>
       <button type="button" id="exportModel">Export current model</button>
       <button type="button" id="clearModel">Clear local model</button>
     </div>
+    <p id="pdfStatus" class="stage-status" role="status" aria-live="polite"></p>
     <p id="uploadError" class="error" role="alert" hidden></p>
     <section class="section" aria-labelledby="stageHeading"><h2 id="stageHeading">Stage status</h2><p id="stageStatus" class="stage-status"></p><dl class="facts"><dt>Visible supported elements</dt><dd id="visibleCount">0</dd><dt>Stage-supported elements</dt><dd id="stageCount">0</dd><dt>Measurement</dt><dd class="measure-readout" id="measurement">—</dd></dl></section>
     <section class="section" aria-labelledby="inspectHeading"><h2 id="inspectHeading">Selection &amp; provenance</h2><div class="inspect" id="inspection">Select Inspect, then choose supported geometry in the viewport.</div><ul class="source-list" id="sourceList"><li class="empty">No source citation selected.</li></ul></section>
@@ -57,10 +59,11 @@
     <details class="section" id="noteRegisterDetails" open><summary><strong>Plan note register <span id="noteCount"></span></strong></summary><p id="noteSummary" class="stage-status">No note register loaded.</p><label class="note-search">Filter notes<input id="noteSearch" type="search" placeholder="Text, sheet, category, or model action"></label><ul class="note-list" id="noteList"><li class="empty">No note register loaded.</li></ul></details>
     <details class="section" open><summary><strong>Unresolved facts</strong></summary><ul class="unknown-list" id="unknownList"></ul></details>
     <details class="section"><summary><strong>Accessible model outline</strong></summary><p id="modelDescription" class="stage-status"></p><ol class="outline" id="modelOutline"></ol></details>
-    <p class="prototype">Local import and persistence are browser-only prototype features, scoped by project ID. They are not production storage, workspace isolation, or secure authentication.</p>
+    <p class="prototype">PDF parsing happens locally in this browser. PDF bytes are not persisted; only the derived, source-hashed review model is stored. Local import and persistence remain prototype features, not production storage, workspace isolation, or secure authentication.</p>
   </aside>
 </main>
 <div class="a11y" id="announcer" aria-live="polite" aria-atomic="true"></div>
+<script src="pdf-import.js"></script>
 <script src="engine.js"></script>
 <script>
 (async function(){

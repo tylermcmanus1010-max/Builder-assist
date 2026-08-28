@@ -7,6 +7,22 @@ step. **Import project model** remains available for a downloaded or modified
 copy. Use the **Plan note register** to inspect or filter all extracted plan
 notes.
 
+## PDF import
+
+Choose **Import plan PDF** to process a PDF entirely in the browser. Assistify
+hashes the file, extracts its text layer with the vendored PDF.js runtime, and
+builds a source-linked note register for review. It does not invent geometry:
+dimensions, symbols, schedules, and drawing context remain unverified until a
+reviewer applies them to a project model. Text-free scanned plans require OCR
+before their notes can be indexed.
+
+The exact `66thST4752-25_APPROVEDPlans_639076997322694800.pdf` file is matched
+by SHA-256 to its committed reviewed model, so importing it restores the 30
+source-linked geometry elements and 1,547-note register. Renamed copies work;
+modified PDFs fall back to the generic review flow.
+
+PDF.js 5.6.205 is vendored under `vendor/pdfjs/` with its Apache 2.0 license.
+
 This directory contains the reusable, feet-based Assistify construction
 viewer. It intentionally ships with an **unconfigured project** and no
 physical building, parcel, terrain, utility, or grading geometry. A project
