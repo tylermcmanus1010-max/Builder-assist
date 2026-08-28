@@ -33,6 +33,9 @@ try{
   check(counts.tools===12&&counts.uniqueTools===12&&counts.buttons===12,'exactly 12 unique reachable Assistify tools',JSON.stringify(counts));
   const truth=await page.evaluate(()=>({map:document.querySelector('[data-tool="map-sync"]').disabled,source:document.querySelector('[data-tool="source"]').disabled,geometry:assistifyViewer.getModel().geometry.elements.length,unknown:document.querySelectorAll('#unknownList li').length,status:document.querySelector('#projectStatus').textContent}));
   check(truth.map&&truth.source&&truth.geometry===0&&truth.unknown>=4&&truth.status==='UNVERIFIED','empty boot model remains truthful and evidence-gated',JSON.stringify(truth));
+  await page.locator('#loadApprovedModel').click();await page.waitForFunction(()=>document.querySelector('#projectName').textContent.includes('4752-25'));
+  const approved=await page.evaluate(()=>({id:assistifyViewer.getModel().project.id,geometry:assistifyViewer.getModel().geometry.elements.length,notes:document.querySelectorAll('#noteList li').length,noteCount:document.querySelector('#noteCount').textContent,stored:!!localStorage.getItem('assistify3d:model:scottsdale-4752-25-approvedplans'),busy:document.querySelector('#loadApprovedModel').hasAttribute('aria-busy'),disabled:document.querySelector('#loadApprovedModel').disabled,error:document.querySelector('#uploadError').hidden?'':document.querySelector('#uploadError').textContent}));
+  check(approved.id==='scottsdale-4752-25-approvedplans'&&approved.geometry===30&&approved.notes===1547&&approved.noteCount==='(1547)'&&approved.stored&&!approved.busy&&!approved.disabled&&!approved.error,'committed 4752-25 approved plan loads, validates, renders its note register, and persists',JSON.stringify(approved));
   await page.locator('#loadSampleModel').click();await page.waitForFunction(()=>document.querySelector('#projectName').textContent.includes('Los Angeles'));
   const sample=await page.evaluate(()=>({geometry:assistifyViewer.getModel().geometry.elements.length,status:document.querySelector('#projectStatus').textContent,docs:document.querySelectorAll('#planRegister li').length,unknown:document.querySelectorAll('#unknownList li').length,error:document.querySelector('#uploadError').hidden?'':document.querySelector('#uploadError').textContent}));
   check(sample.geometry>=35&&sample.status==='INFERRED'&&sample.docs===1&&sample.unknown>=4&&!sample.error,'bundled Los Angeles sample loads as a source-linked two-level floor model with explicit unknowns',JSON.stringify(sample));
@@ -61,4 +64,5 @@ try{
 }finally{await browser.close();await new Promise(resolveClose=>server.close(resolveClose));}
 
 console.log(`Assistify verification: ${passed} passed, ${failed} failed`);
+if(!failed)console.log('ASSISTIFY VERIFICATION PASSED');
 process.exit(failed?1:0);
