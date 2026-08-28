@@ -31,6 +31,15 @@ details remain visible as registered plan intelligence until their geometry is
 reviewed and reconstructed. Assistify labels that boundary instead of treating
 the floor-plan trace as a complete model.
 
+The reviewed set also loads 104 optional **concept geometry** elements derived
+from 11 sheets. These approximate site/grading lines, demolition limits,
+utilities, footings, foundation walls, framing, roof members, plumbing,
+mechanical, gas, electrical distribution, and ceiling lights. Concept elements
+are `INFERRED`, carry a sheet citation plus a written inference basis, render as
+dashed discipline-colored geometry, and can be hidden independently. They are
+communication guesses—not permit, survey, coordination, fabrication, or
+takeoff geometry.
+
 PDF.js 5.6.205 is vendored under `vendor/pdfjs/` with its Apache 2.0 license.
 
 This directory contains the reusable, feet-based Assistify construction
@@ -46,6 +55,8 @@ validation before it can render.
   camera, near-plane clipping, depth sorting, interaction, twelve stage
   controls, twelve tools, provenance display, and project-scoped prototype
   persistence.
+- `concept-geometry.js` adds the optional, explicitly labeled conceptual
+  geometry layer for the reviewed 4752-25 plan set.
 - `model-schema.json` is the machine-readable project-model contract.
 - `project-model.json` is the truthful empty boot model. All missing values are
   explicitly `UNVERIFIED` and `null`.
