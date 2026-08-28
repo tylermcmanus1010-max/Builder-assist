@@ -50,7 +50,7 @@ No estimator code was deleted. What changed around it:
 | `viewContractorPortal` — "No plans yet? Describe the home instead" | `#/build-estimate` | `#/get-pricing` |
 | `data-piqopen` (PlanIQ → priced takeoff) | always `#/build-estimate/results` | admins route through; members get a toast |
 | `estHeader()` back link | "← Back to site" → `#/` | "← Admin portal" → `#/admin-portal` |
-| `adminNav()` | 7 tabs | + `3D Model` tab, + `Whole-Build Estimator`, + `Cost Estimator` links |
+| `adminNav()` | 7 tabs | + `3D Model` tab, + `Assistify 3D` tab, + `Whole-Build Estimator`, + `Cost Estimator` links |
 
 A visitor who wants pricing still has an unbroken public path: the three home
 CTAs land on `#/get-pricing`, the existing public lead-capture form. The landing
@@ -62,12 +62,20 @@ hop into the now-admin-only estimator is replaced, by
 `toast("The full priced takeoff opens in the Builder Assist admin workspace — your account manager sends it back priced.")`.
 Nothing dead-ends into the admin sign-in screen from a signed-in member view.
 
-### 2. Admin Assistify 3D tab at `#/admin-portal/model`
+### 2. Two 3D viewers, two admin tabs, plus a contractor station
 
-`web/blueprint-3d/index.html` is the shared project-specific, twelve-stage
-Canvas viewer. The portal embeds that shared entry point and does not keep a
-second generated engine or permanent sample property. See *How the 3D tab is
-mounted* below.
+They are different tools and both are wanted:
+
+* `#/admin-portal/model` — **3D Model**: the Van Horn Residence seven-stage
+  construction-sequence viewer from `web/vanhorn-3d/index.html`, inlined and
+  namespaced under `#bp3dRoot` by `build-vanhorn3d.py`.
+* `#/admin-portal/assistify` — **Assistify 3D**: the shared project-specific,
+  twelve-stage, plan-traceable Canvas viewer from `web/blueprint-3d/`.
+* Contractor portal station **02** (`#gc-assistify`) — the same Assistify
+  viewer, between plan intake (01) and orders (03).
+
+Assistify always runs inside an iframe, so the two viewers cannot collide. See
+*How the 3D viewers are mounted* below.
 
 ### 3. Defect D1 — horizontal overflow at 390px (fixed)
 
@@ -129,24 +137,55 @@ Credentials (prototype, client-side only): admin `TylerSchopper1` / `Tyler1` →
 
 ---
 
-## How the 3D tab is mounted
+## How the 3D viewers are mounted
 
-The admin route embeds `../blueprint-3d/index.html` in an iframe. This keeps
-CSS, element IDs, camera state, and accessibility semantics isolated while both
-the standalone and portal routes execute the same `engine.js` and validated
-project-model contract. There is no generated second renderer or copied model
-data in `main-site/index.html`.
+### Van Horn (`#/admin-portal/model`)
 
-`web/main-site/build-bp3d.py` is a deterministic synchronization and migration
-step. It verifies that all shared viewer assets exist, removes the legacy
-namespaced engine/data block if encountered, replaces the old tab markup with
-the shared iframe, and leaves an explicitly empty `window.__TAKEOFF` rather
-than a permanent property takeoff.
+Inlined, because it is small and has no assets. `build-vanhorn3d.py` lifts the
+CSS, markup and JS out of `web/vanhorn-3d/index.html` and rewrites them: every
+selector is scoped under `#bp3dRoot`, every class is prefixed `bp-`, every id is
+prefixed `bp3d-`, and the page-level IIFE becomes
+`window.__BP3D.mount(root) -> {destroy}`. The canvas measures its container, so
+`mountBp3d()` runs only once the tab is in the live visible DOM and
+`unmountBp3d()` cancels the rAF loop on the way out.
 
-The shared viewer owns its own mount/destroy lifecycle, dirty-frame rendering,
-`ResizeObserver`, reduced-motion listener, and project-scoped versioned
-prototype storage. The portal's `mountBp3d()` only verifies the iframe title;
-route changes remove the iframe naturally.
+### Assistify (`#/admin-portal/assistify` and `#gc-assistify`)
+
+Iframed, never inlined, so CSS, element ids, camera state, accessibility
+semantics and `localStorage` stay isolated and every entry point executes the
+same `engine.js` against the same validated model contract. There is no copied
+renderer or model data in `main-site/index.html`.
+
+Assistify has to work in **both delivery targets**:
+
+| target | how the frame is filled |
+|---|---|
+| hosted over HTTP | `<iframe src="../blueprint-3d/index.html">` — the real multi-file app |
+| published as one artifact | `iframe.srcdoc` fed from `<script id="assistify-b64">`, the self-contained build from `tools/build-assistify-bundle.mjs` |
+
+The page does not guess. `mountAssistifyFrame()` points the frame at the sibling
+and then looks for Assistify's own `#assistifyRoot` in what loaded; a 404, a
+blocked frame, a cross-origin document or a 6-second timeout all fall back to the
+embedded bundle. Whichever path runs, the viewer gets a working Assistify — never
+an empty frame. The `[data-assistify-note]` line under each frame says which one
+is running. In the artifact target the sibling probe logs one 404; that is the
+detection itself, and nothing user-visible depends on it.
+
+The contractor station starts on an `IntersectionObserver` (it sits far down a
+long scrolling page) and both mounts are torn down in `show()` before the DOM is
+replaced, so no viewer keeps rendering in a screen nobody is looking at.
+
+### Regenerating
+
+    node tools/build-assistify-bundle.mjs      # web/assistify-bundle/index.html
+    python3 web/main-site/build-bp3d.py        # Assistify CSS, payload, mounts, station
+    python3 web/main-site/build-vanhorn3d.py   # Van Horn CSS, JS, markup, mount
+
+Both Python scripts are idempotent and write only between `==BEGIN GEN ...==` /
+`==END GEN ...==` markers. Run `build-bp3d.py` first on a fresh checkout: it
+creates the markers `build-vanhorn3d.py` anchors against. `build-bp3d.py` also
+leaves an explicitly empty `window.__TAKEOFF` rather than a permanent property
+takeoff, and fails the build if the page exceeds 12 MB.
 
 ---
 
