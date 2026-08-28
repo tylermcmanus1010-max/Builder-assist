@@ -57,6 +57,8 @@ validation before it can render.
   persistence.
 - `concept-geometry.js` adds the optional, explicitly labeled conceptual
   geometry layer for the reviewed 4752-25 plan set.
+- `progress-tracker.js` stores project-scoped field progress, stage status,
+  update history, crew notes, and evidence-photo references for the prototype.
 - `model-schema.json` is the machine-readable project-model contract.
 - `project-model.json` is the truthful empty boot model. All missing values are
   explicitly `UNVERIFIED` and `null`.
@@ -110,6 +112,14 @@ Imported model JSON and view state are stored in browser `localStorage` under
 project-scoped, versioned keys. This is a prototype convenience only. It is
 not production storage, authorization, authentication, backup, or workspace
 isolation.
+
+Field progress uses the same prototype boundary. Each construction stage can
+be marked not started, in progress, blocked, needing inspection, or complete,
+with a completion percentage, updater, field note, timestamp, and photo-file
+reference. Progress mode colors the model gray, blue, red, yellow, or green and
+rolls the twelve stages into overall completion and recent activity. Real
+multi-user jobsite updates require a shared project database, authenticated
+worker accounts, conflict handling, and durable evidence-photo storage.
 
 ## Verification
 
