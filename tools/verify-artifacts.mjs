@@ -29,6 +29,7 @@ const { chromium } = loadPlaywright();
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { basename, dirname, join, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { tmpdir } from 'node:os';
 
 const FRAME_RUNTIME = /<!-- frame-runtime -->[\s\S]*?<!-- \/frame-runtime -->/g;
 const BASE_TAG = /<base\s+href="\/_f\/[^"]*"\s*>/g;
