@@ -120,6 +120,10 @@ reference. Progress mode colors the model gray, blue, red, yellow, or green and
 rolls the twelve stages into overall completion and recent activity. Real
 multi-user jobsite updates require a shared project database, authenticated
 worker accounts, conflict handling, and durable evidence-photo storage.
+The vendor-neutral implementation contract is documented in
+`../../docs/assistify-progress-backend-contract.json`; Claude and other coding
+agents should begin with the repository-root `CLAUDE.md` and the project
+handoff in `../../docs/CODEX-PROJECT-HANDOFF.md`.
 
 ## Verification
 
