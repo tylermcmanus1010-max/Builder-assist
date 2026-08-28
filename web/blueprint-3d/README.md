@@ -1,9 +1,11 @@
 # Assistify project-specific 3D viewer
 
 The completed approved-plan test model is available as
-`approvedplans-4752-25-assistify-model.json`. Import it with **Import project
-model**, then use the **Plan note register** to inspect or filter all extracted
-plan notes.
+`approvedplans-4752-25-assistify-model.json`. When the repository is served,
+choose **Load 4752-25 approved plan** to fetch, validate, and persist it in one
+step. **Import project model** remains available for a downloaded or modified
+copy. Use the **Plan note register** to inspect or filter all extracted plan
+notes.
 
 This directory contains the reusable, feet-based Assistify construction
 viewer. It intentionally ships with an **unconfigured project** and no
