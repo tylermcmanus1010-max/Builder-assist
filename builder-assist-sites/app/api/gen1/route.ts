@@ -2,7 +2,7 @@ import { env } from "cloudflare:workers";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { hasExpectedFileSignature, safeStorageFilename, validIdempotencyKey } from "../../../lib/upload-security";
-import { getPropertyModel } from "../../../lib/property-models";
+import { appendSourceDocuments, createProjectModel, parseStoredProjectModel, ProjectModelValidationError, recordScaleCalibration, traceWall, validateProjectModel, type Point2, type ProjectModel, type SourceDocument } from "../../../lib/project-model";
 import {
   gen1EstimateLines,
   gen1FinishSelections,
@@ -11,6 +11,7 @@ import {
   gen1PhaseTasks,
   gen1ProjectEvents,
   gen1ProjectFiles,
+  gen1ProjectModels,
   gen1Projects,
   gen1UploadBatches,
   gen1Workspaces,
@@ -122,6 +123,11 @@ function errorResponse(error: unknown, operation: "GET" | "POST") {
 
 function now() {
   return new Date().toISOString();
+}
+
+async function sha256Hex(bytes: ArrayBuffer) {
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 function boundedNumber(value: unknown, fallback: number, min: number, max: number) {
@@ -279,6 +285,49 @@ function parseJson(value: string) {
   try { return JSON.parse(value); } catch { return {}; }
 }
 
+async function loadCanonicalProjectModel(projectId: string) {
+  const db = getDb();
+  const [row] = await db.select().from(gen1ProjectModels).where(eq(gen1ProjectModels.projectId, projectId)).limit(1);
+  if (!row) return { row: null, model: null, error: "" };
+  try {
+    const model = parseStoredProjectModel(row.modelJson);
+    if (model.projectId !== row.projectId || model.activeRevisionId !== row.activeRevisionId || model.modelVersion !== row.modelVersion || model.schemaVersion !== row.schemaVersion) throw new Error("The ProjectModel envelope does not match its persisted identity.");
+    return { row, model, error: "" };
+  } catch (error) {
+    await db.update(gen1ProjectModels).set({ status: "quarantined", updatedAt: now() }).where(eq(gen1ProjectModels.projectId, projectId));
+    return { row, model: null, error: error instanceof Error ? error.message : "The stored ProjectModel is incompatible." };
+  }
+}
+
+async function commitProjectModelTransition(input: {
+  projectId: string;
+  previousVersion: number | null;
+  model: ProjectModel;
+  projectStatus: string;
+  eventType: string;
+  eventTitle: string;
+  eventDetail: string;
+  uploadBatchId?: string;
+}) {
+  const model = validateProjectModel(input.model);
+  if (model.projectId !== input.projectId) throw new ApiError(400, "MODEL_INVALID", "ProjectModel projectId does not match the selected project.");
+  const timestamp = now();
+  const payload = JSON.stringify(model);
+  const write = input.previousVersion === null
+    ? env.DB.prepare("INSERT INTO gen1_project_models (project_id, schema_version, model_version, active_revision_id, status, model_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").bind(input.projectId, model.schemaVersion, model.modelVersion, model.activeRevisionId, model.status, payload, timestamp, timestamp)
+    : env.DB.prepare("UPDATE gen1_project_models SET schema_version = ?, model_version = ?, active_revision_id = ?, status = ?, model_json = ?, updated_at = ? WHERE project_id = ? AND model_version = ?").bind(model.schemaVersion, model.modelVersion, model.activeRevisionId, model.status, payload, timestamp, input.projectId, input.previousVersion);
+  const guard = "EXISTS (SELECT 1 FROM gen1_project_models WHERE project_id = ? AND model_version = ? AND model_json = ?)";
+  const statements = [
+    write,
+    env.DB.prepare(`UPDATE gen1_projects SET status = ?, updated_at = ? WHERE id = ? AND ${guard}`).bind(input.projectStatus, timestamp, input.projectId, input.projectId, model.modelVersion, payload),
+    env.DB.prepare(`INSERT INTO gen1_project_events (id, project_id, event_type, title, detail, actor, created_at) SELECT ?, ?, ?, ?, ?, ?, ? WHERE ${guard}`).bind(id("evt"), input.projectId, input.eventType, input.eventTitle, input.eventDetail, "ProjectModel pipeline", timestamp, input.projectId, model.modelVersion, payload),
+  ];
+  if (input.uploadBatchId) statements.push(env.DB.prepare(`UPDATE gen1_upload_batches SET status = 'complete', completed_at = ? WHERE id = ? AND project_id = ? AND ${guard}`).bind(timestamp, input.uploadBatchId, input.projectId, input.projectId, model.modelVersion, payload));
+  const results = await env.DB.batch(statements);
+  const changes = Number((results[0] as { meta?: { changes?: number } }).meta?.changes || 0);
+  if (changes !== 1) throw new ApiError(409, "MODEL_VERSION_CONFLICT", "The project changed while this operation was running. Reload the active ProjectModel and retry.");
+}
+
 async function hydrateProject(project: typeof gen1Projects.$inferSelect) {
   const db = getDb();
   const [files, estimateLines, finishes] = await Promise.all([
@@ -292,8 +341,13 @@ async function hydrateProject(project: typeof gen1Projects.$inferSelect) {
     db.select().from(gen1GrowifyRecords).where(eq(gen1GrowifyRecords.projectId, project.id)).orderBy(desc(gen1GrowifyRecords.updatedAt)),
   ]);
   const events = await db.select().from(gen1ProjectEvents).where(eq(gen1ProjectEvents.projectId, project.id)).orderBy(desc(gen1ProjectEvents.createdAt)).limit(60);
-  const controlledModelKey = files.find((file) => file.r2Key === "public:/project-plans/66th-st-approved-plans.pdf") ? "swenka-4752-25" : null;
-  const model = getPropertyModel(controlledModelKey);
+  const { model, error: modelError } = await loadCanonicalProjectModel(project.id);
+  const canonicalEstimateLines = model?.estimateLines.map((line) => ({
+    id: line.estimateLineId, projectId: line.projectId, category: "Walls", item: line.description, unit: line.units,
+    quantity: line.quantity, unitCostCents: line.unitCostCents || 0, laborCostCents: 0, vendor: "Unpriced",
+    source: `ProjectModel element ${line.elementId}`, competitorRates: {}, included: false, sortOrder: 0,
+    updatedAt: project.updatedAt, elementId: line.elementId, revisionId: line.revisionId, sourceGeometryId: line.sourceGeometryId,
+  }));
   return {
     ...project,
     files: files.map((file) => ({
@@ -306,11 +360,17 @@ async function hydrateProject(project: typeof gen1Projects.$inferSelect) {
       analysisStatus: file.analysisStatus,
       createdAt: file.createdAt,
       publicPath: file.r2Key.startsWith("public:") ? file.r2Key.slice(7) : null,
-      controlledModelKey: file.r2Key === "public:/project-plans/66th-st-approved-plans.pdf" ? controlledModelKey : null,
     })),
-    model,
-    modelStatus: model ? "ready" : files.some((file) => !file.documentType.startsWith("module_evidence:")) ? "awaiting_model" : "awaiting_plans",
-    estimateLines: estimateLines.map((row) => ({ ...row, competitorRates: parseJson(row.competitorRatesJson) })),
+    projectModel: model,
+    modelError,
+    modelStatus: modelError ? "invalid_model" : model?.status === "ready" ? "ready" : model ? "geometry_review" : files.some((file) => !file.documentType.startsWith("module_evidence:")) ? "awaiting_model" : "awaiting_plans",
+    drawingElements: model?.geometry2D || [],
+    takeoffItems: model?.takeoffItems || [],
+    modelObjects: model?.modelObjects || [],
+    issues: model?.issues || [],
+    revisionSets: model?.revisionSets || [],
+    reports: model?.reports || [],
+    estimateLines: canonicalEstimateLines || (project.id.startsWith("prj_featured_") ? estimateLines.map((row) => ({ ...row, competitorRates: parseJson(row.competitorRatesJson) })) : []),
     finishes,
     phaseTasks,
     moduleRecords: moduleRecords.map((row) => ({ ...row, payload: parseJson(row.payloadJson) })),
@@ -326,11 +386,12 @@ async function bootstrap(request: Request) {
   // A newly created house is not visible until its complete plan-set upload has
   // committed. Interrupted batches are recovered by the idempotent retry path.
   projects = projects.filter((project) => project.status !== "upload_processing");
-  if (!projects.length) {
+  const demoMode = new URL(request.url).searchParams.get("demo") === "true";
+  if (!projects.length && demoMode) {
     await createFeaturedProject(workspace.id);
     projects = await db.select().from(gen1Projects).where(eq(gen1Projects.workspaceId, workspace.id)).orderBy(desc(gen1Projects.updatedAt));
   }
-  for (const project of projects) await seedProject(project, project.address.includes("12228 N 66th St"));
+  if (demoMode) for (const project of projects) await seedProject(project, project.address.includes("12228 N 66th St"));
   const hydratedProjects = [];
   for (const project of projects) hydratedProjects.push(await hydrateProject(project));
   return { workspace, projects: hydratedProjects };
@@ -451,6 +512,8 @@ async function uploadPlansToProject(request: Request) {
     throw error;
   }
   const storedKeys: string[] = [];
+  const uploadedDocuments: SourceDocument[] = [];
+  let committed = false;
   try {
     for (const file of files) {
       const fileId = id("file");
@@ -458,18 +521,33 @@ async function uploadPlansToProject(request: Request) {
       const r2Key = `${workspace.id}/${projectId}/${fileId}-${safe}`;
       storedKeys.push(r2Key);
       await db.insert(gen1ProjectFiles).values({ id: fileId, projectId, filename: file.name.slice(0, 240), contentType: file.type || "application/octet-stream", sizeBytes: file.size, r2Key, documentType: moduleRecordId ? `module_evidence:${moduleRecordId}` : "plan", analysisStatus: "uploading", uploadBatchId: batchId });
-      await env.BUCKET.put(r2Key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type || "application/octet-stream" } });
+      const bytes = await file.arrayBuffer();
+      await env.BUCKET.put(r2Key, bytes, { httpMetadata: { contentType: file.type || "application/octet-stream" } });
       await db.update(gen1ProjectFiles).set({ analysisStatus: moduleRecordId ? "attached" : "estimate_ready" }).where(and(eq(gen1ProjectFiles.id, fileId), eq(gen1ProjectFiles.projectId, projectId)));
+      if (!moduleRecordId) uploadedDocuments.push({ documentId: fileId, projectId, filename: file.name.slice(0, 240), contentType: file.type || "application/octet-stream", sizeBytes: file.size, lifecycleStatus: "persisted", storageKey: r2Key, sha256: await sha256Hex(bytes), pageCount: file.type === "application/pdf" ? undefined : 1, sheetIds: [] });
     }
-    await db.update(gen1Projects).set(moduleRecordId ? { updatedAt: now() } : { status: "plan_intake", updatedAt: now() }).where(eq(gen1Projects.id, projectId));
-    await db.insert(gen1ProjectEvents).values({
-      id: id("evt"), projectId, eventType: moduleRecordId ? "assistify_evidence_upload" : "plan_upload", title: `${files.length} ${moduleRecordId ? "evidence photo" : "plan document"}${files.length === 1 ? "" : "s"} uploaded`,
-      detail: moduleRecordId ? "Photo evidence was attached to the Assistify record and added to the shared project history." : "Buildify received the files and the shared Assistify/Growify house record was updated.",
-    });
-    await db.update(gen1UploadBatches).set({ status: "complete", completedAt: now() }).where(eq(gen1UploadBatches.id, batchId));
+    if (moduleRecordId) {
+      await db.batch([
+        db.update(gen1Projects).set({ updatedAt: now() }).where(eq(gen1Projects.id, projectId)),
+        db.insert(gen1ProjectEvents).values({ id: id("evt"), projectId, eventType: "assistify_evidence_upload", title: `${files.length} evidence photo${files.length === 1 ? "" : "s"} uploaded`, detail: "Photo evidence was attached to the Assistify record and added to the shared project history." }),
+        db.update(gen1UploadBatches).set({ status: "complete", completedAt: now() }).where(eq(gen1UploadBatches.id, batchId)),
+      ]);
+      committed = true;
+    } else {
+      const current = await loadCanonicalProjectModel(projectId);
+      if (current.error) throw new ApiError(409, "MODEL_QUARANTINED", "The existing ProjectModel is invalid. Resolve or migrate it before adding source documents.");
+      const nextModel = current.model ? appendSourceDocuments(current.model, uploadedDocuments) : createProjectModel(projectId, id("rev"), uploadedDocuments);
+      await commitProjectModelTransition({
+        projectId, previousVersion: current.row?.modelVersion ?? null, model: nextModel, projectStatus: "geometry_review",
+        eventType: "plan_upload", eventTitle: `${files.length} plan document${files.length === 1 ? "" : "s"} uploaded`,
+        eventDetail: "Source documents were persisted and registered in the canonical ProjectModel. Scale calibration and geometry review are required.", uploadBatchId: batchId,
+      });
+      committed = true;
+    }
     const [updated] = await db.select().from(gen1Projects).where(eq(gen1Projects.id, projectId)).limit(1);
     return Response.json({ project: await hydrateProject(updated) }, { status: 201 });
   } catch (error) {
+    if (committed) throw error;
     const cleaned = await cleanupUploadBatch(workspace.id, batchId, projectId, createdForUpload, storedKeys);
     if (!cleaned) throw new ApiError(503, "UPLOAD_RECOVERY_REQUIRED", "Builder Assist preserved the interrupted upload for safe recovery. Retry later or contact support with the incident ID.");
     throw error;
@@ -485,12 +563,6 @@ async function insertProject(workspaceId: string, body: Record<string, unknown>)
     qualityLevel: ["standard", "premium", "luxury"].includes(String(body.qualityLevel)) ? String(body.qualityLevel) : "standard", estimateStatus: "preliminary", updatedAt: now(),
   };
   await db.insert(gen1Projects).values(project);
-  try {
-    await seedProject(project as typeof gen1Projects.$inferSelect);
-  } catch (error) {
-    await db.delete(gen1Projects).where(eq(gen1Projects.id, project.id));
-    throw error;
-  }
   return project as typeof gen1Projects.$inferSelect;
 }
 
@@ -514,6 +586,55 @@ export async function POST(request: Request) {
     const project = await requireProject(request, projectId);
     const db = getDb();
     let createdRecordId = "";
+
+    if (action === "calibrate_scale" || action === "trace_wall") {
+      const current = await loadCanonicalProjectModel(projectId);
+      if (current.error) throw new ApiError(409, "MODEL_QUARANTINED", "The active ProjectModel is invalid and cannot accept commands until it is migrated or replaced.");
+      if (!current.model || !current.row) throw new ApiError(409, "MODEL_REQUIRED", "Upload and persist a source document before editing project geometry.");
+      const expectedModelVersion = Number(body.expectedModelVersion);
+      if (!Number.isInteger(expectedModelVersion) || expectedModelVersion !== current.model.modelVersion) throw new ApiError(409, "MODEL_VERSION_CONFLICT", "The project changed in another workspace. Reload before retrying.");
+      let nextModel: ProjectModel;
+      try {
+        if (action === "calibrate_scale") {
+          nextModel = recordScaleCalibration(current.model, {
+            sheetId: requiredText(body.sheetId, "Sheet identifier", 128),
+            drawingDistance: Number(body.drawingDistance), drawingUnits: body.drawingUnits === "mm" ? "mm" : body.drawingUnits === "px" ? "px" : "in", realDistance: Number(body.realDistance),
+            units: body.units === "m" ? "m" : "ft", calibratedAt: now(),
+            evidence: {
+              sourceDocumentId: requiredText(body.sourceDocumentId, "Source document identifier", 128),
+              pageNumber: Number(body.pageNumber),
+              description: requiredText(body.evidenceDescription, "Scale evidence", 500),
+            },
+          });
+        } else {
+          const start = body.start as Point2, end = body.end as Point2;
+          const reviewed = Boolean(body.reviewed);
+          nextModel = traceWall(current.model, {
+            elementId: optionalText(body.elementId, 128) || undefined,
+            sheetId: requiredText(body.sheetId, "Sheet identifier", 128), sourceGeometryId: requiredText(body.sourceGeometryId, "Source geometry identifier", 128),
+            levelId: requiredText(body.levelId, "Level identifier", 128), levelName: optionalText(body.levelName, 128), levelElevation: body.levelElevation === undefined ? undefined : Number(body.levelElevation),
+            start: { x: Number(start?.x), y: Number(start?.y) }, end: { x: Number(end?.x), y: Number(end?.y) },
+            height: body.height === undefined ? undefined : Number(body.height), thickness: body.thickness === undefined ? undefined : Number(body.thickness),
+            reviewEvidence: reviewed ? {
+              reviewedAt: now(), reviewedBy: "user",
+              sourceDocumentId: requiredText(body.sourceDocumentId, "Source document identifier", 128),
+              pageNumber: Number(body.pageNumber),
+              description: requiredText(body.evidenceDescription, "Wall review evidence", 500),
+            } : undefined,
+          });
+        }
+      } catch (error) {
+        if (error instanceof ProjectModelValidationError) throw new ApiError(400, "MODEL_INVALID", error.message);
+        throw error;
+      }
+      await commitProjectModelTransition({
+        projectId, previousVersion: expectedModelVersion, model: nextModel, projectStatus: nextModel.status,
+        eventType: action === "calibrate_scale" ? "scale_calibrated" : "wall_traced",
+        eventTitle: action === "calibrate_scale" ? "Drawing scale calibrated" : "Wall traced into ProjectModel",
+        eventDetail: action === "calibrate_scale" ? `Scale was verified for ${String(body.sheetId)}.` : `Drawing, Takeoff, Estimate and 3D now reference ${nextModel.buildingElements.at(-1)?.elementId}.`,
+      });
+      return Response.json({ project: await hydrateProject(project) });
+    }
 
     if (action === "update_project") {
       const patch = (body.patch || {}) as Record<string, unknown>;

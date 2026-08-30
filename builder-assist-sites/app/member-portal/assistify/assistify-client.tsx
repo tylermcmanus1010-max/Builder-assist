@@ -3,7 +3,8 @@
 import { ChevronLeft, ChevronRight, CircleAlert, Menu } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import type { PropertyModel } from "../../../lib/property-models";
+import type { ProjectModel } from "../../../lib/project-model";
+import { GeometryReviewControls } from "./geometry-review-controls";
 import { ProjectModelViewer } from "./project-model-viewer";
 
 type Project = {
@@ -12,15 +13,14 @@ type Project = {
   address: string;
   status: string;
   updatedAt: string;
-  model: PropertyModel | null;
-  modelStatus: "ready" | "awaiting_model" | "awaiting_plans";
+  projectModel: ProjectModel | null;
+  modelStatus: "ready" | "geometry_review" | "invalid_model" | "awaiting_model" | "awaiting_plans";
   files: Array<{
     id: string;
     filename: string;
     analysisStatus: string;
     documentType: string;
     publicPath: string | null;
-    controlledModelKey: string | null;
   }>;
 };
 
@@ -62,6 +62,7 @@ export function AssistifyClient({ userName }: { userName: string }) {
     setActiveProjectId(id);
     window.localStorage.setItem("assistify-active-project", id);
   };
+  const updateActiveProjectModel = (projectModel: ProjectModel) => setProjects((current) => current.map((project) => project.id === activeProject?.id ? { ...project, projectModel, modelStatus: projectModel.status === "ready" ? "ready" : "geometry_review" } : project));
 
   if (loading) return <main className="assistify-load" aria-busy="true"><div className="as-spinner"/><h1>Opening Assistify</h1><p>Loading your builds and their project-specific model records…</p></main>;
   if (loadError) return <main className="assistify-load"><CircleAlert/><h1>Assistify could not open</h1><p>{loadError}</p><button type="button" onClick={() => void loadProjects()}>Retry</button></main>;
@@ -84,9 +85,9 @@ export function AssistifyClient({ userName }: { userName: string }) {
         <div className="as-context-bar">
           <div><small>ACTIVE HOUSE</small><strong>{activeProject?.name || "No house selected"}</strong><span>{activeProject?.address || "Upload plans to create a house record"}</span></div>
           {activePlan && <a className="as-source-link" href={`/api/gen1?projectId=${encodeURIComponent(activeProject.id)}&fileId=${encodeURIComponent(activePlan.id)}`} target="_blank" rel="noreferrer">Open this house&apos;s plans</a>}
-          <div className={`as-control-status ${activeProject?.model ? "is-ready" : "is-reference"}`}><span><strong>{activeProject?.model ? "Project geometry loaded" : "Project model pending"}</strong><small>{activeProject?.model ? "No shared or substitute house data" : "Another property will never be substituted"}</small></span></div>
+          <div className={`as-control-status ${activeProject?.modelStatus === "ready" ? "is-ready" : "is-reference"}`}><span><strong>{activeProject?.modelStatus === "ready" ? "Project geometry loaded" : "3D model requires geometry review"}</strong><small>User projects never inherit demonstration geometry.</small></span></div>
         </div>
-        {activeProject ? <ProjectModelViewer key={activeProject.id} model={activeProject.model} projectName={activeProject.name} address={activeProject.address} planCount={planFiles.length}/> : <div className="pmv-empty"><CircleAlert/><h2>No house records found</h2><p>Upload a complete plan set in Buildify to create the first connected project.</p></div>}
+        {activeProject ? <div className="pmv-workbench"><ProjectModelViewer key={`${activeProject.id}:${activeProject.projectModel?.modelVersion || 0}`} model={activeProject.projectModel} projectName={activeProject.name} address={activeProject.address} planCount={planFiles.length}/>{activeProject.projectModel && <GeometryReviewControls projectId={activeProject.id} model={activeProject.projectModel} onUpdated={updateActiveProjectModel}/>}</div> : <div className="pmv-empty"><CircleAlert/><h2>No house records found</h2><p>Upload a complete plan set in Buildify to create the first connected project.</p></div>}
       </section>
     </div>
   </main>;
