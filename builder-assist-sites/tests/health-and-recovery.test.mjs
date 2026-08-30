@@ -23,5 +23,5 @@ test("route failures and missing model data provide truthful recovery", () => {
   assert.match(assistify, /Project data could not be loaded/);
   assert.match(assistify, />Retry</);
   assert.match(modelViewer, /No substitute geometry shown/);
-  assert.match(modelViewer, /never display another property/);
+  assert.match(modelViewer, /never inherit demonstration geometry/);
 });
