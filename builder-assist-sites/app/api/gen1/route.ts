@@ -125,6 +125,11 @@ function now() {
   return new Date().toISOString();
 }
 
+async function sha256Hex(bytes: ArrayBuffer) {
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 function boundedNumber(value: unknown, fallback: number, min: number, max: number) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? Math.min(max, Math.max(min, parsed)) : fallback;
@@ -516,9 +521,10 @@ async function uploadPlansToProject(request: Request) {
       const r2Key = `${workspace.id}/${projectId}/${fileId}-${safe}`;
       storedKeys.push(r2Key);
       await db.insert(gen1ProjectFiles).values({ id: fileId, projectId, filename: file.name.slice(0, 240), contentType: file.type || "application/octet-stream", sizeBytes: file.size, r2Key, documentType: moduleRecordId ? `module_evidence:${moduleRecordId}` : "plan", analysisStatus: "uploading", uploadBatchId: batchId });
-      await env.BUCKET.put(r2Key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type || "application/octet-stream" } });
+      const bytes = await file.arrayBuffer();
+      await env.BUCKET.put(r2Key, bytes, { httpMetadata: { contentType: file.type || "application/octet-stream" } });
       await db.update(gen1ProjectFiles).set({ analysisStatus: moduleRecordId ? "attached" : "estimate_ready" }).where(and(eq(gen1ProjectFiles.id, fileId), eq(gen1ProjectFiles.projectId, projectId)));
-      if (!moduleRecordId) uploadedDocuments.push({ documentId: fileId, projectId, filename: file.name.slice(0, 240), contentType: file.type || "application/octet-stream", sizeBytes: file.size, lifecycleStatus: "persisted", sheetIds: [] });
+      if (!moduleRecordId) uploadedDocuments.push({ documentId: fileId, projectId, filename: file.name.slice(0, 240), contentType: file.type || "application/octet-stream", sizeBytes: file.size, lifecycleStatus: "persisted", storageKey: r2Key, sha256: await sha256Hex(bytes), pageCount: file.type === "application/pdf" ? undefined : 1, sheetIds: [] });
     }
     if (moduleRecordId) {
       await db.batch([
@@ -592,16 +598,29 @@ export async function POST(request: Request) {
         if (action === "calibrate_scale") {
           nextModel = recordScaleCalibration(current.model, {
             sheetId: requiredText(body.sheetId, "Sheet identifier", 128),
-            drawingDistance: Number(body.drawingDistance), realDistance: Number(body.realDistance),
+            drawingDistance: Number(body.drawingDistance), drawingUnits: body.drawingUnits === "mm" ? "mm" : body.drawingUnits === "px" ? "px" : "in", realDistance: Number(body.realDistance),
             units: body.units === "m" ? "m" : "ft", calibratedAt: now(),
+            evidence: {
+              sourceDocumentId: requiredText(body.sourceDocumentId, "Source document identifier", 128),
+              pageNumber: Number(body.pageNumber),
+              description: requiredText(body.evidenceDescription, "Scale evidence", 500),
+            },
           });
         } else {
           const start = body.start as Point2, end = body.end as Point2;
+          const reviewed = Boolean(body.reviewed);
           nextModel = traceWall(current.model, {
+            elementId: optionalText(body.elementId, 128) || undefined,
             sheetId: requiredText(body.sheetId, "Sheet identifier", 128), sourceGeometryId: requiredText(body.sourceGeometryId, "Source geometry identifier", 128),
             levelId: requiredText(body.levelId, "Level identifier", 128), levelName: optionalText(body.levelName, 128), levelElevation: body.levelElevation === undefined ? undefined : Number(body.levelElevation),
             start: { x: Number(start?.x), y: Number(start?.y) }, end: { x: Number(end?.x), y: Number(end?.y) },
             height: body.height === undefined ? undefined : Number(body.height), thickness: body.thickness === undefined ? undefined : Number(body.thickness),
+            reviewEvidence: reviewed ? {
+              reviewedAt: now(), reviewedBy: "user",
+              sourceDocumentId: requiredText(body.sourceDocumentId, "Source document identifier", 128),
+              pageNumber: Number(body.pageNumber),
+              description: requiredText(body.evidenceDescription, "Wall review evidence", 500),
+            } : undefined,
           });
         }
       } catch (error) {
