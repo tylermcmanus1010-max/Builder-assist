@@ -1,0 +1,48 @@
+name: Builder Assist CI
+
+on:
+  pull_request:
+    branches:
+      - claude/builder-assist-workflow-verify-yc0iwy
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: builder-assist-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Build, test, and lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: builder-assist-sites
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Use Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: builder-assist-sites/package-lock.json
+      - name: Install locked dependencies
+        run: npm run install:ci
+      - name: Build deployable Sites artifact
+        run: npm run build
+      - name: Run contract, integration, and end-to-end tests
+        run: node --test tests/*.test.mjs
+      - name: Lint
+        run: npm run lint
+      - name: Upload staging build artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-assist-pr-${{ github.event.pull_request.number || 'manual' }}
+          path: builder-assist-sites/dist
+          if-no-files-found: warn
+          retention-days: 7
