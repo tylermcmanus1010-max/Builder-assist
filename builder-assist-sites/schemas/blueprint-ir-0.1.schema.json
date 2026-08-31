@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://buildscope.local/schemas/blueprint-ir-0.1.schema.json",
+  "title": "BuildScope BlueprintIR",
+  "type": "object",
+  "required": ["schemaVersion", "projectId", "revisionId", "sourceDocumentId", "extractedAt", "parser", "status", "sheets", "viewports", "scaleCandidates", "vectorPrimitives", "textBlocks", "organizedNotes", "dimensions", "geometryCandidates", "warnings", "provenance"],
+  "properties": {
+    "schemaVersion": { "const": "0.1" },
+    "projectId": { "$ref": "#/$defs/id" },
+    "revisionId": { "$ref": "#/$defs/id" },
+    "sourceDocumentId": { "$ref": "#/$defs/id" },
+    "extractedAt": { "type": "string", "format": "date-time" },
+    "parser": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": { "name": { "const": "buildscope-vector-pdf" }, "version": { "const": "0.1.0" } },
+      "additionalProperties": false
+    },
+    "status": { "enum": ["partial", "ready", "quarantined"] },
+    "sheets": { "type": "array", "items": { "type": "object", "required": ["sheetId", "pageNumber", "title", "width", "height", "units", "classification", "confidence"] } },
+    "viewports": { "type": "array", "items": { "type": "object", "required": ["viewportId", "sheetId", "bounds", "classification", "confidence"] } },
+    "scaleCandidates": { "type": "array", "items": { "type": "object", "required": ["scaleCandidateId", "viewportId", "writtenScale", "ratio", "status", "confidence", "dimensionIds"] } },
+    "vectorPrimitives": { "type": "array" },
+    "textBlocks": { "type": "array" },
+    "organizedNotes": { "type": "array" },
+    "dimensions": { "type": "array" },
+    "geometryCandidates": { "type": "array" },
+    "warnings": { "type": "array" },
+    "provenance": { "type": "array" }
+  },
+  "$defs": { "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$" } },
+  "additionalProperties": false
+}
