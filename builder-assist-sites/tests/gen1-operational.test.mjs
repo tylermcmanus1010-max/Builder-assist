@@ -55,10 +55,12 @@ test("Assistify records persist photos and calendar-ready dates without Job Cost
   assert.match(client, /sub === "assistify-operations" \? "assistify"/);
 });
 
-test("the selected house drives the plan workspace and responsive controls", () => {
-  assert.match(client, /swenka-floor-plan\.png/);
-  assert.match(client, /PLAN-LINKED 2\.5D PREVIEW/);
-  assert.match(client, /not BIM geometry/);
+test("the selected house exposes persisted plans without a user-project demo model", () => {
+  assert.doesNotMatch(client, /window\.__BP3D|controlledModelKey|swenka-4752-25/);
+  assert.match(api, /projectModel: model/);
+  assert.match(api, /drawingElements: model\?\.geometry2D/);
+  assert.match(api, /takeoffItems: model\?\.takeoffItems/);
+  assert.match(api, /modelObjects: model\?\.modelObjects/);
   assert.match(css, /\.g1o-plan-model-grid/);
   assert.match(css, /@media\(max-width:620px\).*\.g1o-finish-form/);
   assert.match(css, /\.g1o-new-house:focus-within/);
@@ -83,7 +85,10 @@ test("Gen1 fails closed without authenticated workspace identity and rejects cro
   assert.match(api, /VALIDATION_ERROR/);
   assert.match(api, /PROJECT_NOT_FOUND/);
   assert.match(api, /publicPath: file\.r2Key\.startsWith\("public:"\)/);
-  assert.match(api, /controlledModelKey: file\.r2Key === "public:\/project-plans\/66th-st-approved-plans\.pdf"/);
+  assert.doesNotMatch(api, /controlledModelKey/);
+  assert.doesNotMatch(api, /getPropertyModel\(controlledModelKey\)/);
+  assert.match(api, /parseStoredProjectModel/);
+  assert.match(api, /MODEL_QUARANTINED/);
   assert.doesNotMatch(client, /file\.r2Key/);
   assert.match(api, /assertProjectRecord\("module"/);
   assert.match(api, /assertProjectRecord\("growify"/);
@@ -91,7 +96,7 @@ test("Gen1 fails closed without authenticated workspace identity and rejects cro
   assert.match(api, /PAYLOAD_TOO_LARGE/);
   assert.match(api, /Choose a supported record type to delete/);
   assert.match(api, /Two first-load requests may race/);
-  assert.match(api, /prj_featured_\$\{workspaceId\}/);
+  assert.match(api, /searchParams\.get\("demo"\) === "true"/);
   assert.match(api, /est_seed_\$\{project\.id\}/);
   assert.match(api, /evt_created_\$\{project\.id\}/);
   assert.match(api, /onConflictDoNothing\(\)/);

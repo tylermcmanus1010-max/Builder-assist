@@ -45,6 +45,20 @@ export const gen1ProjectFiles = sqliteTable("gen1_project_files", {
   uploadBatchIdx: index("gen1_project_files_upload_batch_idx").on(table.uploadBatchId),
 }));
 
+export const gen1ProjectModels = sqliteTable("gen1_project_models", {
+  projectId: text("project_id").primaryKey().references(() => gen1Projects.id, { onDelete: "cascade" }),
+  schemaVersion: integer("schema_version").notNull(),
+  modelVersion: integer("model_version").notNull(),
+  activeRevisionId: text("active_revision_id").notNull(),
+  status: text("status").notNull().default("awaiting_scale"),
+  modelJson: text("model_json").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  revisionIdx: index("gen1_project_models_revision_idx").on(table.projectId, table.activeRevisionId),
+  versionIdx: index("gen1_project_models_version_idx").on(table.projectId, table.modelVersion),
+}));
+
 export const gen1EstimateLines = sqliteTable("gen1_estimate_lines", {
   id: text("id").primaryKey(),
   projectId: text("project_id").notNull().references(() => gen1Projects.id, { onDelete: "cascade" }),

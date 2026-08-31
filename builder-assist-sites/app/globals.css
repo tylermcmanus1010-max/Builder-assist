@@ -589,6 +589,17 @@ body:has(.assistify-shell) { background:#eaf1fb; }
 .as-control-status.is-ready { border-color:#86d5b7; background:#effbf6; }
 .as-control-status.is-ready strong { color:#087254; }
 .as-control-status.is-ready small { color:#52776a; }
+.pmv-workbench { min-width:0; min-height:0; overflow:auto; background:#071a36; }
+.pmv-workbench>.pmv-shell { min-height:620px; }
+.geometry-review { display:grid; gap:10px; margin:8px; padding:14px; color:#173b5c; border:1px solid #8caac7; border-radius:6px; background:#f8fbff; }
+.geometry-review>small { color:#0879dd; font-size:8px; font-weight:950; letter-spacing:.14em; }
+.geometry-review form { display:grid; grid-template-columns:repeat(4,minmax(110px,1fr)); gap:8px; align-items:end; }
+.geometry-review h3 { grid-column:1/-1; margin:0; font-size:14px; }
+.geometry-review label { display:grid; gap:4px; color:#607890; font-size:8px; font-weight:900; text-transform:uppercase; }
+.geometry-review input,.geometry-review select { width:100%; min-height:36px; padding:6px 8px; color:#173b5c; border:1px solid #9fb8d1; border-radius:4px; background:#fff; }
+.geometry-review button { min-height:36px; padding:6px 10px; color:#fff; border:0; border-radius:4px; background:#0879dd; cursor:pointer; font-size:8px; font-weight:900; text-transform:uppercase; }
+.geometry-review [data-workspace] { display:flex; flex-wrap:wrap; gap:5px; }
+.geometry-review [data-workspace] span { padding:5px 7px; color:#244966; border:1px solid #cadbea; border-radius:3px; background:#fff; font-size:8px; }
 
 .pmv-shell { min-width:0; min-height:0; display:grid; grid-template-rows:auto minmax(0,1fr) auto; margin:8px; overflow:hidden; border:1px solid #17497f; border-radius:6px; background:#071a36; box-shadow:0 8px 24px #092a5826; }
 .pmv-model-head { min-height:53px; display:flex; align-items:center; justify-content:space-between; gap:18px; padding:8px 14px; color:#e9f8ff; background:#071a36; border-bottom:1px solid #1c4f80; }
@@ -674,10 +685,12 @@ body:has(.assistify-shell) { background:#eaf1fb; }
 .pmv-empty-status small { margin-top:2px; color:#61798e; font-size:8px; }
 
 @media (max-width:900px) {
+  .geometry-review form { grid-template-columns:repeat(2,minmax(110px,1fr)); }
   .pmv-main { grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(300px,58%) minmax(0,42%); }
   .pmv-panel { border-left:0; border-top:1px solid #8caac7; }
 }
 @media (max-width:600px) {
+  .geometry-review form { grid-template-columns:1fr; }
   .pmv-shell,.pmv-empty { margin:5px; }
   .pmv-model-head { min-height:46px; padding-inline:9px; }
   .pmv-engine-state small,.pmv-model-head>div:first-child span { display:none; }

@@ -22,6 +22,13 @@
       "when": 1787820179443,
       "tag": "0002_dapper_freak",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788073200000,
+      "tag": "0003_project_model",
+      "breakpoints": true
     }
   ]
 }
