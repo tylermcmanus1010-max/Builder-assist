@@ -62,6 +62,18 @@ export function AssistifyClient({ userName }: { userName: string }) {
     setActiveProjectId(id);
     window.localStorage.setItem("assistify-active-project", id);
   };
+  const deleteHouse = async (project: Project) => {
+    if (!window.confirm(`Remove "${project.name}" and all of its plans, model and records? This cannot be undone.`)) return;
+    try {
+      const response = await fetch("/api/gen1", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "delete_project", projectId: project.id }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "The house could not be removed.");
+      window.localStorage.removeItem("assistify-active-project");
+      await loadProjects();
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "The house could not be removed.");
+    }
+  };
   const updateActiveProjectModel = (projectModel: ProjectModel) => setProjects((current) => current.map((project) => project.id === activeProject?.id ? { ...project, projectModel, modelStatus: projectModel.status === "ready" ? "ready" : "geometry_review" } : project));
 
   if (loading) return <main className="assistify-load" aria-busy="true"><div className="as-spinner"/><h1>Opening Assistify</h1><p>Loading your builds and their project-specific model records…</p></main>;
@@ -80,6 +92,7 @@ export function AssistifyClient({ userName }: { userName: string }) {
         <div className="as-rail-title"><div><small>HOUSE RECORDS</small><strong>{projects.length} build{projects.length === 1 ? "" : "s"}</strong></div><button type="button" aria-label={railOpen ? "Collapse projects" : "Expand projects"} onClick={() => setRailOpen((value) => !value)}>{railOpen ? <ChevronLeft/> : <ChevronRight/>}</button></div>
         <div className="as-project-list">{projects.map((project) => <button key={project.id} type="button" aria-current={project.id === activeProject?.id ? "true" : undefined} onClick={() => chooseProject(project.id)}><span>{project.name.slice(0,2).toUpperCase()}</span><div><strong>{project.name}</strong><small>{project.address}</small><em>{project.modelStatus === "ready" ? "Model ready" : project.files.length ? "Model pending" : "Plans needed"}</em></div></button>)}</div>
         <Link className="as-upload-link" href="/index.html#/member-portal/buildify">+ Upload plans / add house</Link>
+        {activeProject && <button className="as-remove-house" type="button" onClick={() => void deleteHouse(activeProject)}>Remove &ldquo;{activeProject.name}&rdquo; from my records</button>}
       </aside>
       <section className="as-workspace as-reader-workspace" aria-label="Assistify project-specific plan reader">
         <div className="as-context-bar">

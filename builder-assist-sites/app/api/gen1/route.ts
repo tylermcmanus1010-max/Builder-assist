@@ -2,7 +2,7 @@ import { env } from "cloudflare:workers";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { hasExpectedFileSignature, safeStorageFilename, validIdempotencyKey } from "../../../lib/upload-security";
-import { appendSourceDocuments, createProjectModel, parseStoredProjectModel, ProjectModelValidationError, recordScaleCalibration, traceWall, validateProjectModel, type Point2, type ProjectModel, type SourceDocument } from "../../../lib/project-model";
+import { appendSourceDocuments, applyWallDimensionDefaults, createProjectModel, parseStoredProjectModel, ProjectModelValidationError, recordScaleCalibration, reviewBuildingElements, traceWall, validateProjectModel, type Point2, type ProjectModel, type SourceDocument } from "../../../lib/project-model";
 import { reconcileBlueprintIR } from "../../../lib/blueprint-project-model";
 import { countVectorPdfPages, extractVectorPdf, VectorPdfExtractionError } from "../../../lib/vector-pdf";
 import {
@@ -608,7 +608,7 @@ export async function POST(request: Request) {
     const db = getDb();
     let createdRecordId = "";
 
-    if (action === "calibrate_scale" || action === "trace_wall") {
+    if (action === "calibrate_scale" || action === "trace_wall" || action === "review_geometry" || action === "apply_wall_defaults") {
       const current = await loadCanonicalProjectModel(projectId);
       if (current.error) throw new ApiError(409, "MODEL_QUARANTINED", "The active ProjectModel is invalid and cannot accept commands until it is migrated or replaced.");
       if (!current.model || !current.row) throw new ApiError(409, "MODEL_REQUIRED", "Upload and persist a source document before editing project geometry.");
@@ -616,7 +616,21 @@ export async function POST(request: Request) {
       if (!Number.isInteger(expectedModelVersion) || expectedModelVersion !== current.model.modelVersion) throw new ApiError(409, "MODEL_VERSION_CONFLICT", "The project changed in another workspace. Reload before retrying.");
       let nextModel: ProjectModel;
       try {
-        if (action === "calibrate_scale") {
+        if (action === "review_geometry") {
+          const rawIds = Array.isArray(body.elementIds) ? body.elementIds.map((value) => String(value)).slice(0, 1000) : undefined;
+          nextModel = reviewBuildingElements(current.model, {
+            elementIds: rawIds?.length ? rawIds : undefined,
+            decision: body.decision === "removed" ? "removed" : "approved",
+            reviewedAt: now(),
+            description: requiredText(body.evidenceDescription, "Review evidence", 500),
+          });
+        } else if (action === "apply_wall_defaults") {
+          nextModel = applyWallDimensionDefaults(current.model, {
+            height: body.height === undefined || body.height === null || body.height === "" ? undefined : Number(body.height),
+            thickness: body.thickness === undefined || body.thickness === null || body.thickness === "" ? undefined : Number(body.thickness),
+            appliedAt: now(),
+          });
+        } else if (action === "calibrate_scale") {
           nextModel = recordScaleCalibration(current.model, {
             sheetId: requiredText(body.sheetId, "Sheet identifier", 128),
             drawingDistance: Number(body.drawingDistance), drawingUnits: body.drawingUnits === "mm" ? "mm" : body.drawingUnits === "px" ? "px" : "in", realDistance: Number(body.realDistance),
@@ -648,13 +662,28 @@ export async function POST(request: Request) {
         if (error instanceof ProjectModelValidationError) throw new ApiError(400, "MODEL_INVALID", error.message);
         throw error;
       }
-      await commitProjectModelTransition({
-        projectId, previousVersion: expectedModelVersion, model: nextModel, projectStatus: nextModel.status,
-        eventType: action === "calibrate_scale" ? "scale_calibrated" : "wall_traced",
-        eventTitle: action === "calibrate_scale" ? "Drawing scale calibrated" : "Wall traced into ProjectModel",
-        eventDetail: action === "calibrate_scale" ? `Scale was verified for ${String(body.sheetId)}.` : `Drawing, Takeoff, Estimate and 3D now reference ${nextModel.buildingElements.at(-1)?.elementId}.`,
-      });
+      const transition = action === "calibrate_scale" ? { eventType: "scale_calibrated", eventTitle: "Drawing scale calibrated", eventDetail: `Scale was verified for ${String(body.sheetId)}.` }
+        : action === "review_geometry" ? { eventType: "geometry_reviewed", eventTitle: body.decision === "removed" ? "Detected geometry removed" : "Preliminary walls confirmed", eventDetail: body.decision === "removed" ? "The user removed detected geometry that is not a wall on the plans." : `The user confirmed preliminary walls; ${nextModel.status === "ready" ? "the model is now fully reviewed" : "some walls still require review"}.` }
+        : action === "apply_wall_defaults" ? { eventType: "wall_defaults_applied", eventTitle: "Building basics applied", eventDetail: "Typical wall dimensions were applied to every preliminary wall as explicit assumptions." }
+        : { eventType: "wall_traced", eventTitle: "Wall traced into ProjectModel", eventDetail: `Drawing, Takeoff, Estimate and 3D now reference ${nextModel.buildingElements.at(-1)?.elementId}.` };
+      await commitProjectModelTransition({ projectId, previousVersion: expectedModelVersion, model: nextModel, projectStatus: nextModel.status, ...transition });
       return Response.json({ project: await hydrateProject(project) });
+    }
+
+    if (action === "delete_project") {
+      // Removes a whole house record — e.g. an example or test plan set that
+      // should not stay in the workspace. Stored plan bytes are deleted first
+      // so no orphaned uploads survive the row cascade.
+      const projectFiles = await db.select().from(gen1ProjectFiles).where(eq(gen1ProjectFiles.projectId, projectId));
+      let storageCleared = true;
+      for (const file of projectFiles) {
+        if (file.r2Key.startsWith("public:")) continue;
+        try { await env.BUCKET.delete(file.r2Key); }
+        catch { storageCleared = false; }
+      }
+      if (!storageCleared) throw new ApiError(503, "DELETE_INCOMPLETE", "Some stored plan files could not be removed yet. Retry the delete; nothing else was changed.");
+      await db.delete(gen1Projects).where(and(eq(gen1Projects.id, projectId), eq(gen1Projects.workspaceId, project.workspaceId)));
+      return Response.json({ deleted: true, projectId });
     }
 
     if (action === "update_project") {

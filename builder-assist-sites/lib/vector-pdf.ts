@@ -105,29 +105,62 @@ function dimensions(blocks: BlueprintTextBlock[]): BlueprintDimension[] {
   return output;
 }
 
-function wallCandidates(primitives: BlueprintVectorPrimitive[], ratio: number | null, heightFeet?: number): BlueprintGeometryCandidate[] {
+function wallCandidates(primitives: BlueprintVectorPrimitive[], scale: { ratio: number | null; verified: boolean }, heightFeet?: number): BlueprintGeometryCandidate[] {
   const axisLines = primitives.map((primitive) => {
     const horizontal = Math.abs(primitive.start.y - primitive.end.y) <= .25;
     const vertical = Math.abs(primitive.start.x - primitive.end.x) <= .25;
     if (!horizontal && !vertical) return null;
     const length = Math.hypot(primitive.end.x - primitive.start.x, primitive.end.y - primitive.start.y);
-    if (length < 72) return null;
+    // Short faces are kept so walls broken by openings and intersections still
+    // pair up; fragments are merged and length-filtered after pairing instead.
+    if (length < 24) return null;
     return { primitive, horizontal, a1: horizontal ? Math.min(primitive.start.x, primitive.end.x) : Math.min(primitive.start.y, primitive.end.y), a2: horizontal ? Math.max(primitive.start.x, primitive.end.x) : Math.max(primitive.start.y, primitive.end.y), offset: horizontal ? primitive.start.y : primitive.start.x };
-  }).filter((line): line is NonNullable<typeof line> => line !== null);
+  }).filter((line): line is NonNullable<typeof line> => line !== null)
+    .sort((first, second) => Number(second.horizontal) - Number(first.horizontal) || first.offset - second.offset || first.a1 - second.a1);
+  type WallSegment = { horizontal: boolean; offset: number; a1: number; a2: number; thickness: number; sheetId: string; viewportId: string; pageNumber: number; sourceIds: string[] };
   const used = new Set<string>();
-  const output: BlueprintGeometryCandidate[] = [];
-  for (let index = 0; index < axisLines.length; index += 1) {
-    const first = axisLines[index];
+  const segments: WallSegment[] = [];
+  for (const first of axisLines) {
     if (used.has(first.primitive.primitiveId)) continue;
-    const second = axisLines.slice(index + 1).find((candidate) => candidate.horizontal === first.horizontal && !used.has(candidate.primitive.primitiveId) && Math.abs(candidate.a1 - first.a1) <= 1 && Math.abs(candidate.a2 - first.a2) <= 1 && Math.abs(candidate.offset - first.offset) >= 2 && Math.abs(candidate.offset - first.offset) <= 18);
-    if (!second) continue;
-    used.add(first.primitive.primitiveId); used.add(second.primitive.primitiveId);
-    const center = (first.offset + second.offset) / 2;
-    const points = first.horizontal ? [{ x: (first.a1 + second.a1) / 2, y: center }, { x: (first.a2 + second.a2) / 2, y: center }] : [{ x: center, y: (first.a1 + second.a1) / 2 }, { x: center, y: (first.a2 + second.a2) / 2 }];
-    const sourceIds = [first.primitive.primitiveId, second.primitive.primitiveId].sort();
-    output.push({ geometryId: stableBlueprintId("geo", first.primitive.sheetId, ...sourceIds), sheetId: first.primitive.sheetId, viewportId: first.primitive.viewportId, pageNumber: first.primitive.pageNumber, kind: "wall_centerline", points: points as [{ x: number; y: number }, { x: number; y: number }], thicknessPdfPoints: Math.abs(first.offset - second.offset), heightFeet, sourcePrimitiveIds: sourceIds, extractionMethod: "vector_parallel_faces", confidence: ratio ? .94 : .68, assumptions: ["Parallel vector faces are interpreted as a preliminary wall centerline and require user confirmation."], reviewStatus: "requires_review" });
+    // Opposite faces of one wall rarely start and end together on real plans,
+    // so faces are paired by span overlap rather than exact end alignment.
+    let best: typeof first | null = null;
+    let bestOverlap = 0;
+    for (const candidate of axisLines) {
+      if (candidate === first || candidate.horizontal !== first.horizontal || used.has(candidate.primitive.primitiveId) || candidate.primitive.viewportId !== first.primitive.viewportId) continue;
+      const gap = Math.abs(candidate.offset - first.offset);
+      if (gap < 2 || gap > 18) continue;
+      const overlap = Math.min(first.a2, candidate.a2) - Math.max(first.a1, candidate.a1);
+      if (overlap < Math.max(18, .5 * Math.min(first.a2 - first.a1, candidate.a2 - candidate.a1))) continue;
+      if (overlap > bestOverlap) { best = candidate; bestOverlap = overlap; }
+    }
+    if (!best) continue;
+    used.add(first.primitive.primitiveId); used.add(best.primitive.primitiveId);
+    segments.push({ horizontal: first.horizontal, offset: (first.offset + best.offset) / 2, a1: Math.max(first.a1, best.a1), a2: Math.min(first.a2, best.a2), thickness: Math.abs(first.offset - best.offset), sheetId: first.primitive.sheetId, viewportId: first.primitive.viewportId, pageNumber: first.primitive.pageNumber, sourceIds: [first.primitive.primitiveId, best.primitive.primitiveId] });
   }
-  return output;
+  // Collinear fragments of the same wall run become one candidate so a single
+  // real wall is one review item, not a page of "Wall N" slivers.
+  segments.sort((first, second) => Number(second.horizontal) - Number(first.horizontal) || first.offset - second.offset || first.a1 - second.a1);
+  const merged: WallSegment[] = [];
+  for (const segment of segments) {
+    const previous = merged.at(-1);
+    if (previous && previous.viewportId === segment.viewportId && previous.horizontal === segment.horizontal && Math.abs(previous.offset - segment.offset) <= 1.5 && segment.a1 - previous.a2 <= 12) {
+      previous.a2 = Math.max(previous.a2, segment.a2);
+      previous.offset = (previous.offset + segment.offset) / 2;
+      previous.thickness = Math.max(previous.thickness, segment.thickness);
+      previous.sourceIds.push(...segment.sourceIds);
+      continue;
+    }
+    merged.push({ ...segment, sourceIds: [...segment.sourceIds] });
+  }
+  // A merged run still shorter than ~2 ft (or 48 pt without a scale) is
+  // drafting noise, not a wall the user should have to review.
+  const minLengthPoints = scale.ratio ? Math.max(24, 2 * 864 / scale.ratio) : 48;
+  return merged.filter((segment) => segment.a2 - segment.a1 >= minLengthPoints).map((segment) => {
+    const points = segment.horizontal ? [{ x: segment.a1, y: segment.offset }, { x: segment.a2, y: segment.offset }] : [{ x: segment.offset, y: segment.a1 }, { x: segment.offset, y: segment.a2 }];
+    const sourceIds = [...segment.sourceIds].sort();
+    return { geometryId: stableBlueprintId("geo", segment.sheetId, ...sourceIds), sheetId: segment.sheetId, viewportId: segment.viewportId, pageNumber: segment.pageNumber, kind: "wall_centerline" as const, points: points as [{ x: number; y: number }, { x: number; y: number }], thicknessPdfPoints: segment.thickness, heightFeet, sourcePrimitiveIds: sourceIds, extractionMethod: "vector_parallel_faces" as const, confidence: scale.verified ? .94 : .68, assumptions: ["Parallel vector faces are interpreted as a preliminary wall centerline and require user confirmation."], reviewStatus: "requires_review" as const };
+  });
 }
 
 export async function extractVectorPdf(bytes: ArrayBuffer | Uint8Array, input: { projectId: string; revisionId: string; sourceDocumentId: string; sheetIds: string[]; extractedAt: string }): Promise<BlueprintIR> {
@@ -178,7 +211,8 @@ export async function extractVectorPdf(bytes: ArrayBuffer | Uint8Array, input: {
   const heightMatch = heightBlock?.text.match(/(\d+)\s*['′]\s*-\s*(\d+)\s*["″]/);
   const heightFeet = heightMatch ? Number(heightMatch[1]) + Number(heightMatch[2]) / 12 : undefined;
   const verifiedScale = scaleCandidates.find((candidate) => candidate.status === "dimension_verified");
-  const candidates = wallCandidates(allVectors, verifiedScale?.ratio ?? null, heightFeet);
+  const bestScale = verifiedScale || [...scaleCandidates].sort((first, second) => second.confidence - first.confidence)[0];
+  const candidates = wallCandidates(allVectors, { ratio: bestScale?.ratio ?? null, verified: Boolean(verifiedScale) }, heightFeet);
   const organizedNotes = allText.filter((block) => /GENERAL\s+NOTES|EXTERIOR\s+WALLS|WALL\s+HEIGHT/i.test(block.text)).map((block) => ({ noteId: stableBlueprintId("note", block.textBlockId), projectId: input.projectId, revisionId: input.revisionId, sourceDocumentId: input.sourceDocumentId, sheetId: block.sheetId, viewportId: block.viewportId, pageNumber: block.pageNumber, sourceBounds: block.bounds, category: /EXTERIOR\s+WALLS/i.test(block.text) ? "materials" as const : /HEIGHT/i.test(block.text) ? "dimensions" as const : "general_notes" as const, discipline: "architectural" as const, title: /GENERAL\s+NOTES/i.test(block.text) ? "General notes" : /HEIGHT/i.test(block.text) ? "Wall height" : "Wall assembly note", text: block.text, sourceTextBlockIds: [block.textBlockId], extractionMethod: "embedded_pdf_text" as const, confidence: .98, assumptions: [], reviewStatus: "requires_review" as const }));
   if (!verifiedScale) warnings.push({ code: "scale_requires_review", message: "No written scale was cross-checked against a matching printed dimension." });
   if (!candidates.length) warnings.push({ code: "walls_not_detected", message: "No parallel vector wall faces were detected." });

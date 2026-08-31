@@ -5,17 +5,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { ProjectModel } from "../../../lib/project-model";
-import { createProjectModelGroup, disposeProjectModelGroup, projectModelMeshDescriptors } from "../../../lib/project-model-three";
+import { createProjectModelGroup, disposeProjectModelGroup, preliminaryWallMeshDescriptors, projectModelMeshDescriptors } from "../../../lib/project-model-three";
 
 export function ProjectModelViewer({ model, projectName, address, planCount }: { model: ProjectModel | null; projectName: string; address: string; planCount: number }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const descriptors = useMemo(() => model ? projectModelMeshDescriptors(model) : [], [model]);
-  const reviewRequired = Boolean(model && (model.status !== "ready" || descriptors.length !== model.buildingElements.length));
+  const preliminary = useMemo(() => model ? preliminaryWallMeshDescriptors(model) : [], [model]);
+  const meshCount = descriptors.length + preliminary.length;
+  const reviewRequired = Boolean(model && (model.status !== "ready" || preliminary.length > 0));
 
   useEffect(() => {
     const viewport = viewportRef.current;
-    if (!viewport || !model || !descriptors.length) return;
+    if (!viewport || !model || !meshCount) return;
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x071a2b);
     const camera = new THREE.PerspectiveCamera(45, 1, .1, 10000);
@@ -79,26 +81,33 @@ export function ProjectModelViewer({ model, projectName, address, planCount }: {
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [descriptors.length, model, projectName]);
+  }, [meshCount, model, projectName]);
 
   if (!model) return <section className="pmv-empty" aria-live="polite">
     <div className="pmv-empty-icon"><Box/></div><small>PROJECT MODEL ENGINE</small><h2>{projectName}</h2>
-    <p>{planCount ? "3D model requires geometry review. Calibrate a sheet and trace the required construction elements." : "Upload this house’s complete plan set to begin its project record."}</p>
+    <p>{planCount ? "This house's plans are saved. Upload a vector plan PDF or trace walls to build its 3D model." : "Upload this house's complete plan set to begin its project record."}</p>
     <div className="pmv-empty-status"><CircleAlert/><span><strong>No substitute geometry shown</strong><small>User projects never inherit demonstration geometry.</small></span></div>
   </section>;
 
-  if (!descriptors.length) return <section className="pmv-empty" aria-live="polite">
-    <div className="pmv-empty-icon"><Crosshair/></div><small>ACTIVE PROJECT · MODEL VERSION {model.modelVersion}</small><h2>3D model requires geometry review</h2>
-    <p>Verified scale, wall height, wall thickness, openings, and level data are required before a reliable mesh can be generated.</p>
+  if (!meshCount) return <section className="pmv-empty" aria-live="polite">
+    <div className="pmv-empty-icon"><Crosshair/></div><small>ACTIVE PROJECT · MODEL VERSION {model.modelVersion}</small><h2>No walls found on these plans yet</h2>
+    <p>Nothing on the uploaded pages could be read as a wall. Use the plan review tools below to trace the building outline, or upload a vector (not scanned) plan PDF.</p>
     <div className="pmv-empty-status"><CircleAlert/><span><strong>No inferred building displayed</strong><small>{model.issues.filter((issue) => issue.status === "open").length} open review item(s)</small></span></div>
   </section>;
 
-  const selected = model.buildingElements.find((element) => element.elementId === selectedElementId);
+  const walls = model.buildingElements.filter((element) => element.revisionId === model.activeRevisionId);
+  const selected = walls.find((element) => element.elementId === selectedElementId);
+  const selectedSheet = selected && model.sheets.find((sheet) => sheet.sheetId === selected.sheetId);
+  const stateHeadline = preliminary.length ? "Preliminary model — walls await confirmation" : reviewRequired ? "3D model requires geometry review" : "Reviewed geometry loaded";
   return <section className="pmv-shell" aria-label={`${projectName} project model`}>
-    <div className="pmv-model-head"><div><small>ACTIVE PROJECTMODEL · VERSION {model.modelVersion}</small><strong>{projectName}</strong><span>{address} · revision {model.activeRevisionId}</span></div><div className={`pmv-engine-state ${reviewRequired ? "is-review" : ""}`}><i/><span><strong>{reviewRequired ? "3D model requires geometry review" : "Reviewed geometry loaded"}</strong><small>{descriptors.length} project mesh{descriptors.length === 1 ? "" : "es"}</small></span></div></div>
+    <div className="pmv-model-head"><div><small>ACTIVE PROJECTMODEL · VERSION {model.modelVersion}</small><strong>{projectName}</strong><span>{address} · revision {model.activeRevisionId}</span></div><div className={`pmv-engine-state ${reviewRequired ? "is-review" : ""}`}><i/><span><strong>{stateHeadline}</strong><small>{descriptors.length} confirmed · {preliminary.length} preliminary wall{preliminary.length === 1 ? "" : "s"}</small></span></div></div>
+    {preliminary.length > 0 && <p className="pmv-preliminary-banner" role="status">Amber walls are read from your plans with stated assumptions. Confirm them below — or fix any that look wrong — to turn the model blue. Nothing preliminary is treated as verified.</p>}
     <div className="pmv-main"><div className="pmv-viewport" ref={viewportRef}><div className="pmv-tools"><button type="button" onClick={() => setSelectedElementId(null)} aria-label="Clear selected element"><RefreshCw/> Clear</button></div></div>
-      <aside className="pmv-panel" aria-label="Project element traceability"><small>DRAWING → TAKEOFF → ESTIMATE → 3D</small><h2>Project elements</h2>{model.buildingElements.map((element) => <button key={element.elementId} type="button" data-element-id={element.elementId} aria-current={element.elementId === selectedElementId} onClick={() => setSelectedElementId(element.elementId)}><strong>{element.category}</strong><small>{element.elementId}</small></button>)}
-      {selected && <section className="pmv-selection" data-element-id={selected.elementId}><h3>{selected.elementId}</h3><dl><dt>Sheet</dt><dd>{selected.sheetId}</dd><dt>Source geometry</dt><dd>{selected.sourceGeometryId}</dd><dt>Revision</dt><dd>{selected.revisionId}</dd></dl></section>}</aside>
-    </div><div className="pmv-status" role="status"><span/><strong>{projectName}</strong><small>{planCount} persisted plan file{planCount === 1 ? "" : "s"} · {descriptors.length} reviewed mesh{descriptors.length === 1 ? "" : "es"}</small></div>
+      <aside className="pmv-panel" aria-label="Project element traceability"><small>DRAWING → TAKEOFF → ESTIMATE → 3D</small><h2>Walls in this model</h2>{walls.map((element, index) => {
+        const sheet = model.sheets.find((candidate) => candidate.sheetId === element.sheetId);
+        return <button key={element.elementId} type="button" data-element-id={element.elementId} aria-current={element.elementId === selectedElementId} onClick={() => setSelectedElementId(element.elementId)}><strong>Wall {index + 1} · {element.dimensions.length.toFixed(1)} {element.units}</strong><small>{sheet?.pageNumber ? `Page ${sheet.pageNumber} · ` : ""}{element.reviewStatus === "approved" ? "Confirmed" : element.reviewStatus === "requires_review" ? "Preliminary" : "Removed"}</small></button>;
+      })}
+      {selected && <section className="pmv-selection" data-element-id={selected.elementId}><h3>Wall {walls.indexOf(selected) + 1}</h3><dl><dt>Status</dt><dd>{selected.reviewStatus === "approved" ? "Confirmed" : "Preliminary"}</dd><dt>Length</dt><dd>{selected.dimensions.length.toFixed(2)} {selected.units}</dd><dt>Plan page</dt><dd>{selectedSheet?.pageNumber ?? "—"}</dd><dt>Element</dt><dd>{selected.elementId}</dd><dt>Source geometry</dt><dd>{selected.sourceGeometryId}</dd></dl>{selected.assumptions.length > 0 && <p className="pmv-selection-assumptions">{selected.assumptions.join(" ")}</p>}</section>}</aside>
+    </div><div className="pmv-status" role="status"><span/><strong>{projectName}</strong><small>{planCount} persisted plan file{planCount === 1 ? "" : "s"} · {descriptors.length} confirmed · {preliminary.length} preliminary</small></div>
   </section>;
 }

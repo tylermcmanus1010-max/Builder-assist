@@ -8,8 +8,8 @@ export type WallMeshDescriptor = {
   rotationY: number;
 };
 
-export function wallMeshDescriptor(element: BuildingElement, levelElevation: number): WallMeshDescriptor | null {
-  if (element.category !== "wall" || element.geometry.kind !== "centerline" || element.reviewStatus !== "approved") return null;
+function descriptorFor(element: BuildingElement, levelElevation: number, reviewStatus: BuildingElement["reviewStatus"]): WallMeshDescriptor | null {
+  if (element.category !== "wall" || element.geometry.kind !== "centerline" || element.reviewStatus !== reviewStatus) return null;
   const { start, end } = element.geometry;
   const { length, height, thickness } = element.dimensions;
   if (![start.x, start.y, end.x, end.y, length, height, thickness, levelElevation].every((value) => typeof value === "number" && Number.isFinite(value))) return null;
@@ -25,12 +25,29 @@ export function wallMeshDescriptor(element: BuildingElement, levelElevation: num
   };
 }
 
+export function wallMeshDescriptor(element: BuildingElement, levelElevation: number): WallMeshDescriptor | null {
+  return descriptorFor(element, levelElevation, "approved");
+}
+
 export function projectModelMeshDescriptors(value: ProjectModel) {
   const model = validateProjectModel(value);
   const levels = new Map(model.levels.filter((level) => level.revisionId === model.activeRevisionId).map((level) => [level.levelId, level]));
   return model.buildingElements.filter((element) => element.projectId === model.projectId && element.revisionId === model.activeRevisionId).map((element) => {
     const level = levels.get(element.levelId);
     return level ? wallMeshDescriptor(element, level.elevation) : null;
+  }).filter((descriptor): descriptor is WallMeshDescriptor => descriptor !== null);
+}
+
+// Preliminary walls render separately from approved geometry so the model is
+// visible immediately after extraction, in a clearly labeled unconfirmed style.
+// They are never returned by projectModelMeshDescriptors and never claim the
+// approved review state.
+export function preliminaryWallMeshDescriptors(value: ProjectModel) {
+  const model = validateProjectModel(value);
+  const levels = new Map(model.levels.filter((level) => level.revisionId === model.activeRevisionId).map((level) => [level.levelId, level]));
+  return model.buildingElements.filter((element) => element.projectId === model.projectId && element.revisionId === model.activeRevisionId).map((element) => {
+    const level = levels.get(element.levelId);
+    return level ? descriptorFor(element, level.elevation, "requires_review") : null;
   }).filter((descriptor): descriptor is WallMeshDescriptor => descriptor !== null);
 }
 

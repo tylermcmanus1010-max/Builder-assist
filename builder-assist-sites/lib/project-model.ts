@@ -248,6 +248,71 @@ export function traceWall(model: ProjectModel, input: { elementId?: string; shee
   return validateProjectModel(next);
 }
 
+export function applyWallDimensionDefaults(model: ProjectModel, input: { height?: number; thickness?: number; appliedAt: string }): ProjectModel {
+  validateProjectModel(model);
+  if (input.height === undefined && input.thickness === undefined) throw new ProjectModelValidationError("Provide a wall height or thickness to apply.");
+  if (input.height !== undefined) finitePositive(input.height, "height");
+  if (input.thickness !== undefined) finitePositive(input.thickness, "thickness");
+  const targets = model.buildingElements.filter((element) => element.category === "wall" && element.reviewStatus === "requires_review" && element.revisionId === model.activeRevisionId);
+  if (!targets.length) throw new ProjectModelValidationError("There are no preliminary walls to update.");
+  const next = structuredClone(model);
+  next.modelVersion += 1;
+  for (const element of next.buildingElements) {
+    if (element.category !== "wall" || element.reviewStatus !== "requires_review" || element.revisionId !== next.activeRevisionId) continue;
+    if (input.height !== undefined) {
+      element.dimensions.height = input.height;
+      element.assumptions = element.assumptions.filter((assumption) => !/wall height/i.test(assumption));
+      element.assumptions.push(`Wall height ${input.height} ${element.units} was applied by the user to every preliminary wall and remains preliminary until the walls are confirmed.`);
+    }
+    if (input.thickness !== undefined) {
+      element.dimensions.thickness = input.thickness;
+      element.assumptions = element.assumptions.filter((assumption) => !/wall thickness/i.test(assumption));
+      element.assumptions.push(`Wall thickness ${input.thickness} ${element.units} was applied by the user to every preliminary wall and remains preliminary until the walls are confirmed.`);
+    }
+  }
+  return validateProjectModel(next);
+}
+
+export function reviewBuildingElements(model: ProjectModel, input: { elementIds?: string[]; decision: "approved" | "removed"; reviewedAt: string; description: string }): ProjectModel {
+  validateProjectModel(model);
+  const description = input.description.trim();
+  if (!description) throw new ProjectModelValidationError("Review evidence is required.");
+  const requested = input.elementIds?.length ? new Set(input.elementIds) : null;
+  const targets = model.buildingElements.filter((element) => element.revisionId === model.activeRevisionId && (requested ? requested.has(element.elementId) : element.reviewStatus === "requires_review"));
+  if (requested && targets.length !== requested.size) throw new ProjectModelValidationError("One or more elements to review no longer exist in the active revision.");
+  if (!targets.length) throw new ProjectModelValidationError("There are no preliminary elements to review.");
+  const targetIds = new Set(targets.map((element) => element.elementId));
+  const next = structuredClone(model);
+  next.modelVersion += 1;
+  if (input.decision === "removed") {
+    next.buildingElements = next.buildingElements.filter((element) => !targetIds.has(element.elementId));
+    next.geometry2D = next.geometry2D.filter((geometry) => !targetIds.has(geometry.elementId));
+    next.takeoffItems = next.takeoffItems.filter((item) => !targetIds.has(item.elementId));
+    next.estimateLines = next.estimateLines.filter((line) => !targetIds.has(line.elementId));
+    next.modelObjects = next.modelObjects.filter((object) => !targetIds.has(object.elementId));
+    next.issues = next.issues.filter((issue) => !(issue.elementId && targetIds.has(issue.elementId)));
+    for (const report of next.reports) report.elementIds = report.elementIds.filter((elementId) => !targetIds.has(elementId));
+  } else {
+    for (const element of next.buildingElements) {
+      if (!targetIds.has(element.elementId)) continue;
+      const sheet = next.sheets.find((candidate) => candidate.sheetId === element.sheetId);
+      if (!sheet || sheet.pageNumber === undefined) throw new ProjectModelValidationError(`Element ${element.elementId} has no source sheet to cite as review evidence.`);
+      const missing = [element.dimensions.height === undefined || element.dimensions.height <= 0 ? "height" : "", element.dimensions.thickness === undefined || element.dimensions.thickness <= 0 ? "thickness" : ""].filter(Boolean);
+      if (missing.length) throw new ProjectModelValidationError(`Element ${element.elementId} is missing ${missing.join(" and ")}; set building basics before confirming.`);
+      element.reviewStatus = "approved";
+      element.reviewEvidence = { reviewedAt: input.reviewedAt, reviewedBy: "user", sourceDocumentId: sheet.sourceDocumentId, pageNumber: sheet.pageNumber, description };
+      if (!next.modelObjects.some((object) => object.elementId === element.elementId)) next.modelObjects.push({ modelObjectId: `obj_${element.elementId}`, elementId: element.elementId, projectId: next.projectId, revisionId: next.activeRevisionId, sourceGeometryId: element.sourceGeometryId, category: element.category, modelVersion: next.modelVersion, reviewStatus: "approved" });
+    }
+    for (const object of next.modelObjects) if (targetIds.has(object.elementId)) object.reviewStatus = "approved";
+    for (const line of next.estimateLines) if (targetIds.has(line.elementId)) line.reviewStatus = "approved";
+    next.issues = next.issues.filter((issue) => !(issue.elementId && targetIds.has(issue.elementId) && issue.kind === "review"));
+  }
+  const remaining = next.buildingElements.filter((element) => element.revisionId === next.activeRevisionId);
+  if (!remaining.some((element) => element.reviewStatus === "requires_review")) next.issues = next.issues.filter((issue) => issue.title !== "Extracted wall geometry requires review" && issue.title !== "3D model requires geometry review");
+  next.status = remaining.length && remaining.every((element) => element.reviewStatus === "approved") ? "ready" : "geometry_review";
+  return validateProjectModel(next);
+}
+
 export function validateProjectModel(value: unknown): ProjectModel {
   if (!value || typeof value !== "object") throw new ProjectModelValidationError("ProjectModel must be an object.");
   const model = value as ProjectModel;

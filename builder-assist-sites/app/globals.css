@@ -706,3 +706,21 @@ body:has(.assistify-shell) { background:#eaf1fb; }
   .as-reader-workspace .as-context-bar>div:first-child span { display:none; }
   .as-reader-workspace .as-control-status small { display:none; }
 }
+
+/* Preliminary-model review (simplified contractor flow) */
+.pmv-preliminary-banner { margin:0; padding:8px 14px; color:#3c2b04; background:#fbedcb; border-bottom:1px solid #e3c26a; font-size:10px; line-height:1.5; }
+.pmv-selection-assumptions { margin:9px 0 0; padding:8px; color:#7a5a10; border:1px dashed #d9b45c; border-radius:4px; background:#fdf6e4; font-size:8px; line-height:1.5; }
+.review-summary { margin:0; color:#244966; font-size:11px; line-height:1.55; }
+.review-quick { display:grid; gap:9px; padding:12px; border:1px solid #cadbea; border-radius:6px; background:#fff; }
+.review-quick h3 { margin:0; font-size:13px; }
+.review-quick p { margin:0; color:#607890; font-size:10px; line-height:1.5; }
+.review-basics { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:8px; align-items:end; }
+.review-confirm-all { min-height:42px; font-size:11px !important; background:#0f8a52 !important; }
+.review-wall-list { display:grid; gap:5px; margin:0; padding:0; list-style:none; max-height:280px; overflow:auto; }
+.review-wall-list li { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 8px; border:1px solid #e0eaf4; border-radius:4px; background:#f8fbff; font-size:10px; }
+.review-wall-actions { display:flex; gap:5px; }
+.review-wall-actions button.is-remove { background:#b3400f; }
+.review-advanced summary { color:#607890; cursor:pointer; font-size:10px; font-weight:800; }
+.review-advanced form { margin-top:10px; }
+.as-remove-house { margin:0 10px 10px; min-height:34px; border:1px dashed #8a4a4a; border-radius:9px; color:#f3a6a6; background:transparent; cursor:pointer; font-size:9px; font-weight:800; overflow:hidden; }
+.as-project-rail.is-collapsed .as-remove-house { display:none; }
