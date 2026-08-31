@@ -1,4 +1,6 @@
-export const PROJECT_MODEL_SCHEMA_VERSION = 1 as const;
+import { validateBlueprintIR, type BlueprintIR, type BlueprintOrganizedNote, type BlueprintViewport } from "./blueprint-ir.ts";
+
+export const PROJECT_MODEL_SCHEMA_VERSION = 2 as const;
 
 export type LengthUnit = "ft" | "m";
 export type ReviewStatus = "requires_review" | "approved" | "rejected";
@@ -25,6 +27,9 @@ export type Sheet = {
   revisionId: string;
   title: string;
   pageNumber?: number;
+  classification: BlueprintViewport["classification"];
+  classificationConfidence: number;
+  viewportIds: string[];
   scaleCalibration: null | {
     status: "verified";
     drawingDistance: number;
@@ -32,7 +37,8 @@ export type Sheet = {
     realDistance: number;
     units: LengthUnit;
     calibratedAt: string;
-    calibratedBy: "user";
+    calibratedBy: "user" | "document_extraction";
+    confidence: number;
     evidence: {
       sourceDocumentId: string;
       pageNumber: number;
@@ -46,7 +52,9 @@ export type Geometry2D = {
   elementId: string;
   projectId: string;
   revisionId: string;
+  sourceDocumentId: string;
   sheetId: string;
+  viewportId?: string;
   kind: "wall_centerline" | "opening" | "room" | "boundary";
   points: Point2[];
   units: LengthUnit;
@@ -57,7 +65,9 @@ export type BuildingElement = {
   elementId: string;
   projectId: string;
   revisionId: string;
+  sourceDocumentId: string;
   sheetId: string;
+  viewportId?: string;
   sourceGeometryId: string;
   category: "wall" | "opening" | "room" | "boundary";
   levelId: string;
@@ -65,6 +75,7 @@ export type BuildingElement = {
   dimensions: { length: number; height?: number; thickness?: number };
   units: LengthUnit;
   extractionMethod: "user_trace" | "document_extraction";
+  evidenceClass: "user_reviewed" | "validated_vector_pdf";
   confidence: number;
   assumptions: string[];
   reviewStatus: ReviewStatus;
@@ -75,6 +86,9 @@ export type BuildingElement = {
     pageNumber: number;
     description: string;
   };
+  sourceReferences: Array<{ sourceDocumentId: string; sheetId: string; viewportId?: string; pageNumber: number; recordId: string }>;
+  inferredFields: string[];
+  relatedElementIds: string[];
 };
 
 export type ProjectModel = {
@@ -85,6 +99,8 @@ export type ProjectModel = {
   activeRevisionId: string;
   sourceDocuments: SourceDocument[];
   sheets: Sheet[];
+  blueprintIRs: BlueprintIR[];
+  viewports: BlueprintViewport[];
   levels: Array<{ levelId: string; projectId: string; revisionId: string; name: string; elevation: number; units: LengthUnit; reviewStatus: ReviewStatus }>;
   geometry2D: Geometry2D[];
   buildingElements: BuildingElement[];
@@ -93,7 +109,8 @@ export type ProjectModel = {
   modelObjects: Array<{ modelObjectId: string; elementId: string; projectId: string; revisionId: string; sourceGeometryId: string; category: string; modelVersion: number; reviewStatus: ReviewStatus }>;
   issues: Array<{ issueId: string; projectId: string; revisionId: string; elementId?: string; kind: "review" | "rfi"; title: string; status: "open" | "closed"; reason: string }>;
   revisionSets: Array<{ revisionId: string; projectId: string; sourceDocumentIds: string[]; status: "active" | "superseded" }>;
-  reports: Array<{ reportId: string; projectId: string; revisionId: string; modelVersion: number; elementIds: string[]; status: "draft" | "issued" }>;
+  reports: Array<{ reportId: string; projectId: string; revisionId: string; sourceDocumentId?: string; modelVersion: number; elementIds: string[]; noteIds?: string[]; kind?: "blueprint_extraction"; status: "draft" | "issued" }>;
+  organizedNotes: BlueprintOrganizedNote[];
 };
 
 export class ProjectModelValidationError extends Error {}
@@ -127,6 +144,9 @@ function sheetsForDocuments(projectId: string, revisionId: string, sourceDocumen
     revisionId,
     title: document.pageCount && document.pageCount > 1 ? `${document.filename} - page ${pageIndex + 1}` : document.filename,
     pageNumber: pageIndex + 1,
+    classification: "unknown",
+    classificationConfidence: 0,
+    viewportIds: [],
     scaleCalibration: null,
   })));
 }
@@ -143,6 +163,7 @@ export function createProjectModel(projectId: string, revisionId: string, source
     activeRevisionId: revisionId,
     sourceDocuments: sourceDocuments.map((document) => ({ ...document, sheetIds: sheets.filter((sheet) => sheet.sourceDocumentId === document.documentId).map((sheet) => sheet.sheetId) })),
     sheets,
+    blueprintIRs: [], viewports: [], organizedNotes: [],
     levels: [], geometry2D: [], buildingElements: [], takeoffItems: [], estimateLines: [], modelObjects: [],
     issues: [
       { issueId: `iss_${stableHash(`${projectId}|${revisionId}|scale`)}`, projectId, revisionId, kind: "review", title: "Scale calibration required", status: "open", reason: "Uploaded plans must be calibrated before geometry can be measured." },
@@ -178,7 +199,7 @@ export function recordScaleCalibration(model: ProjectModel, input: { sheetId: st
   if (!sheet) throw new ProjectModelValidationError("sheetId does not belong to the active project revision.");
   if (sheet.sourceDocumentId !== input.evidence.sourceDocumentId || sheet.pageNumber !== input.evidence.pageNumber) throw new ProjectModelValidationError("Scale evidence does not identify the calibrated source sheet.");
   if (!input.evidence.description.trim()) throw new ProjectModelValidationError("Scale calibration evidence is required.");
-  sheet.scaleCalibration = { status: "verified", drawingDistance: input.drawingDistance, drawingUnits: input.drawingUnits, realDistance: input.realDistance, units: input.units, calibratedAt: input.calibratedAt, calibratedBy: "user", evidence: { ...input.evidence, description: input.evidence.description.trim() } };
+  sheet.scaleCalibration = { status: "verified", drawingDistance: input.drawingDistance, drawingUnits: input.drawingUnits, realDistance: input.realDistance, units: input.units, calibratedAt: input.calibratedAt, calibratedBy: "user", confidence: 1, evidence: { ...input.evidence, description: input.evidence.description.trim() } };
   next.modelVersion += 1;
   next.status = "geometry_review";
   next.issues = next.issues.filter((issue) => !(issue.kind === "review" && issue.title === "Scale calibration required"));
@@ -217,8 +238,8 @@ export function traceWall(model: ProjectModel, input: { elementId?: string; shee
   const next = structuredClone(model);
   next.modelVersion = nextVersion;
   if (!existingLevel) next.levels.push({ levelId: input.levelId, projectId: model.projectId, revisionId: model.activeRevisionId, name: input.levelName!.trim(), elevation: input.levelElevation!, units: sheet.scaleCalibration.units, reviewStatus: "approved" });
-  next.geometry2D.push({ geometryId: input.sourceGeometryId, elementId, projectId: model.projectId, revisionId: model.activeRevisionId, sheetId: input.sheetId, kind: "wall_centerline", points: [normalizedStart, normalizedEnd], units: sheet.scaleCalibration.units, provenance: "user_trace" });
-  next.buildingElements.push({ elementId, projectId: model.projectId, revisionId: model.activeRevisionId, sheetId: input.sheetId, sourceGeometryId: input.sourceGeometryId, category: "wall", levelId: input.levelId, geometry: { kind: "centerline", start: normalizedStart, end: normalizedEnd }, dimensions: { length, height: input.height, thickness: input.thickness }, units: sheet.scaleCalibration.units, extractionMethod: "user_trace", confidence: 1, assumptions, reviewStatus, reviewEvidence: input.reviewEvidence ? { ...input.reviewEvidence, description: input.reviewEvidence.description.trim() } : undefined });
+  next.geometry2D.push({ geometryId: input.sourceGeometryId, elementId, projectId: model.projectId, revisionId: model.activeRevisionId, sourceDocumentId: sheet.sourceDocumentId, sheetId: input.sheetId, kind: "wall_centerline", points: [normalizedStart, normalizedEnd], units: sheet.scaleCalibration.units, provenance: "user_trace" });
+  next.buildingElements.push({ elementId, projectId: model.projectId, revisionId: model.activeRevisionId, sourceDocumentId: sheet.sourceDocumentId, sheetId: input.sheetId, sourceGeometryId: input.sourceGeometryId, category: "wall", levelId: input.levelId, geometry: { kind: "centerline", start: normalizedStart, end: normalizedEnd }, dimensions: { length, height: input.height, thickness: input.thickness }, units: sheet.scaleCalibration.units, extractionMethod: "user_trace", evidenceClass: "user_reviewed", confidence: 1, assumptions, reviewStatus, reviewEvidence: input.reviewEvidence ? { ...input.reviewEvidence, description: input.reviewEvidence.description.trim() } : undefined, sourceReferences: [{ sourceDocumentId: sheet.sourceDocumentId, sheetId: sheet.sheetId, pageNumber: sheet.pageNumber!, recordId: input.sourceGeometryId }], inferredFields: [], relatedElementIds: [] });
   next.takeoffItems.push({ takeoffItemId: `tk_${elementId}`, elementId, projectId: model.projectId, revisionId: model.activeRevisionId, sourceGeometryId: input.sourceGeometryId, category: "wall", quantity: length, units: sheet.scaleCalibration.units, modelVersion: nextVersion });
   next.estimateLines.push({ estimateLineId: `est_${elementId}`, elementId, projectId: model.projectId, revisionId: model.activeRevisionId, sourceGeometryId: input.sourceGeometryId, description: "Traced wall material allowance", quantity: length, units: sheet.scaleCalibration.units, unitCostCents: null, modelVersion: nextVersion, reviewStatus: "requires_review" });
   if (reviewStatus === "approved") next.modelObjects.push({ modelObjectId: `obj_${elementId}`, elementId, projectId: model.projectId, revisionId: model.activeRevisionId, sourceGeometryId: input.sourceGeometryId, category: "wall", modelVersion: nextVersion, reviewStatus });
@@ -234,7 +255,7 @@ export function validateProjectModel(value: unknown): ProjectModel {
   requiredId(model.projectId, "projectId");
   requiredId(model.activeRevisionId, "activeRevisionId");
   if (!Number.isInteger(model.modelVersion) || model.modelVersion < 1) throw new ProjectModelValidationError("modelVersion must be a positive integer.");
-  for (const field of ["sourceDocuments", "sheets", "levels", "geometry2D", "buildingElements", "takeoffItems", "estimateLines", "modelObjects", "issues", "revisionSets", "reports"] as const) {
+  for (const field of ["sourceDocuments", "sheets", "blueprintIRs", "viewports", "levels", "geometry2D", "buildingElements", "takeoffItems", "estimateLines", "modelObjects", "issues", "revisionSets", "reports", "organizedNotes"] as const) {
     if (!Array.isArray(model[field])) throw new ProjectModelValidationError(`${field} must be an array.`);
   }
   const documentIds = new Set<string>();
@@ -247,6 +268,21 @@ export function validateProjectModel(value: unknown): ProjectModel {
     if (document.pageCount !== undefined && (!Number.isInteger(document.pageCount) || document.pageCount < 1)) throw new ProjectModelValidationError(`Source document ${document.documentId} has an invalid page count.`);
     documentIds.add(document.documentId);
   }
+  for (const ir of model.blueprintIRs) {
+    validateBlueprintIR(ir);
+    if (ir.projectId !== model.projectId || ir.revisionId !== model.activeRevisionId || !documentIds.has(ir.sourceDocumentId)) throw new ProjectModelValidationError(`BlueprintIR ${ir.sourceDocumentId} crosses the active project, revision, or source boundary.`);
+  }
+  const viewportIds = new Set<string>();
+  const persistedSheetIds = new Set(model.sheets.map((sheet) => sheet.sheetId));
+  for (const viewport of model.viewports) {
+    requiredId(viewport.viewportId, "viewports.viewportId");
+    if (viewportIds.has(viewport.viewportId) || viewport.projectId !== model.projectId || viewport.revisionId !== model.activeRevisionId || !documentIds.has(viewport.sourceDocumentId) || !persistedSheetIds.has(viewport.sheetId)) throw new ProjectModelValidationError(`Viewport ${viewport.viewportId} is duplicated or crosses its source boundary.`);
+    viewportIds.add(viewport.viewportId);
+  }
+  for (const note of model.organizedNotes) {
+    requiredId(note.noteId, "organizedNotes.noteId");
+    if (note.projectId !== model.projectId || note.revisionId !== model.activeRevisionId || !documentIds.has(note.sourceDocumentId) || !viewportIds.has(note.viewportId)) throw new ProjectModelValidationError(`Organized note ${note.noteId} crosses its source boundary.`);
+  }
   for (const sheet of model.sheets) {
     requiredId(sheet.sheetId, "sheets.sheetId");
     if (sheet.projectId !== model.projectId || sheet.revisionId !== model.activeRevisionId || !documentIds.has(sheet.sourceDocumentId)) throw new ProjectModelValidationError(`Sheet ${sheet.sheetId} crosses the active project/revision or has no source document.`);
@@ -254,6 +290,8 @@ export function validateProjectModel(value: unknown): ProjectModel {
     if (!document?.sheetIds.includes(sheet.sheetId)) throw new ProjectModelValidationError(`Sheet ${sheet.sheetId} is not linked by its source document.`);
     if (sheet.pageNumber !== undefined && (!Number.isInteger(sheet.pageNumber) || sheet.pageNumber < 1 || (document.pageCount !== undefined && sheet.pageNumber > document.pageCount))) throw new ProjectModelValidationError(`Sheet ${sheet.sheetId} has an invalid source page number.`);
     if (sheet.scaleCalibration && (sheet.scaleCalibration.evidence.sourceDocumentId !== sheet.sourceDocumentId || sheet.scaleCalibration.evidence.pageNumber !== sheet.pageNumber || !sheet.scaleCalibration.evidence.description.trim())) throw new ProjectModelValidationError(`Sheet ${sheet.sheetId} has invalid scale calibration evidence.`);
+    if (!Array.isArray(sheet.viewportIds) || typeof sheet.classificationConfidence !== "number" || sheet.classificationConfidence < 0 || sheet.classificationConfidence > 1) throw new ProjectModelValidationError(`Sheet ${sheet.sheetId} has invalid classification metadata.`);
+    if (sheet.viewportIds.some((viewportId) => !viewportIds.has(viewportId))) throw new ProjectModelValidationError(`Sheet ${sheet.sheetId} references a missing viewport.`);
   }
   const elementIds = new Set<string>();
   const sheetIds = new Set(model.sheets.filter((sheet) => sheet.revisionId === model.activeRevisionId).map((sheet) => sheet.sheetId));
@@ -261,7 +299,7 @@ export function validateProjectModel(value: unknown): ProjectModel {
   const geometryIds = new Set(model.geometry2D.filter((geometry) => geometry.revisionId === model.activeRevisionId).map((geometry) => geometry.geometryId));
   for (const element of model.buildingElements) {
     for (const [field, id] of Object.entries({ elementId: element.elementId, projectId: element.projectId, revisionId: element.revisionId, sheetId: element.sheetId, sourceGeometryId: element.sourceGeometryId, levelId: element.levelId })) requiredId(id, `buildingElements.${field}`);
-    if (element.projectId !== model.projectId || element.revisionId !== model.activeRevisionId) throw new ProjectModelValidationError(`Building element ${element.elementId} crosses the active project or revision boundary.`);
+    if (element.projectId !== model.projectId || element.revisionId !== model.activeRevisionId || !documentIds.has(element.sourceDocumentId)) throw new ProjectModelValidationError(`Building element ${element.elementId} crosses the active project, revision, or source boundary.`);
     if (elementIds.has(element.elementId)) throw new ProjectModelValidationError(`Duplicate elementId: ${element.elementId}.`);
     if (!sheetIds.has(element.sheetId) || !levelIds.has(element.levelId) || !geometryIds.has(element.sourceGeometryId)) throw new ProjectModelValidationError(`Building element ${element.elementId} has a missing sheet, level, or source geometry reference.`);
     const sourceGeometry = model.geometry2D.find((geometry) => geometry.geometryId === element.sourceGeometryId);
@@ -270,6 +308,7 @@ export function validateProjectModel(value: unknown): ProjectModel {
     const sourceSheet = model.sheets.find((sheet) => sheet.sheetId === element.sheetId);
     if (element.reviewEvidence && (element.reviewEvidence.sourceDocumentId !== sourceSheet?.sourceDocumentId || element.reviewEvidence.pageNumber !== sourceSheet?.pageNumber || !element.reviewEvidence.description.trim())) throw new ProjectModelValidationError(`Building element ${element.elementId} has invalid review evidence.`);
     if (typeof element.confidence !== "number" || element.confidence < 0 || element.confidence > 1) throw new ProjectModelValidationError(`Building element ${element.elementId} has invalid confidence.`);
+    if (!Array.isArray(element.sourceReferences) || element.sourceReferences.some((reference) => reference.sourceDocumentId !== element.sourceDocumentId || reference.sheetId !== element.sheetId)) throw new ProjectModelValidationError(`Building element ${element.elementId} has invalid source references.`);
     elementIds.add(element.elementId);
   }
   for (const collection of [model.geometry2D, model.takeoffItems, model.estimateLines, model.modelObjects]) {
@@ -282,6 +321,10 @@ export function validateProjectModel(value: unknown): ProjectModel {
       if ("geometryId" in item && item.geometryId !== element.sourceGeometryId) throw new ProjectModelValidationError(`Drawing geometry ${item.elementId} loses its source geometry identity.`);
     }
   }
+  for (const report of model.reports) {
+    requiredId(report.reportId, "reports.reportId");
+    if (report.projectId !== model.projectId || report.revisionId !== model.activeRevisionId || report.elementIds.some((elementId) => !elementIds.has(elementId)) || (report.sourceDocumentId !== undefined && !documentIds.has(report.sourceDocumentId))) throw new ProjectModelValidationError(`Report ${report.reportId} crosses its canonical identity boundary.`);
+  }
   return model;
 }
 
@@ -289,5 +332,21 @@ export function parseStoredProjectModel(value: string) {
   let parsed: unknown;
   try { parsed = JSON.parse(value); }
   catch { throw new ProjectModelValidationError("Stored ProjectModel JSON is malformed and was quarantined."); }
-  return validateProjectModel(parsed);
+  return validateProjectModel(migrateProjectModel(parsed));
+}
+
+export function migrateProjectModel(value: unknown): unknown {
+  if (!value || typeof value !== "object") return value;
+  const source = value as Record<string, unknown>;
+  if (source.schemaVersion !== 1) return value;
+  const migrated = structuredClone(source) as unknown as ProjectModel;
+  migrated.schemaVersion = PROJECT_MODEL_SCHEMA_VERSION;
+  migrated.blueprintIRs = [];
+  migrated.viewports = [];
+  migrated.organizedNotes = [];
+  migrated.sheets = migrated.sheets.map((sheet) => ({ ...sheet, classification: "unknown", classificationConfidence: 0, viewportIds: [], scaleCalibration: sheet.scaleCalibration ? { ...sheet.scaleCalibration, confidence: 1 } : null }));
+  const documentForSheet = new Map(migrated.sheets.map((sheet) => [sheet.sheetId, sheet.sourceDocumentId]));
+  migrated.geometry2D = migrated.geometry2D.map((geometry) => ({ ...geometry, sourceDocumentId: documentForSheet.get(geometry.sheetId)! }));
+  migrated.buildingElements = migrated.buildingElements.map((element) => ({ ...element, sourceDocumentId: documentForSheet.get(element.sheetId)!, evidenceClass: "user_reviewed", sourceReferences: [{ sourceDocumentId: documentForSheet.get(element.sheetId)!, sheetId: element.sheetId, pageNumber: migrated.sheets.find((sheet) => sheet.sheetId === element.sheetId)?.pageNumber || 1, recordId: element.sourceGeometryId }], inferredFields: [], relatedElementIds: [] }));
+  return migrated;
 }

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import type { ProjectModel } from "./project-model.ts";
 import { projectModelMeshDescriptors } from "./project-model-mesh.ts";
-export { projectModelMeshDescriptors, wallMeshDescriptor } from "./project-model-mesh.ts";
+export { projectModelMeshDescriptors, projectModelObjectIdentities, wallMeshDescriptor } from "./project-model-mesh.ts";
 
 export function createProjectModelGroup(model: ProjectModel) {
   const group = new THREE.Group();

@@ -1,0 +1,11 @@
+{
+  "fixture": "synthetic-vector-floor-plan.pdf",
+  "origin": "Generated from scripts/generate-vector-pdf-fixture.mjs for BuildScope Phase 2 testing",
+  "createdBy": "BuildScope implementation agent under repository-owner authorization",
+  "createdAt": "2026-08-30",
+  "license": "CC0-1.0",
+  "thirdPartyData": false,
+  "customerData": false,
+  "excludedCustomerFixtures": true,
+  "intendedUse": "Automated vector-PDF ingestion, scale, dimension, note, geometry, persistence, and identity tests"
+}

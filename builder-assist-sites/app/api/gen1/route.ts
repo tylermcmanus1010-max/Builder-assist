@@ -3,6 +3,8 @@ import { and, asc, desc, eq } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { hasExpectedFileSignature, safeStorageFilename, validIdempotencyKey } from "../../../lib/upload-security";
 import { appendSourceDocuments, createProjectModel, parseStoredProjectModel, ProjectModelValidationError, recordScaleCalibration, traceWall, validateProjectModel, type Point2, type ProjectModel, type SourceDocument } from "../../../lib/project-model";
+import { reconcileBlueprintIR } from "../../../lib/blueprint-project-model";
+import { countVectorPdfPages, extractVectorPdf, VectorPdfExtractionError } from "../../../lib/vector-pdf";
 import {
   gen1EstimateLines,
   gen1FinishSelections,
@@ -291,7 +293,7 @@ async function loadCanonicalProjectModel(projectId: string) {
   if (!row) return { row: null, model: null, error: "" };
   try {
     const model = parseStoredProjectModel(row.modelJson);
-    if (model.projectId !== row.projectId || model.activeRevisionId !== row.activeRevisionId || model.modelVersion !== row.modelVersion || model.schemaVersion !== row.schemaVersion) throw new Error("The ProjectModel envelope does not match its persisted identity.");
+    if (model.projectId !== row.projectId || model.activeRevisionId !== row.activeRevisionId || model.modelVersion !== row.modelVersion || row.schemaVersion > model.schemaVersion) throw new Error("The ProjectModel envelope does not match its persisted identity.");
     return { row, model, error: "" };
   } catch (error) {
     await db.update(gen1ProjectModels).set({ status: "quarantined", updatedAt: now() }).where(eq(gen1ProjectModels.projectId, projectId));
@@ -308,6 +310,7 @@ async function commitProjectModelTransition(input: {
   eventTitle: string;
   eventDetail: string;
   uploadBatchId?: string;
+  processedFileIds?: string[];
 }) {
   const model = validateProjectModel(input.model);
   if (model.projectId !== input.projectId) throw new ApiError(400, "MODEL_INVALID", "ProjectModel projectId does not match the selected project.");
@@ -323,6 +326,7 @@ async function commitProjectModelTransition(input: {
     env.DB.prepare(`INSERT INTO gen1_project_events (id, project_id, event_type, title, detail, actor, created_at) SELECT ?, ?, ?, ?, ?, ?, ? WHERE ${guard}`).bind(id("evt"), input.projectId, input.eventType, input.eventTitle, input.eventDetail, "ProjectModel pipeline", timestamp, input.projectId, model.modelVersion, payload),
   ];
   if (input.uploadBatchId) statements.push(env.DB.prepare(`UPDATE gen1_upload_batches SET status = 'complete', completed_at = ? WHERE id = ? AND project_id = ? AND ${guard}`).bind(timestamp, input.uploadBatchId, input.projectId, input.projectId, model.modelVersion, payload));
+  for (const fileId of input.processedFileIds || []) statements.push(env.DB.prepare(`UPDATE gen1_project_files SET analysis_status = 'extracted' WHERE id = ? AND project_id = ? AND ${guard}`).bind(fileId, input.projectId, input.projectId, model.modelVersion, payload));
   const results = await env.DB.batch(statements);
   const changes = Number((results[0] as { meta?: { changes?: number } }).meta?.changes || 0);
   if (changes !== 1) throw new ApiError(409, "MODEL_VERSION_CONFLICT", "The project changed while this operation was running. Reload the active ProjectModel and retry.");
@@ -513,6 +517,7 @@ async function uploadPlansToProject(request: Request) {
   }
   const storedKeys: string[] = [];
   const uploadedDocuments: SourceDocument[] = [];
+  const pdfInputs: Array<{ documentId: string; bytes: ArrayBuffer }> = [];
   let committed = false;
   try {
     for (const file of files) {
@@ -523,8 +528,14 @@ async function uploadPlansToProject(request: Request) {
       await db.insert(gen1ProjectFiles).values({ id: fileId, projectId, filename: file.name.slice(0, 240), contentType: file.type || "application/octet-stream", sizeBytes: file.size, r2Key, documentType: moduleRecordId ? `module_evidence:${moduleRecordId}` : "plan", analysisStatus: "uploading", uploadBatchId: batchId });
       const bytes = await file.arrayBuffer();
       await env.BUCKET.put(r2Key, bytes, { httpMetadata: { contentType: file.type || "application/octet-stream" } });
-      await db.update(gen1ProjectFiles).set({ analysisStatus: moduleRecordId ? "attached" : "estimate_ready" }).where(and(eq(gen1ProjectFiles.id, fileId), eq(gen1ProjectFiles.projectId, projectId)));
-      if (!moduleRecordId) uploadedDocuments.push({ documentId: fileId, projectId, filename: file.name.slice(0, 240), contentType: file.type || "application/octet-stream", sizeBytes: file.size, lifecycleStatus: "persisted", storageKey: r2Key, sha256: await sha256Hex(bytes), pageCount: file.type === "application/pdf" ? undefined : 1, sheetIds: [] });
+      await db.update(gen1ProjectFiles).set({ analysisStatus: moduleRecordId ? "attached" : "processing" }).where(and(eq(gen1ProjectFiles.id, fileId), eq(gen1ProjectFiles.projectId, projectId)));
+      if (!moduleRecordId) {
+        const isPdf = file.type === "application/pdf";
+        const pageCount = isPdf ? countVectorPdfPages(bytes) : 1;
+        if (isPdf && pageCount === undefined) throw new ApiError(422, "PDF_UNREADABLE", "The PDF page structure is unreadable or encrypted and was not persisted as interpreted project data.");
+        uploadedDocuments.push({ documentId: fileId, projectId, filename: file.name.slice(0, 240), contentType: file.type || "application/octet-stream", sizeBytes: file.size, lifecycleStatus: "persisted", storageKey: r2Key, sha256: await sha256Hex(bytes), pageCount, sheetIds: [] });
+        if (isPdf) pdfInputs.push({ documentId: fileId, bytes });
+      }
     }
     if (moduleRecordId) {
       await db.batch([
@@ -536,11 +547,21 @@ async function uploadPlansToProject(request: Request) {
     } else {
       const current = await loadCanonicalProjectModel(projectId);
       if (current.error) throw new ApiError(409, "MODEL_QUARANTINED", "The existing ProjectModel is invalid. Resolve or migrate it before adding source documents.");
-      const nextModel = current.model ? appendSourceDocuments(current.model, uploadedDocuments) : createProjectModel(projectId, id("rev"), uploadedDocuments);
+      let nextModel = current.model ? appendSourceDocuments(current.model, uploadedDocuments) : createProjectModel(projectId, id("rev"), uploadedDocuments);
+      try {
+        for (const pdf of pdfInputs) {
+          const document = nextModel.sourceDocuments.find((candidate) => candidate.documentId === pdf.documentId)!;
+          const ir = await extractVectorPdf(pdf.bytes, { projectId, revisionId: nextModel.activeRevisionId, sourceDocumentId: pdf.documentId, sheetIds: document.sheetIds, extractedAt: now() });
+          nextModel = reconcileBlueprintIR(nextModel, ir);
+        }
+      } catch (error) {
+        if (error instanceof VectorPdfExtractionError) throw new ApiError(422, "PDF_EXTRACTION_FAILED", error.message);
+        throw error;
+      }
       await commitProjectModelTransition({
-        projectId, previousVersion: current.row?.modelVersion ?? null, model: nextModel, projectStatus: "geometry_review",
+        projectId, previousVersion: current.row?.modelVersion ?? null, model: nextModel, projectStatus: nextModel.status,
         eventType: "plan_upload", eventTitle: `${files.length} plan document${files.length === 1 ? "" : "s"} uploaded`,
-        eventDetail: "Source documents were persisted and registered in the canonical ProjectModel. Scale calibration and geometry review are required.", uploadBatchId: batchId,
+        eventDetail: pdfInputs.length ? "Persisted vector PDFs were extracted into BlueprintIR and reconciled into the canonical ProjectModel. Preliminary geometry requires review." : "Source documents were persisted and registered in the canonical ProjectModel.", uploadBatchId: batchId, processedFileIds: uploadedDocuments.map((document) => document.documentId),
       });
       committed = true;
     }

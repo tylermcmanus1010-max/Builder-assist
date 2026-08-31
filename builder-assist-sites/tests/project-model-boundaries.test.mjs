@@ -17,6 +17,9 @@ test("upload commits persisted documents into one canonical model transaction", 
   assert.match(api, /createProjectModel\(projectId/);
   assert.match(api, /appendSourceDocuments\(current\.model/);
   assert.match(api, /commitProjectModelTransition/);
+  assert.match(api, /extractVectorPdf/);
+  assert.match(api, /reconcileBlueprintIR/);
+  assert.match(api, /analysis_status = 'extracted'/);
   assert.match(api, /env\.DB\.batch\(statements\)/);
   assert.match(api, /MODEL_VERSION_CONFLICT/);
   assert.match(schema, /gen1ProjectModels/);
@@ -31,7 +34,7 @@ test("user projects have no hardcoded PropertyModel or implicit demo fallback", 
   assert.match(api, /project\.id\.startsWith\("prj_featured_"\) \? estimateLines/);
 });
 
-test("Drawing, Takeoff and 3D expose the same canonical element identity", () => {
+test("Drawing, Takeoff, Estimate, Reports and 3D share canonical element identity", () => {
   assert.match(controls, /data-workspace="drawing"/);
   assert.match(controls, /data-workspace="takeoff"/);
   assert.match(controls, /data-element-id=\{geometry\.elementId\}/);
@@ -39,6 +42,7 @@ test("Drawing, Takeoff and 3D expose the same canonical element identity", () =>
   assert.match(viewer, /data-element-id=\{element\.elementId\}/);
   assert.match(threeAdapter, /mesh\.name = descriptor\.elementId/);
   assert.match(threeAdapter, /mesh\.userData = \{ elementId:/);
+  assert.match(threeAdapter, /projectModelObjectIdentities/);
 });
 
 test("3D uses Three.js and refuses unreviewed or dimensionless walls", () => {

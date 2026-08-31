@@ -2,157 +2,62 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createProjectModel, parseStoredProjectModel, recordScaleCalibration, traceWall } from "../lib/project-model.ts";
-import { projectModelMeshDescriptors } from "../lib/project-model-mesh.ts";
+import { reconcileBlueprintIR } from "../lib/blueprint-project-model.ts";
+import { extractVectorPdf } from "../lib/vector-pdf.ts";
+import { createProjectModel, parseStoredProjectModel } from "../lib/project-model.ts";
+import { projectModelMeshDescriptors, projectModelObjectIdentities } from "../lib/project-model-mesh.ts";
 
-let threeAdapter = null;
-try { threeAdapter = await import("../lib/project-model-three.ts"); }
-catch (error) {
-  if (error?.code !== "ERR_MODULE_NOT_FOUND") throw error;
+const fixture = await readFile(new URL("./fixtures/synthetic-vector-floor-plan.pdf", import.meta.url));
+const provenance = JSON.parse(await readFile(new URL("./fixtures/synthetic-vector-floor-plan.provenance.json", import.meta.url), "utf8"));
+const projectId = "project-synthetic-vector-001";
+const revisionId = "revision-synthetic-vector-001";
+const documentId = `doc_${createHash("sha256").update(fixture).digest("hex").slice(0, 20)}`;
+const source = { documentId, projectId, filename: "synthetic-vector-floor-plan.pdf", contentType: "application/pdf", sizeBytes: fixture.byteLength, lifecycleStatus: "persisted", storageKey: `projects/${projectId}/${documentId}.pdf`, sha256: createHash("sha256").update(fixture).digest("hex"), pageCount: 1, sheetIds: [] };
+
+async function extractedModel() {
+  const uploaded = createProjectModel(projectId, revisionId, [source]);
+  const ir = await extractVectorPdf(fixture, { projectId, revisionId, sourceDocumentId: documentId, sheetIds: uploaded.sourceDocuments[0].sheetIds, extractedAt: "2026-08-30T12:00:00.000Z" });
+  return { ir, model: reconcileBlueprintIR(uploaded, ir) };
 }
 
-const fixturePath = process.env.BOULDER9_PDF_FIXTURE;
-const fixtureBytes = fixturePath ? await readFile(fixturePath) : null;
-
-const identity = {
-  projectId: "project-boulder9-fernandez",
-  revisionId: "revision-boulder9-source-001",
-  sourceDocumentId: "source-boulder9-plans-pdf-001",
-  elementId: "element-boulder9-level1-wall-trace-001",
-  sourceGeometryId: "geom-boulder9-p03-wall-trace-001",
-};
-
-const sourceDocument = {
-  documentId: identity.sourceDocumentId,
-  projectId: identity.projectId,
-  filename: "01-BOULDER-9-PLANS-20260830-073852-.pdf",
-  contentType: "application/pdf",
-  sizeBytes: 11746217,
-  lifecycleStatus: "persisted",
-  storageKey: `projects/${identity.projectId}/${identity.sourceDocumentId}.pdf`,
-  sha256: "8e30a0ddd7af2218e7cd8162d0882b7561b2661df8662ca11d649938f76f62f4",
-  pageCount: 14,
-  sheetIds: [],
-};
-
-function calibratedModel() {
-  const uploaded = createProjectModel(identity.projectId, identity.revisionId, [sourceDocument]);
-  const sheet = uploaded.sheets.find((candidate) => candidate.pageNumber === 3);
-  assert.ok(sheet, "page 3 is represented by a stable sheet");
-  const calibrated = recordScaleCalibration(uploaded, {
-    sheetId: sheet.sheetId,
-    drawingDistance: 26,
-    drawingUnits: "in",
-    realDistance: 104,
-    units: "ft",
-    calibratedAt: "2026-08-30T08:00:00.000Z",
-    evidence: {
-      sourceDocumentId: identity.sourceDocumentId,
-      pageNumber: 3,
-      description: "Architectural floor plan, page 3: 104'-0\" overall dimension at 1/4 inch = 1 foot.",
-    },
-  });
-  return { calibrated, sheet: calibrated.sheets.find((candidate) => candidate.sheetId === sheet.sheetId) };
-}
-
-test("Boulder 9 acceptance source matches the uploaded 14-page plan-set bytes", { skip: !fixtureBytes && "Set BOULDER9_PDF_FIXTURE to the uploaded plan-set path." }, () => {
-  assert.equal(fixtureBytes.subarray(0, 5).toString("ascii"), "%PDF-");
-  assert.equal(fixtureBytes.byteLength, sourceDocument.sizeBytes);
-  assert.equal(createHash("sha256").update(fixtureBytes).digest("hex"), sourceDocument.sha256);
+test("synthetic vector fixture has explicit reusable provenance and no customer data", () => {
+  assert.equal(fixture.subarray(0, 5).toString("ascii"), "%PDF-");
+  assert.equal(provenance.license, "CC0-1.0");
+  assert.equal(provenance.thirdPartyData, false);
+  assert.equal(provenance.customerData, false);
+  assert.equal(provenance.excludedCustomerFixtures, true);
 });
 
-test("Boulder 9 incomplete wall fails closed with an actionable 3D review item", () => {
-  const { calibrated, sheet } = calibratedModel();
-  const traced = traceWall(calibrated, {
-    elementId: identity.elementId,
-    sheetId: sheet.sheetId,
-    sourceGeometryId: identity.sourceGeometryId,
-    levelId: "level-boulder9-01",
-    levelName: "Level 1",
-    levelElevation: 0,
-    start: { x: 0, y: 0 },
-    end: { x: 3, y: 0 },
-  });
-  assert.equal(traced.status, "geometry_review");
-  assert.equal(traced.buildingElements[0].reviewStatus, "requires_review");
-  assert.equal(traced.modelObjects.length, 0);
-  assert.ok(traced.issues.some((issue) => issue.elementId === identity.elementId && issue.title === "3D model requires geometry review"));
-  assert.equal(projectModelMeshDescriptors(traced).length, 0, "unreviewed geometry produces no inferred mesh descriptor");
+test("persisted vector PDF extracts sheet, viewport, text, vectors, scale, dimension, notes and walls", async () => {
+  const { ir, model } = await extractedModel();
+  assert.equal(ir.schemaVersion, "0.1");
+  assert.equal(ir.sheets[0].classification, "floor_plan");
+  assert.equal(ir.viewports.length, 1);
+  assert.ok(ir.textBlocks.some((block) => block.text === "FLOOR PLAN"));
+  assert.ok(ir.vectorPrimitives.length >= 9);
+  const scale = ir.scaleCandidates.find((candidate) => candidate.status === "dimension_verified");
+  assert.equal(scale?.ratio, 48);
+  assert.equal(ir.dimensions.find((dimension) => dimension.text === "20'-0\"")?.value, 20);
+  assert.ok(ir.organizedNotes.some((note) => note.category === "materials" && note.text.includes("EXTERIOR WALLS")));
+  assert.equal(ir.geometryCandidates.length, 4);
+  assert.equal(model.blueprintIRs[0].sourceDocumentId, documentId);
+  assert.equal(model.sheets[0].scaleCalibration.calibratedBy, "document_extraction");
+  assert.equal(model.status, "geometry_review");
 });
 
-test("Boulder 9 upload, reload, scale and reviewed trace preserve identity through Drawing, Takeoff, Estimate and Three.js", () => {
-  const upload = new File([fixtureBytes || Buffer.from("%PDF-fixture-manifest-only")], sourceDocument.filename, { type: sourceDocument.contentType });
-  const { calibrated, sheet } = calibratedModel();
-  assert.equal(calibrated.projectId, identity.projectId);
-  assert.equal(calibrated.activeRevisionId, identity.revisionId);
-  assert.equal(calibrated.sourceDocuments[0].documentId, identity.sourceDocumentId);
-  assert.equal(calibrated.sourceDocuments[0].lifecycleStatus, "persisted");
-  assert.equal(calibrated.sourceDocuments[0].filename, upload.name);
-  assert.equal(sheet.scaleCalibration.evidence.sourceDocumentId, identity.sourceDocumentId);
-  assert.equal(sheet.scaleCalibration.evidence.pageNumber, 3);
-
-  const traced = traceWall(calibrated, {
-    elementId: identity.elementId,
-    sheetId: sheet.sheetId,
-    sourceGeometryId: identity.sourceGeometryId,
-    levelId: "level-boulder9-01",
-    levelName: "Level 1",
-    levelElevation: 0,
-    start: { x: 0, y: 0 },
-    end: { x: 3, y: 0 },
-    height: 10,
-    thickness: .5,
-    reviewEvidence: {
-      reviewedAt: "2026-08-30T08:05:00.000Z",
-      reviewedBy: "user",
-      sourceDocumentId: identity.sourceDocumentId,
-      pageNumber: 3,
-      description: "Acceptance-test dimensions explicitly approved by the geometry reviewer; not automatically extracted.",
-    },
-  });
-  const reloaded = parseStoredProjectModel(JSON.stringify(traced));
-
-  assert.equal(reloaded.geometry2D[0].elementId, identity.elementId, "Drawing");
-  assert.equal(reloaded.geometry2D[0].geometryId, identity.sourceGeometryId, "Drawing source geometry");
-  assert.equal(reloaded.buildingElements[0].elementId, identity.elementId, "ProjectModel building element");
-  assert.equal(reloaded.takeoffItems[0].elementId, identity.elementId, "Takeoff");
-  assert.equal(reloaded.estimateLines[0].elementId, identity.elementId, "Estimate provenance");
-  assert.equal(reloaded.modelObjects[0].elementId, identity.elementId, "3D projection");
-  assert.equal(reloaded.takeoffItems.length, 1, "no demo takeoff quantity is inherited");
-  assert.equal(reloaded.estimateLines.length, 1, "no demo estimate quantity is inherited");
-  assert.equal(reloaded.buildingElements.length, 1, "no demo geometry is inherited");
-
-  const descriptor = projectModelMeshDescriptors(reloaded)[0];
-  assert.equal(descriptor.elementId, identity.elementId);
-  assert.equal(descriptor.projectId, identity.projectId);
-  assert.equal(descriptor.revisionId, identity.revisionId);
-  assert.equal(descriptor.sheetId, sheet.sheetId);
-  assert.equal(descriptor.sourceGeometryId, identity.sourceGeometryId);
-});
-
-test("Boulder 9 reviewed wall identity reaches Three.js mesh userData", { skip: !threeAdapter && "The installed Three.js dependency is required for mesh execution." }, () => {
-  const { calibrated, sheet } = calibratedModel();
-  const traced = traceWall(calibrated, {
-    elementId: identity.elementId,
-    sheetId: sheet.sheetId,
-    sourceGeometryId: identity.sourceGeometryId,
-    levelId: "level-boulder9-01",
-    levelName: "Level 1",
-    levelElevation: 0,
-    start: { x: 0, y: 0 },
-    end: { x: 3, y: 0 },
-    height: 10,
-    thickness: .5,
-    reviewEvidence: { reviewedAt: "2026-08-30T08:05:00.000Z", reviewedBy: "user", sourceDocumentId: identity.sourceDocumentId, pageNumber: 3, description: "Acceptance-test dimensions explicitly approved by the geometry reviewer; not automatically extracted." },
-  });
-  const group = threeAdapter.createProjectModelGroup(traced);
-  assert.equal(group.children.length, 1);
-  assert.deepEqual(group.children[0].userData, {
-    elementId: identity.elementId,
-    projectId: identity.projectId,
-    revisionId: identity.revisionId,
-    sheetId: sheet.sheetId,
-    sourceGeometryId: identity.sourceGeometryId,
-  });
-  threeAdapter.disposeProjectModelGroup(group);
+test("reload preserves stable wall identity across Drawing, Takeoff, Estimate, Reports and Three.js", async () => {
+  const first = await extractedModel();
+  const second = await extractedModel();
+  const reloaded = parseStoredProjectModel(JSON.stringify(first.model));
+  const ids = reloaded.buildingElements.map((element) => element.elementId).sort();
+  assert.deepEqual(ids, second.model.buildingElements.map((element) => element.elementId).sort(), "deterministic reprocessing");
+  for (const elementId of ids) {
+    assert.ok(reloaded.geometry2D.some((geometry) => geometry.elementId === elementId), "Drawing");
+    assert.ok(reloaded.takeoffItems.some((item) => item.elementId === elementId), "Takeoff");
+    assert.ok(reloaded.estimateLines.some((line) => line.elementId === elementId), "Estimate");
+    assert.ok(reloaded.reports.some((report) => report.elementIds.includes(elementId)), "Reports");
+    assert.ok(projectModelObjectIdentities(reloaded).some((identity) => identity.elementId === elementId), "Three.js identity");
+  }
+  assert.equal(projectModelMeshDescriptors(reloaded).length, 0, "preliminary walls do not render as approved geometry");
+  assert.ok(reloaded.buildingElements.every((element) => element.reviewStatus === "requires_review"));
 });

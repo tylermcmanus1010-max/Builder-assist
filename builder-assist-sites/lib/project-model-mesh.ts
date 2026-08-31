@@ -33,3 +33,12 @@ export function projectModelMeshDescriptors(value: ProjectModel) {
     return level ? wallMeshDescriptor(element, level.elevation) : null;
   }).filter((descriptor): descriptor is WallMeshDescriptor => descriptor !== null);
 }
+
+export function projectModelObjectIdentities(value: ProjectModel) {
+  const model = validateProjectModel(value);
+  return model.modelObjects.map((object) => {
+    const element = model.buildingElements.find((candidate) => candidate.elementId === object.elementId);
+    if (!element || element.sourceGeometryId !== object.sourceGeometryId) throw new Error(`Three.js identity ${object.elementId} has no canonical building element.`);
+    return { elementId: object.elementId, projectId: object.projectId, revisionId: object.revisionId, sheetId: element.sheetId, viewportId: element.viewportId, sourceGeometryId: object.sourceGeometryId, reviewStatus: object.reviewStatus };
+  });
+}

@@ -1,0 +1,47 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const output = resolve(dirname(fileURLToPath(import.meta.url)), "../tests/fixtures/synthetic-vector-floor-plan.pdf");
+const content = [
+  "q", "0.5 w",
+  "144 180 m 504 180 l S", "144 189 m 504 189 l S",
+  "144 387 m 504 387 l S", "144 396 m 504 396 l S",
+  "144 180 m 144 396 l S", "153 180 m 153 396 l S",
+  "495 180 m 495 396 l S", "504 180 m 504 396 l S",
+  "144 420 m 504 420 l S",
+  "36 36 720 54 re S",
+  "BT /F1 14 Tf 72 560 Td (SYNTHETIC VECTOR PLAN) Tj ET",
+  "BT /F1 12 Tf 72 535 Td (FLOOR PLAN) Tj ET",
+  "BT /F1 10 Tf 300 430 Td (20'-0\") Tj ET",
+  "BT /F1 10 Tf 72 70 Td (SCALE: 1/4\" = 1'-0\") Tj ET",
+  "BT /F1 10 Tf 540 70 Td (A1.0) Tj ET",
+  "BT /F1 11 Tf 72 145 Td (GENERAL NOTES) Tj ET",
+  "BT /F1 9 Tf 72 128 Td (1. EXTERIOR WALLS ARE 6 INCH STUDS.) Tj ET",
+  "BT /F1 9 Tf 72 112 Td (WALL HEIGHT: 9'-0\") Tj ET",
+  "Q", "",
+].join("\n");
+
+const objects = [
+  "<< /Type /Catalog /Pages 2 0 R >>",
+  "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+  "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 792 612] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>",
+  `<< /Length ${Buffer.byteLength(content)} >>\nstream\n${content}endstream`,
+  "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+  "<< /Title (BuildScope Synthetic Vector Floor Plan) /Creator (BuildScope fixture generator) /Producer (BuildScope) >>",
+];
+
+let pdf = "%PDF-1.4\n% BuildScope synthetic fixture; no customer data.\n";
+const offsets = [0];
+for (let index = 0; index < objects.length; index += 1) {
+  offsets.push(Buffer.byteLength(pdf));
+  pdf += `${index + 1} 0 obj\n${objects[index]}\nendobj\n`;
+}
+const xref = Buffer.byteLength(pdf);
+pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+for (const offset of offsets.slice(1)) pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
+pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R /Info 6 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+
+await mkdir(dirname(output), { recursive: true });
+await writeFile(output, pdf, "latin1");
+console.log(output);
