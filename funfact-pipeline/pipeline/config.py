@@ -58,7 +58,20 @@ class Config:
     yt_token_path: str = str(PROJECT_ROOT / "token.json")
 
 
+def _load_dotenv(path: Path) -> None:
+    """Load KEY=value lines from .env into the environment (no override)."""
+    if not path.exists():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        os.environ.setdefault(key.strip(), value.strip().strip("'\""))
+
+
 def load_config(path: Optional[Path] = None) -> Config:
+    _load_dotenv(PROJECT_ROOT / ".env")
     cfg = Config()
     config_path = path or DEFAULT_CONFIG_PATH
     if config_path.exists():
