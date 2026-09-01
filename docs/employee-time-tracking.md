@@ -1,32 +1,46 @@
-# Growify time tracking — integration contract (not yet integrated)
+# Employee time tracking — integration contract (not yet integrated)
 
 Status: **standalone preview only.** The working prototype lives in
-`web/growify-time/` and is mounted nowhere. This document is the agreed plan
-for wiring it into the Growify tab of the Gen1 portal and into QuickBooks
-**once the owner gives permission**. Treat everything here as a proposal to
-implement, not as something that already runs.
+`web/employee-time/` and is mounted nowhere. This document is the agreed plan
+for wiring it into the Gen1 portal as its own top-level **Employees** tab —
+per the owner's direction it does **not** go inside Growify — and into
+QuickBooks **once the owner gives permission**. Treat everything here as a
+proposal to implement, not as something that already runs.
 
 ## Where it mounts (when approved)
 
 The Gen1 operational portal (`builder-assist-sites/public/gen1-operational.js`)
-renders Growify tabs from `GROW_TABS`. The time clock becomes one new tab:
+renders the product switcher from `productNav()` — Buildify & Quotify (01),
+Assistify (02), Growify (03). The time clock becomes a fourth top-level
+product, not a tab inside any of them:
 
 ```js
-const GROW_TABS = [ ..., ["time", "Time clock"], ... ];
+// productNav(): add
+<a href="#/member-portal/employees" class="${S.app === "employees" ? "active" : ""}">
+  <i>04</i><span><b>Employees</b><small>Clock in · timesheets · payroll</small></span></a>
 ```
 
-with a `growTime(project)` view built from the prototype's markup and the
-CORE helpers in `web/growify-time/quickbooks-export.mjs`. Per the handoff
-rules, Growify must not absorb Assistify functions: Assistify module 22
-("Time, Crews & Equipment") stays the *approved-labor cost record against the
-house*; the Growify time clock is the *live employee punch clock and payroll
-export*. A closed, approved week may later feed module 22 summaries, but the
-records remain separate.
+with `S.app === "employees"` routed to an `employeesView()` built from the
+prototype's markup and the CORE helpers in
+`web/employee-time/quickbooks-export.mjs`, with sub-tabs Time clock ·
+Timesheet · QuickBooks transfer. One deliberate difference from the three
+house workspaces: employees and their punches are **workspace-level**, not
+per-house — the Employees tab shows the whole crew across houses, and each
+entry attributes its hours to a house through the job field (an existing
+`gen1_projects` row). It therefore joins the product nav but stays out of the
+per-house `syncStrip`.
+
+The boundary with the other products stays as the handoff rules require:
+Assistify module 22 ("Time, Crews & Equipment") remains the *approved-labor
+cost record against the house*; the Employees tab is the *live punch clock
+and payroll export*; Growify keeps CRM/growth workflows only. A closed,
+approved week may later feed module 22 summaries, but the records remain
+separate.
 
 ## Persistence (replaces localStorage when integrated)
 
 The prototype stores everything in per-browser `localStorage`
-(`bah.growifytime.v1.*`) — honest about it on the page, and unacceptable for
+(`bah.employeetime.v1.*`) — honest about it on the page, and unacceptable for
 multi-device crews. Integration adds additive D1 tables in
 `builder-assist-sites/db/schema.ts` (all keys follow the existing gen1
 conventions; timestamps are epoch milliseconds, matching the prototype's
@@ -99,7 +113,7 @@ prototype; tier 3 is the only one that talks to Intuit and does not exist yet.
 
 ## Verification
 
-- `node tools/verify-growify-time.mjs` — 39 assertions: the single-source
+- `node tools/verify-employee-time.mjs` — 39 assertions: the single-source
   CORE guarantee between the `.mjs` and the inlined page copy, duration math
   (midnight crossing, running breaks, clamping), DST-safe Monday week bounds
   (pinned to America/Detroit across the 2026-11-01 fall-back), IIF structure,

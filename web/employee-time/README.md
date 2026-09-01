@@ -1,13 +1,14 @@
-# Growify Time Clock — standalone preview
+# Employee Time Clock — standalone preview
 
-Employee clock in / clock out with QuickBooks transfer, built to mount under
-the **Growify** tab of the Gen1 portal — but deliberately **not mounted yet**.
+Employee clock in / clock out with QuickBooks transfer, built to mount as its
+own top-level **Employees** tab in the Gen1 portal — but deliberately **not
+mounted yet**.
 Nothing in `builder-assist-sites/` references this directory; integration
 happens only when the owner gives permission, following the plan in
-`docs/growify-time-tracking.md`.
+`docs/employee-time-tracking.md`.
 
 Serve over HTTP (e.g. `python -m http.server 8765` from the repository root)
-and open `http://127.0.0.1:8765/web/growify-time/index.html`.
+and open `http://127.0.0.1:8765/web/employee-time/index.html`.
 
 ## What it does
 
@@ -39,16 +40,16 @@ and open `http://127.0.0.1:8765/web/growify-time/index.html`.
 
 - **No live QuickBooks connection.** The exports are files and payloads a
   human reviews and imports. A real sync needs the OAuth backend described in
-  `docs/growify-time-tracking.md`; per repository rules it must never be
+  `docs/employee-time-tracking.md`; per repository rules it must never be
   labelled connected before credentials and authorization exist.
 - **No authentication or server.** Data is per-browser `localStorage`
-  (`bah.growifytime.v1.*`, try/catch-wrapped with an in-memory fallback and a
+  (`bah.employeetime.v1.*`, try/catch-wrapped with an in-memory fallback and a
   visible warning). Two devices never see each other's entries.
 - **No jurisdiction-correct overtime law.** The >40 h weekly flag is an
   illustrative check, not a legal calculation.
 - **No approvals workflow.** `web/employee-hub` has the fuller
   employer/employee split with requests and audit trails; this page is the
-  Growify-shaped clock plus the QuickBooks pipe.
+  portal-ready clock plus the QuickBooks pipe.
 
 All seeded people, jobs, and hours are labelled `demo` and invented.
 
@@ -60,5 +61,5 @@ All seeded people, jobs, and hours are labelled `demo` and invented.
 - `quickbooks-export.mjs` — the canonical export engine. Its marked CORE
   region is copied verbatim into `index.html`; the verifier fails on drift,
   so **edit the `.mjs` first**, then re-splice the region into the page.
-- Checks: `node tools/verify-growify-time.mjs` (39 assertions: single-source
+- Checks: `node tools/verify-employee-time.mjs` (39 assertions: single-source
   guarantee, duration math, DST week bounds, IIF/CSV/TimeActivity formats).

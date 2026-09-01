@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Growify Time Clock — standalone preview</title>
+<title>Employee Time Clock — standalone preview</title>
 <style>
 :root{
   --ink:#071a36; --navy:#081f43; --blue:#0b4fd3; --blue-bright:#1674ff;
@@ -72,10 +72,10 @@ dialog textarea{height:220px;font:12px/1.4 monospace;font-variant-numeric:tabula
 </head>
 <body>
 <div class="wrap">
-  <div class="banner"><b>Standalone preview</b> — this time clock is not yet mounted in the Growify portal and is not connected to any backend or to QuickBooks. Everything below starts as clearly marked seeded demo data stored only in this browser; it does not follow you to another device.</div>
+  <div class="banner"><b>Standalone preview</b> — this time clock is not yet mounted in the portal (it will become its own Employees tab) and is not connected to any backend or to QuickBooks. Everything below starts as clearly marked seeded demo data stored only in this browser; it does not follow you to another device.</div>
   <div class="banner" id="storageWarn"><b>Browser storage unavailable</b> — the page still works, but nothing entered here survives a reload.</div>
 
-  <span class="eyebrow">Growify · Time</span>
+  <span class="eyebrow">Employees · Time</span>
   <h1>Employee time clock</h1>
   <p class="lead">Clock in, take breaks, clock out. Hours are derived from timestamps only, then transferred to QuickBooks as import files or API payloads you review first.</p>
 
@@ -138,7 +138,7 @@ dialog textarea{height:220px;font:12px/1.4 monospace;font-variant-numeric:tabula
 
     <section class="card full">
       <header><h2>Transfer to QuickBooks</h2></header>
-      <p class="note">These builders generate files and payloads locally from the timesheet week shown above, for you to review and import. <b>No live QuickBooks connection exists in this preview</b> — a real sync needs the authorized backend described in <code>docs/growify-time-tracking.md</code>. Only closed shifts transfer; open, stale, or zero-minute entries are listed as excluded, never silently sent.</p>
+      <p class="note">These builders generate files and payloads locally from the timesheet week shown above, for you to review and import. <b>No live QuickBooks connection exists in this preview</b> — a real sync needs the authorized backend described in <code>docs/employee-time-tracking.md</code>. Only closed shifts transfer; open, stale, or zero-minute entries are listed as excluded, never silently sent.</p>
       <div class="formgrid">
         <label>Company file name (IIF)<input id="qbCompany" placeholder="Exactly as in QuickBooks Desktop"></label>
         <label>Service item<input id="qbService" value="Construction labor"></label>
@@ -173,7 +173,7 @@ dialog textarea{height:220px;font:12px/1.4 monospace;font-variant-numeric:tabula
 </dialog>
 
 <script>
-/* ==== BEGIN growify-time core (single source: quickbooks-export.mjs) ==== */
+/* ==== BEGIN employee-time core (single source: quickbooks-export.mjs) ==== */
 var QB_HOUR = 3600000, QB_DAY = 86400000, QB_STALE_MS = 16 * QB_HOUR;
 
 /* ---- durations: derived from timestamps, clamped, midnight-safe ---- */
@@ -307,7 +307,7 @@ function qbBuildCsv(entries, ctx) {
     ].map(qbCsvField).join(','));
   });
   return {
-    name: 'growify-time-quickbooks-' + qbLocalDateKey(ctx.start) + '.csv',
+    name: 'employee-time-quickbooks-' + qbLocalDateKey(ctx.start) + '.csv',
     text: rows.join('\n'),
     included: picked.included, excluded: picked.excluded, errors: []
   };
@@ -340,13 +340,13 @@ function qbBuildIif(entries, ctx) {
       qbIifField(ctx.payrollItem || ''),
       qbHoursHMM(qbWorkedMs(e, ctx.now)),
       '',
-      qbIifField((e.notes ? e.notes + ' · ' : '') + 'growify-time ' + e.id),
+      qbIifField((e.notes ? e.notes + ' · ' : '') + 'employee-time ' + e.id),
       ctx.payrollItem ? 'Y' : 'N',
       ctx.billable ? '1' : '0'
     ].join('\t'));
   });
   return {
-    name: 'growify-time-quickbooks-' + qbLocalDateKey(ctx.start) + '.iif',
+    name: 'employee-time-quickbooks-' + qbLocalDateKey(ctx.start) + '.iif',
     text: lines.join('\n'),
     included: picked.included, excluded: picked.excluded, errors: []
   };
@@ -381,21 +381,21 @@ function qbBuildTimeActivities(entries, ctx) {
       EndTime: qbLocalIso(e.clockOut),
       BreakHours: Math.floor(breakMin / 60),
       BreakMinutes: breakMin % 60,
-      Description: (e.notes ? e.notes + ' · ' : '') + 'growify-time ' + e.id
+      Description: (e.notes ? e.notes + ' · ' : '') + 'employee-time ' + e.id
     };
     if (map.itemId) activity.ItemRef = { value: String(map.itemId) };
     activities.push(activity);
   });
   return { activities: activities, unmapped: unmapped, excluded: picked.excluded, errors: [] };
 }
-/* ==== END growify-time core ==== */
+/* ==== END employee-time core ==== */
 
 /* ==================== page (UI + storage) ==================== */
 (function () {
 'use strict';
 
 /* ---------- storage: try/catch everything, in-memory fallback ---------- */
-var PREFIX = 'bah.growifytime.v1.';
+var PREFIX = 'bah.employeetime.v1.';
 var memory = {}, storageOk = true;
 function sGet(key, fallback) {
   try { var raw = localStorage.getItem(PREFIX + key); return raw == null ? fallback : JSON.parse(raw); }
@@ -532,7 +532,7 @@ function showOutput(title, name, text, excluded, extra) {
     var emp = byId(employees, x.entry.empId);
     return '<li>Excluded: ' + esc(emp ? emp.name : x.entry.empId) + ' · ' + esc(fmtD(x.entry.clockIn)) + ' — ' + esc(x.reason) + '</li>';
   }).join('');
-  el('dlgDownload').dataset.name = name || 'growify-time-export.txt';
+  el('dlgDownload').dataset.name = name || 'employee-time-export.txt';
   el('dlgOut').showModal();
 }
 function runIif() {
@@ -552,7 +552,7 @@ function runJson() {
   el('qbErr').textContent = '';
   var out = qbBuildTimeActivities(entries, exportCtx());
   var excluded = out.excluded.concat(out.unmapped);
-  showOutput('TimeActivity payloads — QuickBooks Online API', 'growify-time-timeactivities.json',
+  showOutput('TimeActivity payloads — QuickBooks Online API', 'employee-time-timeactivities.json',
     JSON.stringify(out.activities, null, 2), excluded,
     out.activities.length + ' payloads for POST /v3/company/{realmId}/timeactivity — requires the authorized OAuth backend, not yet connected.');
 }

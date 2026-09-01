@@ -1,4 +1,4 @@
-// Growify time clock — QuickBooks transfer engine.
+// Employee time clock — QuickBooks transfer engine.
 //
 // Converts closed time-clock entries into the three formats QuickBooks
 // accepts today, without pretending any live connection exists:
@@ -7,11 +7,11 @@
 //   2. Timesheet CSV         (QuickBooks Time / QuickBooks Online import wizard)
 //   3. TimeActivity payloads (QuickBooks Online API — bodies only; posting them
 //                             requires the OAuth backend described in
-//                             docs/growify-time-tracking.md)
+//                             docs/employee-time-tracking.md)
 //
 // The CORE region below is the single source of truth. It is copied verbatim
-// into web/growify-time/index.html (which must stay self-contained for the
-// artifact build), and tools/verify-growify-time.mjs fails if the two copies
+// into web/employee-time/index.html (which must stay self-contained for the
+// artifact build), and tools/verify-employee-time.mjs fails if the two copies
 // ever drift. Everything in CORE is pure: no DOM, no storage, no network.
 //
 // Entry shape (same contract as web/employee-hub — epoch milliseconds are the
@@ -19,7 +19,7 @@
 //   Entry { id, empId, jobId, clockIn(ms), clockOut(ms|null),
 //           breaks: [{start(ms), end(ms|null)}], status, notes?, seeded? }
 
-/* ==== BEGIN growify-time core (single source: quickbooks-export.mjs) ==== */
+/* ==== BEGIN employee-time core (single source: quickbooks-export.mjs) ==== */
 var QB_HOUR = 3600000, QB_DAY = 86400000, QB_STALE_MS = 16 * QB_HOUR;
 
 /* ---- durations: derived from timestamps, clamped, midnight-safe ---- */
@@ -153,7 +153,7 @@ function qbBuildCsv(entries, ctx) {
     ].map(qbCsvField).join(','));
   });
   return {
-    name: 'growify-time-quickbooks-' + qbLocalDateKey(ctx.start) + '.csv',
+    name: 'employee-time-quickbooks-' + qbLocalDateKey(ctx.start) + '.csv',
     text: rows.join('\n'),
     included: picked.included, excluded: picked.excluded, errors: []
   };
@@ -186,13 +186,13 @@ function qbBuildIif(entries, ctx) {
       qbIifField(ctx.payrollItem || ''),
       qbHoursHMM(qbWorkedMs(e, ctx.now)),
       '',
-      qbIifField((e.notes ? e.notes + ' · ' : '') + 'growify-time ' + e.id),
+      qbIifField((e.notes ? e.notes + ' · ' : '') + 'employee-time ' + e.id),
       ctx.payrollItem ? 'Y' : 'N',
       ctx.billable ? '1' : '0'
     ].join('\t'));
   });
   return {
-    name: 'growify-time-quickbooks-' + qbLocalDateKey(ctx.start) + '.iif',
+    name: 'employee-time-quickbooks-' + qbLocalDateKey(ctx.start) + '.iif',
     text: lines.join('\n'),
     included: picked.included, excluded: picked.excluded, errors: []
   };
@@ -227,14 +227,14 @@ function qbBuildTimeActivities(entries, ctx) {
       EndTime: qbLocalIso(e.clockOut),
       BreakHours: Math.floor(breakMin / 60),
       BreakMinutes: breakMin % 60,
-      Description: (e.notes ? e.notes + ' · ' : '') + 'growify-time ' + e.id
+      Description: (e.notes ? e.notes + ' · ' : '') + 'employee-time ' + e.id
     };
     if (map.itemId) activity.ItemRef = { value: String(map.itemId) };
     activities.push(activity);
   });
   return { activities: activities, unmapped: unmapped, excluded: picked.excluded, errors: [] };
 }
-/* ==== END growify-time core ==== */
+/* ==== END employee-time core ==== */
 
 export {
   QB_HOUR, QB_DAY, QB_STALE_MS,

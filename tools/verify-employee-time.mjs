@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// Regression checks for the Growify time clock's QuickBooks transfer engine.
+// Regression checks for the employee time clock's QuickBooks transfer engine.
 //
-//   node tools/verify-growify-time.mjs
+//   node tools/verify-employee-time.mjs
 //
 // Covers: the single-source guarantee between quickbooks-export.mjs and the
-// inline copy in web/growify-time/index.html, duration math (midnight
+// inline copy in web/employee-time/index.html, duration math (midnight
 // crossing, running breaks, clamping), DST-safe week bounds, and the three
 // QuickBooks output formats (IIF structure, CSV escaping and formula
 // guarding, TimeActivity mapping honesty).
@@ -27,7 +27,7 @@ if (process.env.TZ !== 'America/Detroit') {
   process.exit(r.status ?? 1);
 }
 
-const qb = await import('../web/growify-time/quickbooks-export.mjs');
+const qb = await import('../web/employee-time/quickbooks-export.mjs');
 
 let failures = 0, passes = 0;
 function check(name, ok, detail) {
@@ -39,9 +39,9 @@ function section(name) { console.log('\n' + name); }
 /* ---- 1. single source: the inline copy in index.html must be identical ---- */
 section('single-source core');
 {
-  const marker = /\/\* ==== BEGIN growify-time core[\s\S]*?==== END growify-time core ==== \*\//;
-  const fromModule = readFileSync(join(root, 'web/growify-time/quickbooks-export.mjs'), 'utf8').match(marker);
-  const fromPage = readFileSync(join(root, 'web/growify-time/index.html'), 'utf8').match(marker);
+  const marker = /\/\* ==== BEGIN employee-time core[\s\S]*?==== END employee-time core ==== \*\//;
+  const fromModule = readFileSync(join(root, 'web/employee-time/quickbooks-export.mjs'), 'utf8').match(marker);
+  const fromPage = readFileSync(join(root, 'web/employee-time/index.html'), 'utf8').match(marker);
   check('both files contain the marked core region', !!fromModule && !!fromPage);
   check('core region is byte-identical in module and page',
     !!fromModule && !!fromPage && fromModule[0] === fromPage[0],
@@ -148,7 +148,7 @@ section('CSV (QuickBooks Time / Online import)');
   const out = qb.qbBuildCsv(exportEntries, { ...baseCtx, serviceItem: 'Construction labor' });
   const lines = out.text.split('\n');
   check('header plus one row per entry', lines.length === 3);
-  check('filename carries the week start', out.name === 'growify-time-quickbooks-' + qb.qbLocalDateKey(week.start) + '.csv', out.name);
+  check('filename carries the week start', out.name === 'employee-time-quickbooks-' + qb.qbLocalDateKey(week.start) + '.csv', out.name);
   check('comma/quote names are quoted and doubled', out.text.includes('"Dana, ""the saw"""'));
   check('leading = in a note is neutralised', out.text.includes("'=SUM(A1:A9)"), 'formula injection guard');
   check('hours columns agree (8:00 and 8.0000)', lines[1].includes('8:00') && lines[1].includes('8.0000'));
