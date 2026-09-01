@@ -30,18 +30,53 @@ def alignment_path_for(audio: Path) -> Path:
 
 def synthesize(cfg: Config, script: VideoScript, out_dir: Path, offline: bool = False) -> List[Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    paths = []
-    for i, segment in enumerate(script.all_segments):
+    segments = script.all_segments
+    paths, todo = [], []
+    for i, segment in enumerate(segments):
+        path = out_dir / (f"segment_{i:02d}.wav" if offline else f"segment_{i:02d}.mp3")
+        # Resume support: a clip from an interrupted run is complete when its
+        # timing data was also written, so it can be skipped, not re-billed.
+        cached = path.exists() and (offline or alignment_path_for(path).exists())
+        paths.append(path)
+        if not cached:
+            todo.append((i, segment, path))
+
+    if not offline and todo:
+        _check_quota(cfg, sum(len(seg.narration) for _, seg, _ in todo))
+
+    for i, segment, path in todo:
         if offline:
-            path = out_dir / f"segment_{i:02d}.wav"
             duration = max(2.0, len(segment.narration.split()) / WORDS_PER_SECOND)
             _silent_wav(path, duration)
         else:
-            path = out_dir / f"segment_{i:02d}.mp3"
             _elevenlabs_tts(cfg, segment.narration, path)
-        paths.append(path)
-        print(f"  audio {i + 1}/{len(script.all_segments)}: {path.name}")
+        print(f"  audio {i + 1}/{len(segments)}: {path.name}")
+    if len(todo) < len(segments):
+        print(f"  ({len(segments) - len(todo)} clips reused from a previous run)")
     return paths
+
+
+def _check_quota(cfg: Config, characters_needed: int) -> None:
+    """Fail before the first paid call when the ElevenLabs quota can't cover
+    the remaining narration. Best-effort: an unreachable endpoint doesn't block."""
+    try:
+        response = httpx.get(
+            "https://api.elevenlabs.io/v1/user/subscription",
+            headers={"xi-api-key": cfg.elevenlabs_api_key},
+            timeout=30,
+        )
+        response.raise_for_status()
+        data = response.json()
+        remaining = data["character_limit"] - data["character_count"]
+    except (httpx.HTTPError, KeyError, ValueError):
+        return
+    if characters_needed > remaining:
+        raise RuntimeError(
+            f"ElevenLabs quota too low: {characters_needed} characters of narration "
+            f"left to synthesize, but only {remaining} remain on the "
+            f"'{data.get('tier', 'unknown')}' plan. Upgrade the plan or wait for the "
+            "monthly reset, then re-run — finished clips are reused automatically."
+        )
 
 
 def _elevenlabs_tts(cfg: Config, text: str, path: Path, retries: int = 3) -> None:
@@ -66,6 +101,10 @@ def _elevenlabs_tts(cfg: Config, text: str, path: Path, retries: int = 3) -> Non
                 },
                 timeout=180,
             )
+            if response.status_code in (401, 402, 403) and "quota" in response.text:
+                # Out of characters: retrying can't help, and the raw 401 is
+                # misleading (the key itself is fine).
+                raise RuntimeError(f"ElevenLabs quota exhausted: {response.text[:300]}")
             response.raise_for_status()
             payload = response.json()
             path.write_bytes(base64.b64decode(payload["audio_base64"]))

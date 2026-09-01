@@ -36,8 +36,14 @@ def generate_images(cfg: Config, script: VideoScript, out_dir: Path, offline: bo
     # visual_anchors carries the story's recurring people/places so every
     # image renders them with the same details.
     anchors = f"{script.visual_anchors.strip()} " if script.visual_anchors else ""
+    reused = 0
     for i, segment in enumerate(script.all_segments):
         path = out_dir / f"segment_{i:02d}.png"
+        # Resume support: images from an interrupted run are reused, not re-billed.
+        if path.exists():
+            paths.append(path)
+            reused += 1
+            continue
         prompt = cfg.style_prefix + anchors + segment.image_prompt
         if offline:
             _placeholder(prompt, path, cfg.image_width, cfg.image_height, i)
@@ -47,6 +53,8 @@ def generate_images(cfg: Config, script: VideoScript, out_dir: Path, offline: bo
             _fal_generate(cfg, prompt, path)
         paths.append(path)
         print(f"  image {i + 1}/{len(script.all_segments)}: {path.name}")
+    if reused:
+        print(f"  ({reused} images reused from a previous run)")
     return paths
 
 

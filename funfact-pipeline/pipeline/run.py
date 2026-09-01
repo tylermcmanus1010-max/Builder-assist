@@ -69,6 +69,8 @@ def main(argv=None) -> int:
                         help="no API calls: canned script, placeholder images, silent audio")
     parser.add_argument("--skip-upload", action="store_true", help="stop after rendering")
     parser.add_argument("--subject", help="override the subject wheel for this run")
+    parser.add_argument("--fresh", action="store_true",
+                        help="ignore an existing script.json instead of resuming it")
     parser.add_argument("--out", help="build directory (default: build/<date>)")
     args = parser.parse_args(argv)
 
@@ -78,10 +80,19 @@ def main(argv=None) -> int:
     build_dir = Path(args.out) if args.out else Path(cfg.build_dir) / run_date
     build_dir.mkdir(parents=True, exist_ok=True)
 
+    script_path = build_dir / "script.json"
+    research = None
     if args.offline:
         print("[1/7] topic research (offline fixture)")
         print("[2/7] scriptwriting (offline fixture)")
         research, script = offline_fixture()
+    elif script_path.exists() and not args.fresh:
+        # Resume support: keep the interrupted run's script so its cached
+        # images and audio still match (--fresh forces a new story).
+        print("[1/7] topic research (reusing script.json from interrupted run)")
+        print("[2/7] scriptwriting (reusing script.json)")
+        script = VideoScript.model_validate_json(script_path.read_text())
+        print(f"      {len(script.all_segments)} segments, title: {script.title_options[0]}")
     else:
         from .scriptwriter import write_script
         from .topics import pick_topic
@@ -93,7 +104,7 @@ def main(argv=None) -> int:
         script = write_script(cfg, research)
         print(f"      {len(script.all_segments)} segments, title: {script.title_options[0]}")
 
-    (build_dir / "script.json").write_text(script.model_dump_json(indent=2))
+    script_path.write_text(script.model_dump_json(indent=2))
 
     print("[3/7] image generation")
     images = generate_images(cfg, script, build_dir / "images", offline=args.offline)
@@ -126,7 +137,8 @@ def main(argv=None) -> int:
         manifest.youtube_video_id = upload_video(
             cfg, video_path, title, script.description, script.tags, thumb_path
         )
-        ledger.record(script.topic, research.subject_area, manifest.youtube_video_id)
+        subject_area = research.subject_area if research else ""
+        ledger.record(script.topic, subject_area, manifest.youtube_video_id)
 
     (build_dir / "manifest.json").write_text(manifest.model_dump_json(indent=2))
     print(f"done: {video_path}")
