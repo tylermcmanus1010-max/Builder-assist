@@ -36,6 +36,8 @@ def offline_fixture() -> tuple:
                              angle="An animal whose hearts stop when it swims", facts=facts)
     script = VideoScript(
         topic=research.topic,
+        visual_anchors="A reddish-brown octopus with golden eyes, deep blue "
+                       "moonlit water, scattered pale coral.",
         hook=Segment(narration="This animal has three hearts. And two of them stop every time it swims.",
                      image_prompt="an octopus gliding through deep blue water",
                      caption="Three hearts. Really."),

@@ -24,9 +24,10 @@ class TopicResearch(BaseModel):
 
 
 class Segment(BaseModel):
-    narration: str = Field(description="Spoken narration for this segment, 2-4 sentences")
+    narration: str = Field(description="Spoken narration for this segment")
     image_prompt: str = Field(
-        description="Image-generation prompt depicting exactly what the narration describes"
+        description="Image-generation prompt depicting exactly what the narration describes, "
+                    "restating the relevant visual anchors word-for-word"
     )
     caption: str = Field(description="Short on-screen caption, max 60 characters")
     source_url: Optional[str] = None
@@ -34,6 +35,12 @@ class Segment(BaseModel):
 
 class VideoScript(BaseModel):
     topic: str
+    visual_anchors: str = Field(
+        default="",
+        description="Recurring people, places, and objects with fixed visual details "
+                    "(era, clothing, colors, weather) repeated in every image prompt "
+                    "so the pictures stay consistent across the video",
+    )
     hook: Segment
     segments: List[Segment]
     outro: Segment

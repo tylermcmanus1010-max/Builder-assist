@@ -1,26 +1,30 @@
 # Channel configuration. Secrets never go here - they come from env vars
 # (see .env.example). Anything omitted falls back to defaults in pipeline/config.py.
 
-channel_name: Fun Fact Channel
+channel_name: Nighttime Stories
 
+# Story themes the channel rotates through. Each run picks one dramatic true
+# story within the day's theme.
 subject_wheel:
-  - history
-  - biology
-  - space
-  - food
-  - geography
-  - technology
-  - ocean life
-  - the human body
-  - language
-  - physics
+  - unsolved disappearances
+  - shipwrecks and maritime disasters
+  - doomed expeditions
+  - ghost towns and abandoned places
+  - lost civilizations
+  - daring escapes and heists
+  - wilderness survival
+  - historical mysteries
+  - legends and cursed treasures
+  - strange events no one can explain
 
-segments_per_video: 14
+segments_per_video: 12
 
-# Prefixed to every image prompt for a consistent channel look. Tweak freely.
+# Prefixed to every image prompt for a consistent channel look. The script's
+# visual_anchors (recurring people/places with fixed details) are inserted
+# between this prefix and each segment's prompt.
 style_prefix: >-
-  Vibrant editorial illustration, flat color style, bold shapes, high contrast,
-  no text, no words, no letters.
+  Atmospheric painterly night scene, cinematic, muted deep blues with warm
+  lamplight accents, soft mist, dreamlike calm, no text, no words, no letters.
 
 # claude-opus-5 writes research + scripts; the fallback runs only if the
 # primary model declines a request.
@@ -37,10 +41,21 @@ image_model: fal-ai/flux/schnell
 # Replicate model (owner/name). Same FLUX family; needs REPLICATE_API_TOKEN.
 replicate_image_model: black-forest-labs/flux-schnell
 
-# ElevenLabs. Browse voices at elevenlabs.io/voice-library, paste the voice ID.
-# eleven_flash_v2_5 is half the price of eleven_multilingual_v2.
-voice_id: JBFqnCBsd6RMkjVDRZzb
+# ElevenLabs. Brian (deep, resonant, comforting) suits sleep narration.
+# Browse voices at elevenlabs.io/voice-library, paste the voice ID.
+voice_id: nPczCjzI2devNBz1zQrb
 tts_model: eleven_multilingual_v2
+
+# Sleep-story delivery: high stability evens out the read, zero style keeps it
+# understated, speed below 1.0 slows the pace (ElevenLabs allows 0.7-1.2).
+voice_stability: 0.75
+voice_similarity_boost: 0.75
+voice_style: 0.0
+voice_speed: 0.85
+
+# Timed subtitles burned into the video, synced to the narration.
+subtitle_font_size: 56
+subtitle_max_chars: 42
 
 # Optional royalty-free music file (e.g. from the YouTube Audio Library),
 # looped and ducked under narration. Leave null for no music.

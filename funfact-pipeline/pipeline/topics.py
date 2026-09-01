@@ -13,19 +13,23 @@ from .config import Config
 from .models import TopicResearch
 from .state import TopicLedger
 
-RESEARCH_SYSTEM = """You are the researcher for a faceless YouTube channel about \
-surprising, verifiable fun facts. You pick one topic, verify 6-10 facts about it \
-using web search, and report only facts you could confirm in a reputable source. \
-Discard anything you cannot verify — an interesting false fact is worse than a \
-boring true one. Prefer facts that are visual (they will be illustrated) and \
-genuinely surprising to a general audience."""
+RESEARCH_SYSTEM = """You are the researcher for a nighttime-stories YouTube \
+channel: dramatic true stories told in a calm, soothing voice that listeners \
+fall asleep to. You pick one real story, verify 8-12 facts about it using web \
+search, and report only facts you could confirm in a reputable source. Discard \
+anything you cannot verify — an interesting false detail is worse than a plain \
+true one. Choose stories with genuine drama (a disappearance, a disaster, a \
+mystery, a desperate escape) and strong atmosphere. Order the facts as a \
+narrative arc: the setting and the people, the rising tension, the turning \
+point, and the aftermath or enduring mystery. Prefer facts rich in visual, \
+sensory detail — they will be illustrated."""
 
-RESEARCH_PROMPT = """Subject area for today: {subject}
+RESEARCH_PROMPT = """Story theme for tonight: {subject}
 
-Topics already covered (do NOT repeat or closely overlap these):
+Stories already told (do NOT repeat or closely overlap these):
 {used_topics}
 
-Pick one specific, compelling topic within the subject area, verify facts about it
+Pick one specific, dramatic true story within the theme, verify facts about it
 with web search, then output ONLY a JSON object (no other text, no code fences)
 matching this shape:
 

@@ -33,9 +33,12 @@ def generate_images(cfg: Config, script: VideoScript, out_dir: Path, offline: bo
     out_dir.mkdir(parents=True, exist_ok=True)
     provider = resolve_provider(cfg)
     paths = []
+    # visual_anchors carries the story's recurring people/places so every
+    # image renders them with the same details.
+    anchors = f"{script.visual_anchors.strip()} " if script.visual_anchors else ""
     for i, segment in enumerate(script.all_segments):
         path = out_dir / f"segment_{i:02d}.png"
-        prompt = cfg.style_prefix + segment.image_prompt
+        prompt = cfg.style_prefix + anchors + segment.image_prompt
         if offline:
             _placeholder(prompt, path, cfg.image_width, cfg.image_height, i)
         elif provider == "replicate":

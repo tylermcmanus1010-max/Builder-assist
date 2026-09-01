@@ -14,15 +14,19 @@ DEFAULT_CONFIG_PATH = PROJECT_ROOT / "config.yaml"
 @dataclass
 class Config:
     # Content
-    channel_name: str = "Fun Fact Channel"
+    channel_name: str = "Nighttime Stories"
     subject_wheel: List[str] = field(default_factory=lambda: [
-        "history", "biology", "space", "food", "geography",
-        "technology", "ocean life", "the human body", "language", "physics",
+        "unsolved disappearances", "shipwrecks and maritime disasters",
+        "doomed expeditions", "ghost towns and abandoned places",
+        "lost civilizations", "daring escapes and heists",
+        "wilderness survival", "historical mysteries",
+        "legends and cursed treasures", "strange events no one can explain",
     ])
-    segments_per_video: int = 14
+    segments_per_video: int = 12
     style_prefix: str = (
-        "Vibrant editorial illustration, flat color style, bold shapes, "
-        "high contrast, no text, no words, no letters. "
+        "Atmospheric painterly night scene, cinematic, muted deep blues with "
+        "warm lamplight accents, soft mist, dreamlike calm, "
+        "no text, no words, no letters. "
     )
 
     # Models / services
@@ -33,8 +37,14 @@ class Config:
     replicate_image_model: str = "black-forest-labs/flux-schnell"
     image_width: int = 1920
     image_height: int = 1088  # multiple of 32 for FLUX; cropped to 1080 at assembly
-    voice_id: str = "JBFqnCBsd6RMkjVDRZzb"  # ElevenLabs default voice; replace with yours
+    voice_id: str = "nPczCjzI2devNBz1zQrb"  # Brian: deep, resonant, comforting
     tts_model: str = "eleven_multilingual_v2"
+    # Delivery tuned for sleep content: high stability evens out the read,
+    # zero style keeps it understated, speed < 1 slows the pace.
+    voice_stability: float = 0.75
+    voice_similarity_boost: float = 0.75
+    voice_style: float = 0.0
+    voice_speed: float = 0.85
 
     # Video
     fps: int = 30
@@ -43,6 +53,8 @@ class Config:
     music_path: Optional[str] = None  # royalty-free track; ducked under narration
     music_volume: float = 0.12
     font_path: Optional[str] = None  # auto-detected if None
+    subtitle_font_size: int = 56
+    subtitle_max_chars: int = 42  # max characters per timed subtitle cue
 
     # Upload
     privacy_status: str = "unlisted"  # review gate: flip to public in YouTube Studio
