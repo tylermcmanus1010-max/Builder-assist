@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Growify Time Clock — standalone preview</title>
+<style>
+:root{
+  --ink:#071a36; --navy:#081f43; --blue:#0b4fd3; --blue-bright:#1674ff;
+  --cyan:#68d4ff; --ice:#f2f7ff; --line:#d9e5f7; --muted:#5e6f89;
+  --bg:#f2f7ff; --card:#ffffff; --text:#071a36; --warn-bg:#fff6e6; --warn-ink:#7a4a00;
+  --bad:#b3261e; --good:#0a7a3d;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#050e20; --card:#0b1c3a; --text:#e8f1ff; --ink:#e8f1ff; --navy:#dce9ff;
+    --line:#1c3560; --muted:#93a7c7; --ice:#0e2246; --warn-bg:#3a2a05; --warn-ink:#ffd88a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#050e20; --card:#0b1c3a; --text:#e8f1ff; --ink:#e8f1ff; --navy:#dce9ff;
+  --line:#1c3560; --muted:#93a7c7; --ice:#0e2246; --warn-bg:#3a2a05; --warn-ink:#ffd88a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Arial,Helvetica,sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:16px 16px 48px}
+.eyebrow{color:var(--blue-bright);font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
+h1{margin:.15em 0 .2em;font-size:30px;color:var(--ink)}
+h2{margin:0;font-size:18px;color:var(--ink)}
+h3{margin:0 0 6px;font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+p.lead{margin:0 0 8px;color:var(--muted);max-width:70ch}
+.banner{background:var(--warn-bg);color:var(--warn-ink);border:1px solid var(--line);padding:10px 14px;font-size:13px;margin:0 0 14px}
+.banner b{letter-spacing:.08em;text-transform:uppercase}
+#storageWarn{display:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid>*{min-width:0} /* a wide table's intrinsic width must scroll inside its card, not stretch the grid */
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);padding:14px}
+.card.full{grid-column:1/-1}
+.card header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:8px 0}
+input,select,textarea{width:100%;padding:8px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit}
+button{font:inherit;font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;
+  border:0;border-radius:0;padding:10px 14px;background:var(--blue);color:#fff;cursor:pointer}
+button:disabled{background:var(--muted);cursor:not-allowed;opacity:.6}
+button.ghost{background:transparent;color:var(--blue-bright);border:1px solid var(--line)}
+button.danger{background:var(--bad)}
+.clockrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.clockrow button{flex:1;min-width:120px}
+.status{margin-top:10px;padding:10px;background:var(--ice);border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.status b.big{font-size:24px}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;vertical-align:top}
+.tablewrap{overflow-x:auto}
+.flag{display:inline-block;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:1px 6px;border:1px solid var(--line)}
+.flag.bad{color:var(--bad)} .flag.ot{color:var(--warn-ink);background:var(--warn-bg)} .flag.ok{color:var(--good)}
+.demo{color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.08em;border:1px dashed var(--line);padding:0 4px}
+.weeknav{display:flex;align-items:center;gap:8px}
+.weeknav b{font-variant-numeric:tabular-nums}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0 10px;align-items:end}
+.note{font-size:12px;color:var(--muted)}
+.errors{color:var(--bad);font-size:13px;white-space:pre-line}
+ul.excl{margin:6px 0;padding-left:18px;font-size:12px;color:var(--muted)}
+dialog{border:1px solid var(--line);background:var(--card);color:var(--text);max-width:760px;width:92vw;padding:14px}
+dialog::backdrop{background:rgba(7,26,54,.55)}
+dialog textarea{height:220px;font:12px/1.4 monospace;font-variant-numeric:tabular-nums;white-space:pre}
+.qbmap td input{min-width:110px}
+.totals{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.totals span{background:var(--ice);border:1px solid var(--line);padding:6px 10px;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner"><b>Standalone preview</b> — this time clock is not yet mounted in the Growify portal and is not connected to any backend or to QuickBooks. Everything below starts as clearly marked seeded demo data stored only in this browser; it does not follow you to another device.</div>
+  <div class="banner" id="storageWarn"><b>Browser storage unavailable</b> — the page still works, but nothing entered here survives a reload.</div>
+
+  <span class="eyebrow">Growify · Time</span>
+  <h1>Employee time clock</h1>
+  <p class="lead">Clock in, take breaks, clock out. Hours are derived from timestamps only, then transferred to QuickBooks as import files or API payloads you review first.</p>
+
+  <div class="grid">
+    <section class="card">
+      <header><h2>Time clock</h2></header>
+      <label>Employee<select id="clkEmp"></select></label>
+      <label>Job / customer<select id="clkJob"></select></label>
+      <div class="status" id="clkStatus"></div>
+      <div class="clockrow">
+        <button id="btnIn">Clock in</button>
+        <button id="btnBreak" class="ghost">Start break</button>
+        <button id="btnOut" class="danger">Clock out</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <header><h2>On the clock now</h2></header>
+      <div id="roster"></div>
+      <h3 style="margin-top:14px">People &amp; jobs</h3>
+      <div class="formgrid">
+        <label>New employee name<input id="newEmpName" placeholder="Full name"></label>
+        <label>Trade / role<input id="newEmpRole" placeholder="Carpenter"></label>
+        <label><button id="btnAddEmp" class="ghost" style="width:100%">Add employee</button></label>
+        <label>New job name<input id="newJobName" placeholder="Customer or Customer:Job"></label>
+        <label><button id="btnAddJob" class="ghost" style="width:100%">Add job</button></label>
+        <label><button id="btnReset" class="ghost" style="width:100%">Reset demo data</button></label>
+      </div>
+    </section>
+
+    <section class="card full">
+      <header>
+        <h2>Timesheet</h2>
+        <div class="weeknav">
+          <button class="ghost" id="wkPrev" aria-label="Previous week">←</button>
+          <b id="wkLabel"></b>
+          <button class="ghost" id="wkNext" aria-label="Next week">→</button>
+        </div>
+      </header>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Date</th><th>Employee</th><th>Job</th><th>In</th><th>Out</th><th>Break</th><th>Hours</th><th>Status</th><th></th></tr></thead>
+        <tbody id="entryRows"></tbody>
+      </table></div>
+      <div class="totals" id="weekTotals"></div>
+      <h3 style="margin-top:14px">Add a shift manually</h3>
+      <p class="note">For hours worked without the clock. Both times are on the chosen date unless the shift crossed midnight.</p>
+      <div class="formgrid">
+        <label>Employee<select id="mEmp"></select></label>
+        <label>Job<select id="mJob"></select></label>
+        <label>Date<input id="mDate" type="date"></label>
+        <label>Clock in<input id="mIn" type="time"></label>
+        <label>Clock out<input id="mOut" type="time"></label>
+        <label>Break (min)<input id="mBreak" type="number" min="0" step="1" value="0"></label>
+        <label>Note<input id="mNote" placeholder="Optional"></label>
+        <label style="display:flex;align-items:center;gap:6px"><input id="mNextDay" type="checkbox" style="width:auto"> Ends next day</label>
+        <label><button id="btnManual" style="width:100%">Add shift</button></label>
+      </div>
+      <div class="errors" id="mErr"></div>
+    </section>
+
+    <section class="card full">
+      <header><h2>Transfer to QuickBooks</h2></header>
+      <p class="note">These builders generate files and payloads locally from the timesheet week shown above, for you to review and import. <b>No live QuickBooks connection exists in this preview</b> — a real sync needs the authorized backend described in <code>docs/growify-time-tracking.md</code>. Only closed shifts transfer; open, stale, or zero-minute entries are listed as excluded, never silently sent.</p>
+      <div class="formgrid">
+        <label>Company file name (IIF)<input id="qbCompany" placeholder="Exactly as in QuickBooks Desktop"></label>
+        <label>Service item<input id="qbService" value="Construction labor"></label>
+        <label>Payroll item (optional)<input id="qbPayroll" placeholder="e.g. Hourly Regular"></label>
+        <label style="display:flex;align-items:center;gap:6px"><input id="qbBillable" type="checkbox" style="width:auto"> Billable to customer</label>
+      </div>
+      <div class="clockrow">
+        <button id="btnIif">Build IIF · QuickBooks Desktop</button>
+        <button id="btnCsv">Build CSV · QuickBooks Time / Online import</button>
+        <button id="btnJson" class="ghost">Build TimeActivity JSON · QBO API</button>
+      </div>
+      <div class="errors" id="qbErr"></div>
+      <h3 style="margin-top:14px">QuickBooks Online ID mapping (for TimeActivity JSON)</h3>
+      <p class="note">The QuickBooks Online API addresses employees and customers by the IDs of the connected company. Enter them here once you have them — an entry without a mapped ID is reported as unmapped, never guessed.</p>
+      <div class="tablewrap"><table class="qbmap"><tbody id="qbMapRows"></tbody></table></div>
+      <label style="max-width:340px">Service ItemRef ID (optional)<input id="qbItemId" placeholder="QuickBooks Online item ID"></label>
+    </section>
+  </div>
+</div>
+
+<dialog id="dlgOut">
+  <h2 id="dlgTitle"></h2>
+  <p class="note" id="dlgMeta"></p>
+  <ul class="excl" id="dlgExcluded"></ul>
+  <textarea id="dlgText" readonly></textarea>
+  <div class="clockrow">
+    <button id="dlgCopy">Copy to clipboard</button>
+    <button id="dlgDownload" class="ghost">Download file</button>
+    <button id="dlgClose" class="ghost">Close</button>
+  </div>
+  <p class="note">If the download button does nothing in this embedded view, use Copy and paste into a file with the name shown above.</p>
+</dialog>
+
+<script>
+/* ==== BEGIN growify-time core (single source: quickbooks-export.mjs) ==== */
+var QB_HOUR = 3600000, QB_DAY = 86400000, QB_STALE_MS = 16 * QB_HOUR;
+
+/* ---- durations: derived from timestamps, clamped, midnight-safe ---- */
+function qbBreakMs(entry, now) {
+  var s = 0, list = entry.breaks || [];
+  for (var i = 0; i < list.length; i++) {
+    var b = list[i];
+    s += Math.max(0, (b.end == null ? now : b.end) - b.start);
+  }
+  return s;
+}
+function qbWorkedMs(entry, now) {
+  var end = entry.clockOut == null ? now : entry.clockOut;
+  return Math.max(0, end - entry.clockIn - qbBreakMs(entry, now));
+}
+function qbIsStale(entry, now) { return entry.clockOut == null && (now - entry.clockIn) > QB_STALE_MS; }
+function qbOnBreak(entry) {
+  var list = entry.breaks || [];
+  return list.length > 0 && list[list.length - 1].end == null;
+}
+
+/* ---- calendar arithmetic: a DST week is 23 or 25 hours long, so day and
+        week hops must go through Date fields, never fixed milliseconds ---- */
+function qbDayStart(t) { var d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); }
+function qbAddDays(t, n) {
+  var d = new Date(t); d.setDate(d.getDate() + n); d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+function qbMondayOf(t) {
+  var d = new Date(t); d.setHours(0, 0, 0, 0);
+  var dow = (d.getDay() + 6) % 7; // Mon=0
+  return qbAddDays(d.getTime(), -dow);
+}
+function qbWeekRange(offset, now) {
+  var start = qbAddDays(qbMondayOf(now), offset * 7);
+  return { start: start, end: qbAddDays(start, 7) };
+}
+function qbLocalDateKey(t) {
+  var d = new Date(t), p = function (n) { return String(n).padStart(2, '0'); };
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
+
+/* ---- formats QuickBooks expects ---- */
+function qbRoundMinutes(ms) { return Math.round(Math.max(0, ms) / 60000); }
+function qbHoursHMM(ms) {
+  var m = qbRoundMinutes(ms);
+  return Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0');
+}
+function qbDateMMDDYY(t) {
+  var d = new Date(t), p = function (n) { return String(n).padStart(2, '0'); };
+  return p(d.getMonth() + 1) + '/' + p(d.getDate()) + '/' + String(d.getFullYear()).slice(-2);
+}
+function qbLocalHM(t) {
+  var d = new Date(t), p = function (n) { return String(n).padStart(2, '0'); };
+  return p(d.getHours()) + ':' + p(d.getMinutes());
+}
+function qbTzOffset(t) {
+  // JS getTimezoneOffset() is minutes *behind* UTC, so the sign flips.
+  var m = -new Date(t).getTimezoneOffset(), sign = m < 0 ? '-' : '+', a = Math.abs(m);
+  return sign + String(Math.floor(a / 60)).padStart(2, '0') + ':' + String(a % 60).padStart(2, '0');
+}
+function qbLocalIso(t) {
+  var d = new Date(t), p = function (n) { return String(n).padStart(2, '0'); };
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) +
+    'T' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds()) + qbTzOffset(t);
+}
+
+/* ---- field hygiene ---- */
+function qbCsvField(v) {
+  v = String(v == null ? '' : v);
+  // A leading =, +, - or @ executes as a formula in spreadsheet tools that
+  // sit between this file and payroll; the apostrophe neutralises it.
+  if (/^[=+\-@]/.test(v)) v = "'" + v;
+  return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}
+function qbIifField(v) {
+  // IIF is tab-delimited with one record per line and no quoting mechanism.
+  return String(v == null ? '' : v).replace(/[\t\r\n]+/g, ' ').trim();
+}
+
+/* ---- entry selection: QuickBooks must only ever receive settled hours ---- */
+function qbSelectEntries(entries, opts) {
+  var start = opts.start, end = opts.end, now = opts.now;
+  var included = [], excluded = [];
+  (entries || []).forEach(function (e) {
+    if (e.clockIn < start || e.clockIn >= end) return; // outside the range: not this export's business
+    if (e.clockOut == null) {
+      excluded.push({ entry: e, reason: qbIsStale(e, now)
+        ? 'left open more than 16 h — close or correct the shift before transferring'
+        : 'still on the clock — clock out before transferring' });
+      return;
+    }
+    if (e.status === 'rejected') { excluded.push({ entry: e, reason: 'rejected entry — excluded from payroll' }); return; }
+    if (qbRoundMinutes(qbWorkedMs(e, now)) === 0) { excluded.push({ entry: e, reason: 'zero worked minutes' }); return; }
+    included.push(e);
+  });
+  included.sort(function (a, b) { return a.clockIn - b.clockIn || String(a.empId).localeCompare(String(b.empId)); });
+  return { included: included, excluded: excluded };
+}
+
+function qbLookup(list, id) {
+  for (var i = 0; i < (list || []).length; i++) if (list[i].id === id) return list[i];
+  return null;
+}
+
+/* ---- 1. Timesheet CSV (QuickBooks Time / QuickBooks Online import wizard) ---- */
+function qbBuildCsv(entries, ctx) {
+  var picked = qbSelectEntries(entries, ctx);
+  var head = ['date', 'employee', 'employee_role', 'customer_job', 'service_item',
+    'start_time', 'end_time', 'break_minutes', 'hours_hmm', 'hours_decimal',
+    'billable', 'notes', 'entry_id', 'seeded_demo'];
+  var rows = [head.join(',')];
+  picked.included.forEach(function (e) {
+    var emp = qbLookup(ctx.employees, e.empId), job = qbLookup(ctx.jobs, e.jobId);
+    var worked = qbWorkedMs(e, ctx.now);
+    rows.push([
+      qbLocalDateKey(e.clockIn),
+      emp ? emp.name : e.empId,
+      emp && emp.role ? emp.role : '',
+      job ? job.name : e.jobId,
+      ctx.serviceItem || '',
+      qbLocalDateKey(e.clockIn) + ' ' + qbLocalHM(e.clockIn),
+      qbLocalDateKey(e.clockOut) + ' ' + qbLocalHM(e.clockOut),
+      qbRoundMinutes(qbBreakMs(e, ctx.now)),
+      qbHoursHMM(worked),
+      (worked / QB_HOUR).toFixed(4),
+      ctx.billable ? 'yes' : 'no',
+      e.notes || '',
+      e.id,
+      e.seeded ? 'yes' : ''
+    ].map(qbCsvField).join(','));
+  });
+  return {
+    name: 'growify-time-quickbooks-' + qbLocalDateKey(ctx.start) + '.csv',
+    text: rows.join('\n'),
+    included: picked.included, excluded: picked.excluded, errors: []
+  };
+}
+
+/* ---- 2. IIF timer activities (QuickBooks Desktop) ---- */
+function qbBuildIif(entries, ctx) {
+  var errors = [];
+  if (!ctx.companyName || !String(ctx.companyName).trim())
+    errors.push('Company name is required and must match the QuickBooks company file name exactly.');
+  if (!ctx.serviceItem || !String(ctx.serviceItem).trim())
+    errors.push('A service item is required; it must already exist in the QuickBooks item list.');
+  if (errors.length) return { name: '', text: '', included: [], excluded: [], errors: errors };
+
+  var picked = qbSelectEntries(entries, ctx);
+  var map = ctx.mapping || {};
+  var lines = [
+    ['!TIMERHDR', 'VER', 'REL', 'COMPANYNAME', 'IMPORTEDBEFORE', 'FROMTIMER', 'COMPANYCREATETIME'].join('\t'),
+    ['TIMERHDR', '8', '0', qbIifField(ctx.companyName), 'N', 'Y', '0'].join('\t'),
+    ['!TIMEACT', 'DATE', 'JOB', 'EMP', 'ITEM', 'PITEM', 'DURATION', 'PROJ', 'NOTE', 'XFERTOPAYROLL', 'BILLINGSTATUS'].join('\t')
+  ];
+  picked.included.forEach(function (e) {
+    var emp = qbLookup(ctx.employees, e.empId), job = qbLookup(ctx.jobs, e.jobId);
+    lines.push([
+      'TIMEACT',
+      qbDateMMDDYY(e.clockIn),
+      qbIifField((map.jobs && map.jobs[e.jobId]) || (job ? job.name : e.jobId)),
+      qbIifField((map.employees && map.employees[e.empId]) || (emp ? emp.name : e.empId)),
+      qbIifField(ctx.serviceItem),
+      qbIifField(ctx.payrollItem || ''),
+      qbHoursHMM(qbWorkedMs(e, ctx.now)),
+      '',
+      qbIifField((e.notes ? e.notes + ' · ' : '') + 'growify-time ' + e.id),
+      ctx.payrollItem ? 'Y' : 'N',
+      ctx.billable ? '1' : '0'
+    ].join('\t'));
+  });
+  return {
+    name: 'growify-time-quickbooks-' + qbLocalDateKey(ctx.start) + '.iif',
+    text: lines.join('\n'),
+    included: picked.included, excluded: picked.excluded, errors: []
+  };
+}
+
+/* ---- 3. TimeActivity payloads (QuickBooks Online API) ----
+   IDs must come from the connected QuickBooks company via the mapping —
+   an entry whose employee or customer has no mapped QuickBooks ID is
+   reported as unmapped, never guessed. ---- */
+function qbBuildTimeActivities(entries, ctx) {
+  var picked = qbSelectEntries(entries, ctx);
+  var map = ctx.mapping || {}, empIds = map.employees || {}, custIds = map.customers || {};
+  var activities = [], unmapped = [];
+  picked.included.forEach(function (e) {
+    var missing = [];
+    if (!empIds[e.empId]) missing.push('employee');
+    if (!custIds[e.jobId]) missing.push('customer/job');
+    if (missing.length) {
+      var emp = qbLookup(ctx.employees, e.empId), job = qbLookup(ctx.jobs, e.jobId);
+      unmapped.push({ entry: e, reason: 'no QuickBooks ID mapped for ' + missing.join(' and ') +
+        ' (' + (emp ? emp.name : e.empId) + ' · ' + (job ? job.name : e.jobId) + ')' });
+      return;
+    }
+    var breakMin = qbRoundMinutes(qbBreakMs(e, ctx.now));
+    var activity = {
+      TxnDate: qbLocalDateKey(e.clockIn),
+      NameOf: 'Employee',
+      EmployeeRef: { value: String(empIds[e.empId]) },
+      CustomerRef: { value: String(custIds[e.jobId]) },
+      BillableStatus: ctx.billable ? 'Billable' : 'NotBillable',
+      StartTime: qbLocalIso(e.clockIn),
+      EndTime: qbLocalIso(e.clockOut),
+      BreakHours: Math.floor(breakMin / 60),
+      BreakMinutes: breakMin % 60,
+      Description: (e.notes ? e.notes + ' · ' : '') + 'growify-time ' + e.id
+    };
+    if (map.itemId) activity.ItemRef = { value: String(map.itemId) };
+    activities.push(activity);
+  });
+  return { activities: activities, unmapped: unmapped, excluded: picked.excluded, errors: [] };
+}
+/* ==== END growify-time core ==== */
+
+/* ==================== page (UI + storage) ==================== */
+(function () {
+'use strict';
+
+/* ---------- storage: try/catch everything, in-memory fallback ---------- */
+var PREFIX = 'bah.growifytime.v1.';
+var memory = {}, storageOk = true;
+function sGet(key, fallback) {
+  try { var raw = localStorage.getItem(PREFIX + key); return raw == null ? fallback : JSON.parse(raw); }
+  catch (e) { storageOk = false; return key in memory ? memory[key] : fallback; }
+}
+function sSet(key, value) {
+  memory[key] = value;
+  try { localStorage.setItem(PREFIX + key, JSON.stringify(value)); }
+  catch (e) { storageOk = false; }
+  if (!storageOk) document.getElementById('storageWarn').style.display = 'block';
+}
+
+/* ---------- demo seed (every seeded row is labelled) ---------- */
+var idSeq = 0;
+function nid(p) { return p + '_' + Date.now().toString(36) + '_' + (idSeq++); }
+function buildSeed() {
+  var employees = [
+    { id: 'emp_mike', name: 'Mike Torres (demo)', role: 'Foreman', seeded: true },
+    { id: 'emp_dana', name: 'Dana Whitfield (demo)', role: 'Carpenter', seeded: true },
+    { id: 'emp_luis', name: 'Luis Ortega (demo)', role: 'Laborer', seeded: true }
+  ];
+  var jobs = [
+    { id: 'job_maple', name: 'Maple Street Remodel (demo)', seeded: true },
+    { id: 'job_shop', name: 'Shop / Warehouse (demo)', seeded: true }
+  ];
+  var now = Date.now(), wk0 = qbMondayOf(now), entries = [];
+  function mk(empId, jobId, weekStart, dayIdx, inH, outH, brkMin) {
+    var base = qbAddDays(weekStart, dayIdx);
+    var cin = base + Math.round(inH * QB_HOUR), cout = base + Math.round(outH * QB_HOUR);
+    if (cout >= now) return; // seed only hours that are already in the past
+    var breaks = brkMin ? [{ start: cin + Math.round((cout - cin) / 2) - brkMin * 30000,
+                             end: cin + Math.round((cout - cin) / 2) + brkMin * 30000 }] : [];
+    entries.push({ id: nid('ent'), empId: empId, jobId: jobId, clockIn: cin, clockOut: cout,
+      breaks: breaks, status: 'closed', notes: '', seeded: true });
+  }
+  var wk1 = qbAddDays(wk0, -7);
+  [0, 1, 2, 3, 4].forEach(function (d) {
+    mk('emp_mike', 'job_maple', wk1, d, 7, 15.5, 30);
+    mk('emp_dana', 'job_maple', wk1, d, 7, d === 4 ? 18 : 16, 30); // Friday long day
+    mk('emp_luis', 'job_shop', wk1, d, 8, 14.5, 0);
+  });
+  mk('emp_mike', 'job_maple', wk0, 0, 7, 15.5, 30);
+  mk('emp_dana', 'job_shop', wk0, 0, 7, 15, 30);
+  return { employees: employees, jobs: jobs, entries: entries };
+}
+
+var employees = sGet('employees', null), jobs = sGet('jobs', null), entries = sGet('entries', null);
+if (!employees || !jobs || !entries) {
+  var seed = buildSeed();
+  employees = seed.employees; jobs = seed.jobs; entries = seed.entries;
+  sSet('employees', employees); sSet('jobs', jobs); sSet('entries', entries);
+}
+var ui = sGet('ui', { weekOffset: 0, empId: '', jobId: '' });
+var qbMap = sGet('qbmap', { employees: {}, customers: {}, itemId: '' });
+function saveEntries() { sSet('entries', entries); }
+
+/* ---------- helpers ---------- */
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function byId(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }
+function el(id) { return document.getElementById(id); }
+function fmtH(ms) { return (ms / QB_HOUR).toFixed(2); }
+function fmtT(t) { return t == null ? '—' : new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); }
+function fmtD(t) { return new Date(t).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }); }
+function openEntryFor(empId) {
+  for (var i = 0; i < entries.length; i++) if (entries[i].empId === empId && entries[i].clockOut == null) return entries[i];
+  return null;
+}
+function toast(msg) {
+  var t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 16px;font-size:13px;z-index:9';
+  document.body.appendChild(t); setTimeout(function () { t.remove(); }, 2400);
+}
+
+/* ---------- clock actions ---------- */
+function clockIn() {
+  var empId = el('clkEmp').value, jobId = el('clkJob').value;
+  if (!empId || !jobId) { toast('Pick an employee and a job first'); return; }
+  if (openEntryFor(empId)) { toast('Already on the clock — clock out first'); return; }
+  entries.push({ id: nid('ent'), empId: empId, jobId: jobId, clockIn: Date.now(), clockOut: null, breaks: [], status: 'open', notes: '', seeded: false });
+  saveEntries(); render();
+}
+function toggleBreak() {
+  var e = openEntryFor(el('clkEmp').value);
+  if (!e) { toast('Not on the clock'); return; }
+  if (qbOnBreak(e)) e.breaks[e.breaks.length - 1].end = Date.now();
+  else (e.breaks = e.breaks || []).push({ start: Date.now(), end: null });
+  saveEntries(); render();
+}
+function clockOut() {
+  var e = openEntryFor(el('clkEmp').value);
+  if (!e) { toast('Not on the clock — nothing to clock out'); return; }
+  var now = Date.now();
+  if (qbOnBreak(e)) e.breaks[e.breaks.length - 1].end = now; // a running break ends with the shift
+  e.clockOut = now; e.status = 'closed';
+  saveEntries(); render();
+}
+
+/* ---------- manual entry ---------- */
+function addManual() {
+  var err = el('mErr'); err.textContent = '';
+  var empId = el('mEmp').value, jobId = el('mJob').value, date = el('mDate').value;
+  var tin = el('mIn').value, tout = el('mOut').value, brk = Math.max(0, Math.round(Number(el('mBreak').value || 0)));
+  if (!empId || !jobId || !date || !tin || !tout) { err.textContent = 'Employee, job, date and both times are required.'; return; }
+  var cin = new Date(date + 'T' + tin).getTime();
+  var cout = new Date(date + 'T' + tout).getTime();
+  if (el('mNextDay').checked) { var d = new Date(cout); d.setDate(d.getDate() + 1); cout = d.getTime(); }
+  if (!(cout > cin)) { err.textContent = 'Clock out must be after clock in — tick “Ends next day” if the shift crossed midnight.'; return; }
+  if (cout > Date.now()) { err.textContent = 'Those times are in the future. Only hours already worked can be added.'; return; }
+  if (brk * 60000 >= cout - cin) { err.textContent = 'The break is as long as the whole shift — shorten it.'; return; }
+  var breaks = brk ? [{ start: cin + Math.round((cout - cin) / 2) - brk * 30000, end: cin + Math.round((cout - cin) / 2) + brk * 30000 }] : [];
+  entries.push({ id: nid('ent'), empId: empId, jobId: jobId, clockIn: cin, clockOut: cout, breaks: breaks, status: 'closed', notes: el('mNote').value.trim(), seeded: false });
+  saveEntries(); render(); toast('Shift added');
+}
+
+/* ---------- QuickBooks builders ---------- */
+function exportCtx() {
+  var range = qbWeekRange(ui.weekOffset, Date.now());
+  return {
+    employees: employees, jobs: jobs, now: Date.now(),
+    start: range.start, end: range.end,
+    companyName: el('qbCompany').value.trim(),
+    serviceItem: el('qbService').value.trim(),
+    payrollItem: el('qbPayroll').value.trim(),
+    billable: el('qbBillable').checked,
+    mapping: qbMap
+  };
+}
+function showOutput(title, name, text, excluded, extra) {
+  el('dlgTitle').textContent = title;
+  el('dlgMeta').textContent = name ? 'File name: ' + name + (extra ? ' · ' + extra : '') : (extra || '');
+  el('dlgText').value = text;
+  el('dlgExcluded').innerHTML = (excluded || []).map(function (x) {
+    var emp = byId(employees, x.entry.empId);
+    return '<li>Excluded: ' + esc(emp ? emp.name : x.entry.empId) + ' · ' + esc(fmtD(x.entry.clockIn)) + ' — ' + esc(x.reason) + '</li>';
+  }).join('');
+  el('dlgDownload').dataset.name = name || 'growify-time-export.txt';
+  el('dlgOut').showModal();
+}
+function runIif() {
+  el('qbErr').textContent = '';
+  var out = qbBuildIif(entries, exportCtx());
+  if (out.errors.length) { el('qbErr').textContent = out.errors.join('\n'); return; }
+  showOutput('IIF timer activities — QuickBooks Desktop', out.name, out.text, out.excluded,
+    out.included.length + ' entries. Import via File → Utilities → Import → IIF Files. Employee names, the service item and any payroll item must already exist in QuickBooks.');
+}
+function runCsv() {
+  el('qbErr').textContent = '';
+  var out = qbBuildCsv(entries, exportCtx());
+  showOutput('Timesheet CSV — QuickBooks Time / Online import', out.name, out.text, out.excluded,
+    out.included.length + ' entries. The QuickBooks import wizard maps these columns interactively.');
+}
+function runJson() {
+  el('qbErr').textContent = '';
+  var out = qbBuildTimeActivities(entries, exportCtx());
+  var excluded = out.excluded.concat(out.unmapped);
+  showOutput('TimeActivity payloads — QuickBooks Online API', 'growify-time-timeactivities.json',
+    JSON.stringify(out.activities, null, 2), excluded,
+    out.activities.length + ' payloads for POST /v3/company/{realmId}/timeactivity — requires the authorized OAuth backend, not yet connected.');
+}
+
+/* ---------- rendering ---------- */
+function options(list, selected, roleField) {
+  return '<option value="">— pick —</option>' + list.map(function (x) {
+    return '<option value="' + esc(x.id) + '"' + (x.id === selected ? ' selected' : '') + '>' +
+      esc(x.name) + (roleField && x.role ? ' · ' + esc(x.role) : '') + '</option>';
+  }).join('');
+}
+function renderClockStatus() {
+  var empId = el('clkEmp').value, box = el('clkStatus');
+  var e = empId ? openEntryFor(empId) : null, now = Date.now();
+  if (!empId) { box.innerHTML = 'Pick an employee to see their clock.'; }
+  else if (!e) { box.innerHTML = '<b>Off the clock.</b>'; }
+  else {
+    var job = byId(jobs, e.jobId);
+    box.innerHTML = (qbOnBreak(e) ? '<span class="flag ot">On break</span> ' : '<span class="flag ok">On the clock</span> ') +
+      'since ' + esc(fmtT(e.clockIn)) + ' on ' + esc(job ? job.name : e.jobId) +
+      ' — <b class="big">' + fmtH(qbWorkedMs(e, now)) + ' h</b> worked' +
+      (qbIsStale(e, now) ? ' <span class="flag bad">Left open &gt;16 h — excluded from totals</span>' : '');
+  }
+  el('btnIn').disabled = !empId || !!e;
+  el('btnBreak').disabled = !e;
+  el('btnBreak').textContent = e && qbOnBreak(e) ? 'End break' : 'Start break';
+  el('btnOut').disabled = !e;
+}
+function renderRoster() {
+  var now = Date.now();
+  var open = entries.filter(function (e) { return e.clockOut == null; });
+  el('roster').innerHTML = open.length ? open.map(function (e) {
+    var emp = byId(employees, e.empId), job = byId(jobs, e.jobId);
+    return '<div class="status">' + esc(emp ? emp.name : e.empId) + ' · ' + esc(job ? job.name : e.jobId) +
+      ' · in ' + esc(fmtT(e.clockIn)) + ' · <b>' + fmtH(qbWorkedMs(e, now)) + ' h</b>' +
+      (qbOnBreak(e) ? ' <span class="flag ot">on break</span>' : '') +
+      (qbIsStale(e, now) ? ' <span class="flag bad">stale</span>' : '') + '</div>';
+  }).join('') : '<p class="note">Nobody is clocked in right now.</p>';
+}
+function renderWeek() {
+  var now = Date.now(), range = qbWeekRange(ui.weekOffset, now);
+  el('wkLabel').textContent = qbLocalDateKey(range.start) + ' → ' + qbLocalDateKey(qbAddDays(range.end, -1)) +
+    (ui.weekOffset === 0 ? ' (this week)' : '');
+  var list = entries.filter(function (e) { return e.clockIn >= range.start && e.clockIn < range.end; })
+    .sort(function (a, b) { return a.clockIn - b.clockIn; });
+  el('entryRows').innerHTML = list.length ? list.map(function (e) {
+    var emp = byId(employees, e.empId), job = byId(jobs, e.jobId), stale = qbIsStale(e, now);
+    var crosses = e.clockOut != null && qbDayStart(e.clockOut) !== qbDayStart(e.clockIn);
+    return '<tr><td>' + esc(fmtD(e.clockIn)) + '</td><td>' + esc(emp ? emp.name : e.empId) +
+      (e.seeded ? ' <span class="demo">demo</span>' : '') + '</td><td>' + esc(job ? job.name : e.jobId) +
+      '</td><td>' + esc(fmtT(e.clockIn)) + '</td><td>' + esc(fmtT(e.clockOut)) + (crosses ? ' <span class="flag">+1d</span>' : '') +
+      '</td><td>' + qbRoundMinutes(qbBreakMs(e, now)) + 'm</td><td>' + (stale ? '—' : fmtH(qbWorkedMs(e, now))) +
+      '</td><td>' + (e.clockOut == null ? (stale ? '<span class="flag bad">left open</span>' : '<span class="flag ok">open</span>') : '<span class="flag">closed</span>') +
+      '</td><td><button class="ghost" data-del="' + esc(e.id) + '">✕</button></td></tr>';
+  }).join('') : '<tr><td colspan="9" class="note">No entries in this week.</td></tr>';
+  var totals = {};
+  list.forEach(function (e) {
+    if (qbIsStale(e, now)) return; // never let a forgotten shift accumulate silently
+    totals[e.empId] = (totals[e.empId] || 0) + qbWorkedMs(e, now);
+  });
+  el('weekTotals').innerHTML = Object.keys(totals).map(function (empId) {
+    var emp = byId(employees, empId), ms = totals[empId];
+    return '<span>' + esc(emp ? emp.name : empId) + ' <b>' + fmtH(ms) + ' h</b>' +
+      (ms > 40 * QB_HOUR ? ' <span class="flag ot">&gt;40 h — check overtime with payroll</span>' : '') + '</span>';
+  }).join('') || '<span class="note">No counted hours this week.</span>';
+}
+function renderQbMap() {
+  el('qbMapRows').innerHTML =
+    employees.map(function (emp) {
+      return '<tr><td>Employee · ' + esc(emp.name) + '</td><td><input data-map-emp="' + esc(emp.id) + '" placeholder="EmployeeRef ID" value="' + esc(qbMap.employees[emp.id] || '') + '"></td></tr>';
+    }).join('') +
+    jobs.map(function (job) {
+      return '<tr><td>Customer/Job · ' + esc(job.name) + '</td><td><input data-map-job="' + esc(job.id) + '" placeholder="CustomerRef ID" value="' + esc(qbMap.customers[job.id] || '') + '"></td></tr>';
+    }).join('');
+  el('qbItemId').value = qbMap.itemId || '';
+}
+function render() {
+  el('clkEmp').innerHTML = options(employees, ui.empId, true);
+  el('clkJob').innerHTML = options(jobs, ui.jobId);
+  el('mEmp').innerHTML = options(employees, '', true);
+  el('mJob').innerHTML = options(jobs, '');
+  renderClockStatus(); renderRoster(); renderWeek(); renderQbMap();
+}
+
+/* ---------- events ---------- */
+el('btnIn').addEventListener('click', clockIn);
+el('btnBreak').addEventListener('click', toggleBreak);
+el('btnOut').addEventListener('click', clockOut);
+el('btnManual').addEventListener('click', addManual);
+el('clkEmp').addEventListener('change', function () { ui.empId = this.value; sSet('ui', ui); renderClockStatus(); });
+el('clkJob').addEventListener('change', function () { ui.jobId = this.value; sSet('ui', ui); });
+el('wkPrev').addEventListener('click', function () { ui.weekOffset--; sSet('ui', ui); renderWeek(); });
+el('wkNext').addEventListener('click', function () { ui.weekOffset++; sSet('ui', ui); renderWeek(); });
+el('btnAddEmp').addEventListener('click', function () {
+  var name = el('newEmpName').value.trim(); if (!name) { toast('Employee name required'); return; }
+  employees.push({ id: nid('emp'), name: name, role: el('newEmpRole').value.trim(), seeded: false });
+  sSet('employees', employees); el('newEmpName').value = ''; el('newEmpRole').value = ''; render();
+});
+el('btnAddJob').addEventListener('click', function () {
+  var name = el('newJobName').value.trim(); if (!name) { toast('Job name required'); return; }
+  jobs.push({ id: nid('job'), name: name, seeded: false });
+  sSet('jobs', jobs); el('newJobName').value = ''; render();
+});
+el('btnReset').addEventListener('click', function () {
+  if (!confirm('Wipe ALL local time-clock data (including non-demo entries) and reseed the demo?')) return;
+  var seed = buildSeed();
+  employees = seed.employees; jobs = seed.jobs; entries = seed.entries;
+  sSet('employees', employees); sSet('jobs', jobs); saveEntries(); render();
+});
+el('entryRows').addEventListener('click', function (ev) {
+  var id = ev.target && ev.target.dataset && ev.target.dataset.del;
+  if (!id) return;
+  if (!confirm('Delete this entry? This cannot be undone.')) return;
+  entries = entries.filter(function (e) { return e.id !== id; });
+  saveEntries(); render();
+});
+el('qbMapRows').addEventListener('input', function (ev) {
+  var t = ev.target;
+  if (t.dataset.mapEmp) qbMap.employees[t.dataset.mapEmp] = t.value.trim();
+  if (t.dataset.mapJob) qbMap.customers[t.dataset.mapJob] = t.value.trim();
+  sSet('qbmap', qbMap);
+});
+el('qbItemId').addEventListener('input', function () { qbMap.itemId = this.value.trim(); sSet('qbmap', qbMap); });
+el('btnIif').addEventListener('click', runIif);
+el('btnCsv').addEventListener('click', runCsv);
+el('btnJson').addEventListener('click', runJson);
+el('dlgClose').addEventListener('click', function () { el('dlgOut').close(); });
+el('dlgCopy').addEventListener('click', function () {
+  el('dlgText').select();
+  try { navigator.clipboard.writeText(el('dlgText').value).then(function () { toast('Copied'); }); }
+  catch (e) { document.execCommand && document.execCommand('copy'); toast('Copied'); }
+});
+el('dlgDownload').addEventListener('click', function () {
+  // Inert inside embedded artifact viewers — the copy button is the fallback.
+  var a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(el('dlgText').value);
+  a.download = this.dataset.name; document.body.appendChild(a); a.click(); a.remove();
+});
+
+/* live ticker: display only — nothing accumulates, so a backgrounded tab loses no time */
+setInterval(function () { renderClockStatus(); renderRoster(); }, 1000);
+
+try { localStorage.setItem(PREFIX + 'probe', '1'); localStorage.removeItem(PREFIX + 'probe'); }
+catch (e) { storageOk = false; document.getElementById('storageWarn').style.display = 'block'; }
+render();
+})();
+</script>
+</body>
+</html>
