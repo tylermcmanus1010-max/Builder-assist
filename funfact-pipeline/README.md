@@ -9,7 +9,7 @@ as the voiceover reaches it — renders a thumbnail, and uploads to YouTube.
 ```
 1. Topic picker ── Claude + web search: pick topic, verify facts, keep sources
 2. Scriptwriter ── Claude structured output: narration + image prompt per segment
-3. Image gen ───── FLUX via fal.ai: one 16:9 image per segment
+3. Image gen ───── FLUX via fal.ai or Replicate: one 16:9 image per segment
 4. Voiceover ───── ElevenLabs: one audio clip per segment (drives image timing)
 5. Assembly ────── ffmpeg: hard cuts per segment, captions, optional ducked music
 6. Thumbnail ───── Pillow: hook image + title text
@@ -46,6 +46,7 @@ Copy `.env.example` to `.env`, fill in, and export (or use `direnv`):
 |---|---|
 | `ANTHROPIC_API_KEY` | console.anthropic.com → API keys |
 | `FAL_KEY` | fal.ai → dashboard → keys |
+| `REPLICATE_API_TOKEN` | replicate.com → account → API tokens (alternative to fal) |
 | `ELEVENLABS_API_KEY` | elevenlabs.io → profile → API keys |
 
 ### 2. YouTube OAuth (one time)
@@ -86,6 +87,8 @@ Everything editable lives in `config.yaml`:
 - **Look**: `style_prefix` is prepended to every image prompt — this is your
   channel's visual identity. `image_model` trades cost for quality
   (`fal-ai/flux/schnell` ≈ $0.01/image, `fal-ai/flux-pro` ≈ $0.05–0.10).
+  `image_provider` picks fal.ai or Replicate (`replicate_image_model`,
+  ≈ $0.003/image for `black-forest-labs/flux-schnell`).
 - **Voice**: pick any ElevenLabs voice ID; `eleven_flash_v2_5` halves TTS cost
   vs `eleven_multilingual_v2`. Voice quality is the biggest perceived-quality
   lever on a faceless channel.

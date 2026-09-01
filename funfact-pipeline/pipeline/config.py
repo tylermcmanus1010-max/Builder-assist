@@ -28,7 +28,9 @@ class Config:
     # Models / services
     claude_model: str = "claude-opus-5"
     claude_fallback_model: str = "claude-opus-4-8"
+    image_provider: str = "auto"  # "fal", "replicate", or "auto" (first provider with a key)
     image_model: str = "fal-ai/flux/schnell"
+    replicate_image_model: str = "black-forest-labs/flux-schnell"
     image_width: int = 1920
     image_height: int = 1088  # multiple of 32 for FLUX; cropped to 1080 at assembly
     voice_id: str = "JBFqnCBsd6RMkjVDRZzb"  # ElevenLabs default voice; replace with yours
@@ -53,6 +55,7 @@ class Config:
     # Secrets (env only, never in config.yaml)
     anthropic_api_key: Optional[str] = None
     fal_key: Optional[str] = None
+    replicate_api_token: Optional[str] = None
     elevenlabs_api_key: Optional[str] = None
     yt_client_secret_path: str = str(PROJECT_ROOT / "client_secret.json")
     yt_token_path: str = str(PROJECT_ROOT / "token.json")
@@ -77,7 +80,7 @@ def load_config(path: Optional[Path] = None) -> Config:
     if config_path.exists():
         data = yaml.safe_load(config_path.read_text()) or {}
         for key, value in data.items():
-            if hasattr(cfg, key) and not key.endswith(("_key", "_secret_path", "_token_path")):
+            if hasattr(cfg, key) and not key.endswith(("_key", "_secret_path", "_token_path", "_api_token")):
                 setattr(cfg, key, value)
     # FUNFACT_ANTHROPIC_API_KEY is a fallback name for platforms that reserve
     # or strip the standard ANTHROPIC_API_KEY variable (e.g. Claude Code
@@ -86,6 +89,7 @@ def load_config(path: Optional[Path] = None) -> Config:
         os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("FUNFACT_ANTHROPIC_API_KEY")
     )
     cfg.fal_key = os.environ.get("FAL_KEY")
+    cfg.replicate_api_token = os.environ.get("REPLICATE_API_TOKEN")
     cfg.elevenlabs_api_key = os.environ.get("ELEVENLABS_API_KEY")
     cfg.yt_client_secret_path = os.environ.get("YT_CLIENT_SECRET_PATH", cfg.yt_client_secret_path)
     cfg.yt_token_path = os.environ.get("YT_TOKEN_PATH", cfg.yt_token_path)
