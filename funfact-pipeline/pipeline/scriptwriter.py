@@ -43,7 +43,10 @@ def write_script(cfg: Config, research: TopicResearch) -> VideoScript:
     def call(model: str):
         return client.messages.parse(
             model=model,
-            max_tokens=32000,
+            # The SDK requires streaming when max_tokens implies a possible
+            # >10-minute response (above ~21k tokens); a full script fits in
+            # far less, so stay under the non-streaming limit.
+            max_tokens=16000,
             system=SCRIPT_SYSTEM,
             messages=[{"role": "user", "content": prompt}],
             output_format=VideoScript,
