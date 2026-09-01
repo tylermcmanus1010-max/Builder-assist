@@ -50,22 +50,22 @@ class TestCommands(unittest.TestCase):
     def test_segment_command_shape(self):
         cmd = build_segment_command(
             self.cfg, Path("img.png"), Path("aud.mp3"), Path("cap.txt"),
-            duration=12.5, out=Path("out.mp4"), index=0, font="/font.ttf",
+            duration=12.5, out=Path("out.mp4"), font="/font.ttf",
         )
         joined = " ".join(cmd)
-        self.assertIn("zoompan", joined)
         self.assertIn("drawtext", joined)
         self.assertIn("-t 12.500", joined)
-        self.assertIn("1+0.10*on/375", joined)  # 12.5s * 30fps, zoom-in on even index
+        self.assertIn("crop=1920:1080", joined)
+        # Hard cuts only: image is held static, no motion or transition filters
+        self.assertNotIn("zoompan", joined)
+        self.assertNotIn("fade", joined)
 
-    def test_odd_index_zooms_out_and_caption_optional(self):
+    def test_caption_optional(self):
         cmd = build_segment_command(
             self.cfg, Path("img.png"), Path("aud.mp3"), None,
-            duration=10.0, out=Path("out.mp4"), index=1, font=None,
+            duration=10.0, out=Path("out.mp4"), font=None,
         )
-        joined = " ".join(cmd)
-        self.assertIn("1.10-0.10*on/300", joined)
-        self.assertNotIn("drawtext", joined)
+        self.assertNotIn("drawtext", " ".join(cmd))
 
     def test_music_command_ducks(self):
         cmd = build_music_command(self.cfg, Path("v.mp4"), Path("m.mp3"), Path("f.mp4"))

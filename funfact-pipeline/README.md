@@ -3,15 +3,15 @@
 A fully automated, faceless YouTube fun-fact channel. One command researches a
 topic (facts verified via web search with source URLs), writes a script,
 generates a custom illustration for every segment, synthesizes narration,
-assembles a 1080p video with Ken Burns motion and burned-in captions, renders a
-thumbnail, and uploads to YouTube.
+assembles a 1080p video with burned-in captions — hard cuts to each new image
+as the voiceover reaches it — renders a thumbnail, and uploads to YouTube.
 
 ```
 1. Topic picker ── Claude + web search: pick topic, verify facts, keep sources
 2. Scriptwriter ── Claude structured output: narration + image prompt per segment
 3. Image gen ───── FLUX via fal.ai: one 16:9 image per segment
 4. Voiceover ───── ElevenLabs: one audio clip per segment (drives image timing)
-5. Assembly ────── ffmpeg: pan/zoom, fades, captions, optional ducked music
+5. Assembly ────── ffmpeg: hard cuts per segment, captions, optional ducked music
 6. Thumbnail ───── Pillow: hook image + title text
 7. Upload ──────── YouTube Data API (unlisted by default = your review gate)
 ```

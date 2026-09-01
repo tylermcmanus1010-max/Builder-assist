@@ -1,10 +1,11 @@
 """Stage 5: assemble the video with ffmpeg.
 
-Each segment is rendered as its own clip — Ken Burns pan/zoom over the
-segment's image for exactly the length of its narration, caption burned in,
-short fade at each end — then the clips are concatenated and optional
-background music is ducked underneath. Command builders are separated from
-execution so they can be unit-tested without running ffmpeg.
+Each segment is rendered as its own clip — the segment's image held static
+for exactly the length of its narration, caption burned in — then the clips
+are concatenated with hard cuts, so the picture changes the moment the
+voiceover moves to the next subject. Optional background music is ducked
+underneath. Command builders are separated from execution so they can be
+unit-tested without running ffmpeg.
 """
 
 import subprocess
@@ -14,7 +15,6 @@ from typing import List, Optional
 from .config import Config, find_font
 from .models import SegmentAssets
 
-FADE_SECONDS = 0.25
 AUDIO_TAIL_PAD = 0.45  # breathing room after each narration clip
 
 
@@ -34,25 +34,13 @@ def build_segment_command(
     caption_file: Optional[Path],
     duration: float,
     out: Path,
-    index: int,
     font: Optional[str],
 ) -> List[str]:
-    total_frames = max(1, int(duration * cfg.fps))
-    # Alternate zoom direction per segment so the motion doesn't feel looped
-    if index % 2 == 0:
-        zoom = f"1+0.10*on/{total_frames}"
-    else:
-        zoom = f"1.10-0.10*on/{total_frames}"
-
     filters = [
-        "scale=3840:-2",  # oversample before zoompan to avoid jitter
-        (
-            f"zoompan=z='{zoom}':d=1:"
-            "x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
-            f"s={cfg.video_width}x{cfg.video_height}:fps={cfg.fps}"
-        ),
-        f"fade=t=in:st=0:d={FADE_SECONDS}",
-        f"fade=t=out:st={max(0.0, duration - FADE_SECONDS):.3f}:d={FADE_SECONDS}",
+        # Fill the frame and center-crop (source may be e.g. 1920x1088)
+        f"scale={cfg.video_width}:{cfg.video_height}:force_original_aspect_ratio=increase",
+        f"crop={cfg.video_width}:{cfg.video_height}",
+        f"fps={cfg.fps}",
     ]
     if caption_file and font:
         filters.append(
@@ -111,7 +99,7 @@ def assemble(
             caption_file = clips_dir / f"caption_{i:02d}.txt"
             caption_file.write_text(caption)
         clip = clips_dir / f"clip_{i:02d}.mp4"
-        command = build_segment_command(cfg, image, audio, caption_file, duration, clip, i, font)
+        command = build_segment_command(cfg, image, audio, caption_file, duration, clip, font)
         subprocess.run(command, check=True, capture_output=True)
         assets.append(SegmentAssets(
             index=i, image_path=str(image), audio_path=str(audio),
