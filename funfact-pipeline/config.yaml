@@ -1,0 +1,45 @@
+# Channel configuration. Secrets never go here - they come from env vars
+# (see .env.example). Anything omitted falls back to defaults in pipeline/config.py.
+
+channel_name: Fun Fact Channel
+
+subject_wheel:
+  - history
+  - biology
+  - space
+  - food
+  - geography
+  - technology
+  - ocean life
+  - the human body
+  - language
+  - physics
+
+segments_per_video: 14
+
+# Prefixed to every image prompt for a consistent channel look. Tweak freely.
+style_prefix: >-
+  Vibrant editorial illustration, flat color style, bold shapes, high contrast,
+  no text, no words, no letters.
+
+# claude-opus-5 writes research + scripts; the fallback runs only if the
+# primary model declines a request.
+claude_model: claude-opus-5
+claude_fallback_model: claude-opus-4-8
+
+# fal.ai model. Cheap/fast: fal-ai/flux/schnell. Higher quality: fal-ai/flux-pro.
+image_model: fal-ai/flux/schnell
+
+# ElevenLabs. Browse voices at elevenlabs.io/voice-library, paste the voice ID.
+# eleven_flash_v2_5 is half the price of eleven_multilingual_v2.
+voice_id: JBFqnCBsd6RMkjVDRZzb
+tts_model: eleven_multilingual_v2
+
+# Optional royalty-free music file (e.g. from the YouTube Audio Library),
+# looped and ducked under narration. Leave null for no music.
+music_path: null
+music_volume: 0.12
+
+# unlisted = your review gate: check the video in YouTube Studio, flip to
+# public. Change to "public" only when you trust the pipeline fully.
+privacy_status: unlisted

@@ -1,0 +1,74 @@
+# GitHub Actions workflow for the nightly video.
+#
+# This file is NOT active where it sits. When you move funfact-pipeline to its
+# own repository (recommended), copy it to .github/workflows/daily-video.yml
+# there, then add these repository secrets (Settings -> Secrets -> Actions):
+#   ANTHROPIC_API_KEY, FAL_KEY, ELEVENLABS_API_KEY,
+#   YT_CLIENT_SECRET (contents of client_secret.json),
+#   YT_TOKEN         (contents of token.json from `python -m pipeline.auth`)
+
+name: Daily fun-fact video
+
+on:
+  schedule:
+    - cron: "0 9 * * *"  # 09:00 UTC daily; adjust to taste
+  workflow_dispatch: {}   # manual "Run workflow" button for testing
+
+permissions:
+  contents: write  # push the updated topic ledger back
+
+concurrency:
+  group: daily-video
+  cancel-in-progress: false
+
+jobs:
+  produce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Restore YouTube credentials
+        env:
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_TOKEN: ${{ secrets.YT_TOKEN }}
+        run: |
+          printf '%s' "$YT_CLIENT_SECRET" > client_secret.json
+          printf '%s' "$YT_TOKEN" > token.json
+
+      - name: Produce and upload today's video
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FAL_KEY: ${{ secrets.FAL_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: python -m pipeline.run
+
+      - name: Commit updated topic ledger
+        run: |
+          git config user.name "funfact-pipeline"
+          git config user.email "actions@users.noreply.github.com"
+          git add state/topics.json
+          git diff --cached --quiet || git commit -m "Record $(date -u +%F) topic"
+          git push
+
+      - name: Keep the video as a run artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-${{ github.run_id }}
+          path: |
+            build/**/final.mp4
+            build/**/manifest.json
+            build/**/thumbnail.jpg
+          retention-days: 7
