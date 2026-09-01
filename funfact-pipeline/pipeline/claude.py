@@ -18,7 +18,13 @@ def make_client(cfg: Config) -> anthropic.Anthropic:
         # Fall through to the SDK's own resolution (ANTHROPIC_AUTH_TOKEN,
         # `ant auth login` profile) before failing.
         return anthropic.Anthropic()
-    return anthropic.Anthropic(api_key=cfg.anthropic_api_key)
+    # Pin the official endpoint: some managed environments export an
+    # ANTHROPIC_BASE_URL for their own tooling, which would otherwise
+    # silently redirect our calls.
+    return anthropic.Anthropic(
+        api_key=cfg.anthropic_api_key,
+        base_url="https://api.anthropic.com",
+    )
 
 
 def with_refusal_fallback(cfg: Config, call: Callable[[str], "anthropic.types.Message"]):

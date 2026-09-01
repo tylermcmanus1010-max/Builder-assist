@@ -79,7 +79,12 @@ def load_config(path: Optional[Path] = None) -> Config:
         for key, value in data.items():
             if hasattr(cfg, key) and not key.endswith(("_key", "_secret_path", "_token_path")):
                 setattr(cfg, key, value)
-    cfg.anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY")
+    # FUNFACT_ANTHROPIC_API_KEY is a fallback name for platforms that reserve
+    # or strip the standard ANTHROPIC_API_KEY variable (e.g. Claude Code
+    # remote environments).
+    cfg.anthropic_api_key = (
+        os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("FUNFACT_ANTHROPIC_API_KEY")
+    )
     cfg.fal_key = os.environ.get("FAL_KEY")
     cfg.elevenlabs_api_key = os.environ.get("ELEVENLABS_API_KEY")
     cfg.yt_client_secret_path = os.environ.get("YT_CLIENT_SECRET_PATH", cfg.yt_client_secret_path)
