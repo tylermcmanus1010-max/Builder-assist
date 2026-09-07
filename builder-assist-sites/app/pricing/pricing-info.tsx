@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- legacy marketing shell uses hash routes */
 import { ArrowIcon } from "./pricing-icons";
 
 export function MaterialSection() {
@@ -10,7 +11,9 @@ export function FaqSection() {
   const questions = [
     ["What happens after the 12-month founding period?", "The founding rate ends after month 12. The company then selects the standard monthly rate or the available annual rate for its plan."],
     ["Are clients, vendors and subcontractors charged as users?", "Core and Complete include unlimited external collaborators. Paid internal-user allowances apply to the people operating Builder Assist inside your company."],
-    ["What happens when AI-plan or 3D usage exceeds the allowance?", "Overage pricing is not published on this page. Builder Assist should confirm the applicable upgrade or usage terms in the order form before any overage charge is incurred."],
+    ["What counts as one processed project?", "One project credit covers one job or site and one initial plan-and-specification package totaling up to 50 MB. The project record can remain in the workspace after the initial processing cycle."],
+    ["What happens when a plan package is larger than 50 MB?", "Capacity is based on total processed file size rather than page count. A 51-100 MB package uses two project credits, a 101-150 MB package uses three, and so on. Additional credits are $79 each."],
+    ["How are revised plans handled?", "A revised or replacement plan package that requires another processing run uses project capacity based on the size of that new package. Files stored without a new processing run do not consume another processing credit."],
     ["How much onboarding is included?", "Core includes standard support and setup guides. Complete includes priority onboarding and support. Scale includes a dedicated implementation manager. Enterprise implementation and migration are scoped through sales."],
     ["Is every listed capability and integration available today?", "The plans describe the intended commercial scope. During sales review, Builder Assist should identify each capability as live, beta or planned and include only production-ready commitments in the signed order form."],
     ["Are fencing and flooring included in a software subscription?", "No. Physical products, delivery and installation are quoted separately. The software can help organize and compare project purchasing, but material charges remain separate."],
