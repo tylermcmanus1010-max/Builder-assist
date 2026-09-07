@@ -23,6 +23,16 @@ const eslintConfig = defineConfig([
       "react-hooks/set-state-in-effect": "off",
     },
   },
+  {
+    files: [
+      "app/pricing/pricing-marketing.tsx",
+      "app/pricing/pricing-plans.tsx",
+    ],
+    rules: {
+      // Marketing copy intentionally contains natural apostrophes in JSX text.
+      "react/no-unescaped-entities": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;
