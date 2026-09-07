@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- legacy marketing shell uses hash routes */
 import { ArrowIcon, BrandMark } from "./pricing-icons";
 
 export function ModuleSection() {
