@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- legacy marketing shell uses hash routes */
 import { ArrowIcon, CheckIcon } from "./pricing-icons";
 
 export function PricingHero() {
@@ -5,7 +6,7 @@ export function PricingHero() {
     ["01", "Lead", "Growify CRM and follow-up"],
     ["02", "Plans", "Uploads and project record"],
     ["03", "Price", "Takeoff, estimate and margin"],
-    ["04", "Visualize", "Selections and 3D decisions"],
+    ["04", "Approve", "Selections, scope and decisions"],
     ["05", "Purchase", "Compare, order and deliver"],
     ["06", "Build", "Schedule, field and approvals"],
     ["07", "Grow", "Closeout, referral and next job"],
@@ -23,7 +24,7 @@ export function PricingHero() {
             <a className="flex min-h-14 items-center justify-center border border-white/30 bg-white/5 px-6 text-[13px] font-black transition hover:-translate-y-0.5 hover:border-[#68d4ff] hover:bg-white/10" href="/index.html#/get-pricing">Request a founding demo</a>
           </div>
           <div className="mt-7 flex flex-wrap gap-x-5 gap-y-3 text-[11px] font-bold text-[#aebfd7]">
-            {["Founding rates stay month-to-month for 12 months", "Unlimited external collaborators on Core and Complete", "Clear usage allowances by plan"].map((item) => <span key={item} className="flex items-start gap-2"><CheckIcon className="h-4 w-4 shrink-0 text-[#68d4ff]" />{item}</span>)}
+            {["Founding rates stay month-to-month for 12 months", "Unlimited external collaborators on Core and Complete", "Project-based processing allowances"].map((item) => <span key={item} className="flex items-start gap-2"><CheckIcon className="h-4 w-4 shrink-0 text-[#68d4ff]" />{item}</span>)}
           </div>
         </div>
         <div className="relative overflow-hidden border border-white/20 bg-white/[.07] shadow-[0_28px_70px_rgba(0,0,0,.27)] backdrop-blur-xl">
