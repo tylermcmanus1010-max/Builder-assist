@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- legacy marketing shell uses hash routes */
 import { ArrowIcon, CheckIcon } from "./pricing-icons";
 import { billingOptions, plans, type BillingMode, type SoftwarePlan } from "./pricing-data";
 
@@ -34,13 +35,21 @@ function PlanCard({ plan, billing }: { plan: SoftwarePlan; billing: BillingMode 
           <small className="text-[9px] text-[#8291a4]">{price.secondary}</small>
         </div>
       </div>
-      <div className="mt-5 grid grid-cols-2 gap-px border border-[#d9e5f7] bg-[#d9e5f7]">
-        {[plan.pages, plan.models].map((item, index) => (
-          <div key={item} className="min-w-0 bg-[#f2f7ff] p-3.5">
-            <small className="mb-1.5 block text-[7px] font-black tracking-[.13em] text-[#71849c]">{index ? "VISUALIZATION" : "PLAN PROCESSING"}</small>
-            <strong className="block text-[10px] leading-4 text-[#071a36]">{item}</strong>
+      <div className="mt-5 border border-[#d9e5f7] bg-[#f2f7ff]">
+        <div className="border-b border-[#d9e5f7] p-4">
+          <small className="mb-1.5 block text-[7px] font-black tracking-[.13em] text-[#71849c]">MONTHLY PROJECT CAPACITY</small>
+          <strong className="block text-[12px] leading-5 text-[#071a36]">{plan.projects}</strong>
+        </div>
+        <div className="grid grid-cols-2 gap-px bg-[#d9e5f7]">
+          <div className="min-w-0 bg-[#f2f7ff] p-3.5">
+            <small className="mb-1.5 block text-[7px] font-black tracking-[.13em] text-[#71849c]">PER PROJECT</small>
+            <strong className="block text-[10px] leading-4 text-[#071a36]">{plan.projectSize}</strong>
           </div>
-        ))}
+          <div className="min-w-0 bg-[#f2f7ff] p-3.5">
+            <small className="mb-1.5 block text-[7px] font-black tracking-[.13em] text-[#71849c]">EXTRA CAPACITY</small>
+            <strong className="block text-[10px] leading-4 text-[#071a36]">{plan.extraProject}</strong>
+          </div>
+        </div>
       </div>
       <ul className="my-6 grid gap-3 text-[11px] leading-4 text-[#3f536f]">
         {plan.highlights.map((feature) => <li key={feature} className="flex items-start gap-2"><CheckIcon className="h-4 w-4 shrink-0 text-[#0b4fd3]" /><span>{feature}</span></li>)}
@@ -66,15 +75,19 @@ export function PricingPlans({ billing, setBilling }: { billing: BillingMode; se
           {billingOptions.map((option) => <button key={option.id} type="button" role="tab" aria-selected={billing === option.id} className={billing === option.id ? "min-h-14 bg-white px-5 text-left text-[#0b4fd3] shadow-[0_5px_18px_rgba(7,26,54,.11)]" : "min-h-14 bg-transparent px-5 text-left text-[#48617f]"} onClick={() => setBilling(option.id)}><strong className="block text-[11px]">{option.label}</strong><small className="mt-1 block text-[8px]">{option.note}</small></button>)}
         </div>
       </div>
+      <div className="mb-5 grid gap-4 border-l-4 border-[#0b4fd3] bg-[#eaf3ff] p-5 lg:grid-cols-[.72fr_1.28fr] lg:items-center lg:gap-8">
+        <div><span className="block text-[8px] font-black tracking-[.16em] text-[#0b4fd3]">PROJECT-BASED PROCESSING</span><strong className="mt-1 block text-base text-[#071a36]">Customers buy project capacity, not page counts.</strong></div>
+        <p className="m-0 text-xs leading-5 text-[#4f6480]">One project credit covers one job or site and an initial plan-and-specification package up to 50 MB. A 51-100 MB package uses two credits. Additional project credits are $79 each.</p>
+      </div>
       {billing === "founding" && <div className="mb-5 grid gap-3 border-l-4 border-[#68d4ff] bg-gradient-to-r from-[#071a36] to-[#0b3d8c] p-5 text-white lg:grid-cols-[.7fr_1.3fr] lg:items-center lg:gap-8"><div><span className="block text-[8px] font-black tracking-[.16em] text-[#68d4ff]">FOUNDING CUSTOMER PROGRAM</span><strong className="mt-1 block text-base">The discount is temporary. The value is not.</strong></div><p className="m-0 text-xs leading-5 text-[#cad9ee]">Founding customers receive the lower month-to-month rate for their first 12 months. After that period, they select standard monthly or annual pricing.</p></div>}
       <div className="grid items-stretch gap-6 xl:grid-cols-3">{plans.map((plan) => <PlanCard key={plan.id} plan={plan} billing={billing} />)}</div>
       <article className="mt-5 grid items-center gap-8 bg-gradient-to-r from-[#071a36] to-[#0b3b88] p-7 text-white lg:grid-cols-[1.2fr_.65fr_1fr] lg:p-10">
-        <div><span className="text-[8px] font-black tracking-[.17em] text-[#68d4ff]">ENTERPRISE & SUPPLIER NETWORK</span><h3 className="my-3 text-3xl font-black leading-tight tracking-[-.045em]">Configured for manufacturers, distributors, franchises and large builders.</h3><p className="m-0 text-[11px] leading-5 text-[#b9cce6]">Enterprise pricing is scoped around implementation, integrations, catalogs, processing volume, security, support and service-level requirements.</p></div>
+        <div><span className="text-[8px] font-black tracking-[.17em] text-[#68d4ff]">ENTERPRISE & SUPPLIER NETWORK</span><h3 className="my-3 text-3xl font-black leading-tight tracking-[-.045em]">Configured for manufacturers, distributors, franchises and large builders.</h3><p className="m-0 text-[11px] leading-5 text-[#b9cce6]">Enterprise pricing is scoped around implementation, integrations, catalogs, project-processing volume, security, support and service-level requirements.</p></div>
         <div className="border border-white/20 bg-white/5 p-6"><small className="mb-2 block text-[7px] font-black tracking-[.13em] text-[#68d4ff]">INDICATIVE MONTHLY STARTING RANGE</small><strong className="block text-3xl font-black tracking-[-.05em]">$1,500-$2,500+</strong><span className="mt-2 block text-[9px] text-[#aac0dd]">Final price configured through sales</span></div>
-        <div className="grid gap-2 text-[10px] leading-4 text-[#d5e1f2]">{["Implementation and migration", "Private product catalogs and dealer networks", "White-label customer experience", "Custom integrations and governance", "High-volume AI and 3D processing", "Configured security, support and service levels"].map((feature) => <span key={feature} className="flex gap-2"><CheckIcon className="h-4 w-4 shrink-0 text-[#68d4ff]" />{feature}</span>)}</div>
+        <div className="grid gap-2 text-[10px] leading-4 text-[#d5e1f2]">{["Implementation and migration", "Private product catalogs and dealer networks", "White-label customer experience", "Custom integrations and governance", "High-volume project processing", "Configured security, support and service levels"].map((feature) => <span key={feature} className="flex gap-2"><CheckIcon className="h-4 w-4 shrink-0 text-[#68d4ff]" />{feature}</span>)}</div>
         <a className="flex min-h-12 items-center justify-center gap-3 bg-[#68d4ff] px-5 text-xs font-black text-[#071a36] transition hover:-translate-y-0.5 lg:col-start-3 lg:w-fit" href="/index.html#/get-pricing">Design an enterprise plan <ArrowIcon className="h-4 w-4" /></a>
       </article>
-      <p className="mt-5 text-[9px] leading-4 text-[#75859a]">Founding rates apply for the first 12 months and are not lifetime prices. Annual figures are effective monthly rates billed annually. All software prices are in U.S. dollars and exclude applicable taxes, custom services and usage beyond the stated allowance.</p>
+      <p className="mt-5 text-[9px] leading-4 text-[#75859a]">Founding rates apply for the first 12 months and are not lifetime prices. Annual figures are effective monthly rates billed annually. Project credits apply when Builder Assist processes a new plan-and-specification package. Revised or replacement packages that require another processing run use capacity based on their total file size. All prices are in U.S. dollars and exclude applicable taxes and custom services.</p>
     </section>
   );
 }
