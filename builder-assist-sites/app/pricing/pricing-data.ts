@@ -10,8 +10,9 @@ export type SoftwarePlan = {
   annual: number;
   annualSavings: string;
   users: string;
-  pages: string;
-  models: string;
+  projects: string;
+  projectSize: string;
+  extraProject: string;
   featured?: boolean;
   highlights: string[];
 };
@@ -33,8 +34,9 @@ export const plans: SoftwarePlan[] = [
     annual: 169,
     annualSavings: "Save $360/year",
     users: "3 internal users",
-    pages: "250 AI plan pages / month",
-    models: "2 3D conversions / month",
+    projects: "2 processed projects / month",
+    projectSize: "Up to 50 MB per project",
+    extraProject: "$79 per extra project credit",
     highlights: [
       "Plan and specification uploads",
       "Digital takeoffs and basic assemblies",
@@ -56,14 +58,15 @@ export const plans: SoftwarePlan[] = [
     annual: 425,
     annualSavings: "Save $888/year",
     users: "Up to 10 internal users",
-    pages: "1,500 AI plan pages / month",
-    models: "10 3D conversions / month",
+    projects: "6 processed projects / month",
+    projectSize: "Up to 50 MB per project",
+    extraProject: "$79 per extra project credit",
     featured: true,
     highlights: [
       "Full Buildify, Assistify and Growify access",
       "AI-assisted takeoff and estimate generation",
       "Estimate review and missing-scope detection",
-      "Interactive selections and 3D visualization",
+      "Selections, allowances and client approvals",
       "Vendor RFQs, material comparisons and POs",
       "Schedules, daily logs and field records",
       "Advanced CRM and automated follow-up",
@@ -80,8 +83,9 @@ export const plans: SoftwarePlan[] = [
     annual: 765,
     annualSavings: "Save $1,608/year",
     users: "25-30 internal users",
-    pages: "5,000 AI plan pages / month",
-    models: "30 3D conversions / month",
+    projects: "12 processed projects / month",
+    projectSize: "Up to 50 MB per project",
+    extraProject: "$79 per extra project credit",
     highlights: [
       "Multiple companies, branches or divisions",
       "Advanced roles and approval thresholds",
@@ -135,7 +139,7 @@ export const detailedScope = [
           "Estimate review and missing-scope detection",
           "Assemblies, alternates and allowances",
           "Branded proposals, contracts and deposits",
-          "Selections and interactive 3D visualization",
+          "Selections, allowances and client approvals",
           "Advanced CRM and automated follow-up",
         ],
       },
@@ -196,8 +200,9 @@ export const detailedScope = [
 export const comparisonRows = [
   ["Internal office users", "3", "Up to 10", "25-30", "Configured"],
   ["External collaborators", "Unlimited", "Unlimited", "Included", "Configured"],
-  ["AI plan pages / month", "250", "1,500", "5,000", "High-volume"],
-  ["3D conversions / month", "2", "10", "30", "Custom volume"],
+  ["Processed projects / month", "2", "6", "12", "Configured"],
+  ["Included size / project", "Up to 50 MB", "Up to 50 MB", "Up to 50 MB", "Configured"],
+  ["Additional project credit", "$79", "$79", "$79", "Volume pricing"],
   ["Estimating + proposals", "Core", "Full", "Full + controls", "Custom"],
   ["Supplier + purchasing", "Basic compare", "RFQs, POs, delivery", "Regional controls", "Network-scale"],
   ["Project execution", "Core", "Full", "Multi-team", "Custom workflows"],
