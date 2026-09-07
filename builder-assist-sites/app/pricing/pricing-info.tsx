@@ -1,29 +1,25 @@
-/* eslint-disable @next/next/no-html-link-for-pages -- legacy marketing shell uses hash routes */
-import { ArrowIcon } from "./pricing-icons";
-
-export function MaterialSection() {
-  return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#071a36] to-[#0a347e] px-5 py-24 text-white sm:px-[6vw] sm:py-28"><div className="absolute -right-24 -top-32 h-80 w-80 rounded-full bg-[#68d4ff]/15 blur-3xl" /><div className="relative mx-auto max-w-[1268px]"><div className="mb-12 grid items-end gap-6 lg:grid-cols-[1.15fr_.85fr] lg:gap-16"><div><span className="mb-4 block text-[10px] font-black tracking-[.19em] text-[#68d4ff]">PHYSICAL PRODUCTS</span><h2 className="text-[39px] font-black leading-[.96] tracking-[-.06em] uppercase sm:text-[54px]">Software and materials stay clearly separated.</h2></div><p className="m-0 text-[15px] leading-7 text-[#c2d2e9]">Builder Assist can also supply project materials. Product charges are quoted separately from platform and plan-reader pricing.</p></div><div className="grid gap-5 lg:grid-cols-2"><article className="grid gap-5 rounded-[24px] border border-white/20 bg-white/[.07] p-7 shadow-[0_20px_50px_rgba(0,0,0,.12)]"><span className="text-[8px] font-black tracking-[.17em] text-[#68d4ff]">TEMPORARY ANTI-CLIMB FENCE</span><div><strong className="block text-[44px] font-black tracking-[-.055em]">$2.50</strong><small className="text-[10px] text-[#acc0dd]">per linear foot / standard</small></div><p className="m-0 text-[11px] text-[#c5d5eb]">Basic privacy mesh: <b className="text-white">+$0.75 per linear foot</b></p><a className="flex w-fit items-center gap-3 border-b-2 border-[#68d4ff] pb-2 text-xs font-black text-[#68d4ff]" href="/index.html#/get-pricing">Price a fence project <ArrowIcon className="h-4 w-4" /></a></article><article className="grid gap-5 rounded-[24px] border border-white/20 bg-white/[.07] p-7 shadow-[0_20px_50px_rgba(0,0,0,.12)]"><span className="text-[8px] font-black tracking-[.17em] text-[#68d4ff]">ENGINEERED HARDWOOD</span><div><strong className="block text-[44px] font-black tracking-[-.055em]">$4.00-$5.75</strong><small className="text-[10px] text-[#acc0dd]">per square foot</small></div><p className="m-0 text-[11px] text-[#c5d5eb]">Final price depends on product, finish, quantity and availability.</p><a className="flex w-fit items-center gap-3 border-b-2 border-[#68d4ff] pb-2 text-xs font-black text-[#68d4ff]" href="/index.html#/get-pricing">Price a flooring project <ArrowIcon className="h-4 w-4" /></a></article></div><p className="mt-5 text-[9px] leading-4 text-[#8fa8ca]">Final material quotes may vary by specifications, quantity, rental term, delivery, installation, site conditions, finish and availability.</p></div></section>
-  );
-}
-
 export function FaqSection() {
   const questions = [
-    ["How do the project sliders affect my monthly price?", "The platform price covers your selected Builder Assist software level. The sliders add your chosen monthly plan-reader capacity. You can select 50-page uploads, 100-page uploads or a mix of both."],
-    ["How does progressive volume pricing work?", "Progressive pricing means only the projects inside each tier receive that tier's rate. For Builder Scale 50-page uploads, projects 1-10 are $10 each, 11-20 are $8 each, 21-35 are $7.50 each and projects above 35 are $7 each."],
-    ["How are 100-page uploads priced?", "Across Core, Complete and Scale, the first 15 selected 100-page uploads are $15 each, uploads 16-25 are $12 each and uploads above 25 are $10 each."],
-    ["What do 50 Build Plan Pages and 100 Build Plan Pages mean?", "These are the commercial upload sizes shown on the pricing page. One upload applies to one project plan package up to the selected page allowance. Unusually large scans, supplemental packages or repeated revisions may require added capacity."],
-    ["Can I change project volume from month to month?", "Yes. The intended model allows the company to change its future monthly plan-reader capacity before the next billing cycle, subject to the final order-form rules and any minimums for Builder Scale."],
-    ["What is included with Pay by the Plan?", "Pay by the Plan is designed for occasional processing without a monthly platform commitment. A 50-page plan upload is $75 and a 100-page plan upload is $135. Full Growify, Assistify and ongoing company workflow access require a platform plan."],
-    ["What does the $1,500-$2,500 custom enterprise fee cover?", "It is a one-time build and configuration range for an industry-specific quoting system, such as a window, flooring, fencing, cabinet, manufacturing or distribution workflow. The final scope may include quote logic, forms, catalogs, Growify, Assistify and integrations. Ongoing plan-reader volume, hosting, support and custom services are priced monthly."],
-    ["What happens after the 12-month founding period?", "The founding platform rate ends after month 12. The company then selects the standard monthly platform rate or the available annual platform rate. Plan-reader capacity remains based on the selected monthly project mix."],
-    ["Are clients, vendors and subcontractors charged as users?", "Core and Complete include unlimited external collaborators. Paid internal-user allowances apply to the people operating Builder Assist inside your company."],
-    ["How are revised plans handled?", "A revised or replacement plan package that requires another processing run counts as another upload at the applicable 50-page or 100-page level. Simple file storage without a new processing run does not create another reader charge."],
-    ["Is every listed capability and integration available today?", "The plans describe the intended commercial scope. During sales review, Builder Assist should identify each capability as live, beta or planned and include only production-ready commitments in the signed order form."],
-    ["Are fencing and flooring included in a software subscription?", "No. Physical products, delivery and installation are quoted separately. The software can organize and compare project purchasing, but material charges remain separate."],
+    ["How do the sliders affect the monthly price?", "The selected platform rate is combined with the number and size of build-plan uploads chosen for that month."],
+    ["Why does Builder Core only offer 50-page uploads?", "Core is the lean entry plan. Customers that need 100-page uploads can select Builder Complete, Builder Scale or Pay by the Plan."],
+    ["Are the listed capabilities available today?", "Yes. Everything listed as included is available today. The only exceptions are items explicitly marked in red as Coming soon."],
+    ["What is included in the enterprise build price?", "The $1,500-$2,500 range covers the one-time design and configuration of a specialized company quote system. Ongoing reader volume, hosting and support receive a custom monthly quote."],
   ];
 
   return (
-    <section className="mx-auto grid w-full max-w-[1440px] gap-12 px-5 py-24 sm:px-[6vw] sm:py-28 lg:grid-cols-[.68fr_1.32fr] lg:gap-16"><div className="self-start lg:sticky lg:top-28"><span className="mb-4 block text-[10px] font-black tracking-[.19em] text-[#0b4fd3]">PRICING QUESTIONS</span><h2 className="text-[39px] font-black leading-[.96] tracking-[-.06em] text-[#071a36] uppercase sm:text-[54px]">Know exactly what changes the price.</h2><p className="mt-6 text-[13px] leading-6 text-[#5e6f89]">Platform access, plan-reader volume, custom implementation and physical materials are separated so customers can see what they are paying for.</p></div><div className="overflow-hidden rounded-[24px] border border-[#d9e5f7] bg-white shadow-[0_18px_45px_rgba(7,26,54,.06)]">{questions.map(([question, answer]) => <details key={question} className="border-b border-[#d9e5f7] last:border-0"><summary className="grid min-h-20 cursor-pointer list-none grid-cols-[1fr_30px] items-center gap-5 px-5 py-4 text-sm font-black leading-5 text-[#071a36]"><span>{question}</span><i className="text-2xl not-italic text-[#0b4fd3]">+</i></summary><p className="-mt-1 mr-10 px-5 pb-6 text-xs leading-6 text-[#5e6f89]">{answer}</p></details>)}</div></section>
+    <section className="mx-auto grid w-full max-w-[1440px] gap-10 px-5 py-20 sm:px-[6vw] sm:py-24 lg:grid-cols-[.72fr_1.28fr] lg:gap-14" id="faq">
+      <div>
+        <span className="text-[8px] font-black tracking-[.16em] text-[#0b4fd3]">PRICING QUESTIONS</span>
+        <h2 className="mt-3 text-[38px] font-black leading-[.96] tracking-[-.055em] text-[#071a36] sm:text-[54px]">Simple answers.</h2>
+      </div>
+      <div className="overflow-hidden rounded-[22px] border border-[#d9e5f7] bg-white shadow-[0_17px_42px_rgba(7,26,54,.06)]">
+        {questions.map(([question, answer], index) => (
+          <details className="border-b border-[#d9e5f7] last:border-0" key={question} open={index === 0}>
+            <summary className="grid min-h-17 cursor-pointer list-none grid-cols-[1fr_28px] items-center gap-4 px-5 py-4 text-[11px] font-black leading-5 text-[#071a36]"><span>{question}</span><i className="text-xl not-italic text-[#0b4fd3]">+</i></summary>
+            <p className="-mt-1 mr-10 px-5 pb-5 text-[9px] leading-5 text-[#5e6f89]">{answer}</p>
+          </details>
+        ))}
+      </div>
+    </section>
   );
 }
