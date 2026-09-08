@@ -1,0 +1,1 @@
+This marker confirms the full priced-product and product-photo catalog workflow payload was reconstructed, checksum-protected, and ready for a manual workflow_dispatch run.
