@@ -1,0 +1,234 @@
+name: Phoenix full priced products and photos catalog v4
+
+on:
+  push:
+    branches:
+      - catalog/full-priced-products-photos-20260907-v3
+    paths:
+      - ".github/workflows/phoenix-catalog-v4.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: phoenix-full-catalog-v4-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PAYLOAD_BRANCH: catalog/full-priced-products-photos-20260907-v1
+
+jobs:
+  validate-pipeline:
+    name: Validate catalog payload v4
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out payload branch
+        uses: actions/checkout@v4
+        with:
+          ref: catalog/full-priced-products-photos-20260907-v1
+
+      - name: Reconstruct and validate pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/catalog
+          cat \
+            catalog-pipeline/pipeline.b64.part00a \
+            catalog-pipeline/pipeline.b64.part00b \
+            catalog-pipeline/pipeline.b64.part01 \
+            catalog-pipeline/pipeline.b64.part02 \
+            catalog-pipeline/pipeline.b64.part03 \
+            catalog-pipeline/pipeline.b64.part04 \
+            catalog-pipeline/pipeline.b64.part05 \
+            catalog-pipeline/pipeline.b64.part06 \
+            catalog-pipeline/pipeline.b64.part07 \
+            | base64 --decode > /tmp/catalog-pipeline.tar.gz
+          sha256sum /tmp/catalog-pipeline.tar.gz
+          tar -tzf /tmp/catalog-pipeline.tar.gz
+          tar -xzf /tmp/catalog-pipeline.tar.gz -C /tmp/catalog
+          test -s /tmp/catalog/catalog_pipeline.py
+          test -s /tmp/catalog/requirements.txt
+          test -s /tmp/catalog/supplier_master_500.csv.gz
+          python -m py_compile /tmp/catalog/catalog_pipeline.py
+          python - <<'PY'
+          import csv
+          import gzip
+          with gzip.open('/tmp/catalog/supplier_master_500.csv.gz', 'rt', encoding='utf-8-sig', newline='') as handle:
+              rows = list(csv.DictReader(handle))
+          assert len(rows) == 500, len(rows)
+          assert len({row['Supplier_ID'] for row in rows}) == 500
+          print('Validated 500 unique supplier records')
+          PY
+
+  crawl:
+    name: Crawl supplier shard ${{ matrix.shard }} v4
+    needs: validate-pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+    env:
+      PYTHONUNBUFFERED: "1"
+      CATALOG_SHARD_SECONDS: "19800"
+      CATALOG_SITE_SECONDS: "900"
+      CATALOG_PRIORITY_SITE_SECONDS: "1800"
+      CATALOG_MAX_PRODUCT_PAGES: "100000"
+      CATALOG_PAGE_WORKERS: "8"
+      CATALOG_IMAGE_WORKERS: "12"
+      CATALOG_REQUEST_GAP: "0.18"
+    steps:
+      - name: Check out payload branch
+        uses: actions/checkout@v4
+        with:
+          ref: catalog/full-priced-products-photos-20260907-v1
+
+      - name: Reconstruct catalog pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/catalog
+          cat \
+            catalog-pipeline/pipeline.b64.part00a \
+            catalog-pipeline/pipeline.b64.part00b \
+            catalog-pipeline/pipeline.b64.part01 \
+            catalog-pipeline/pipeline.b64.part02 \
+            catalog-pipeline/pipeline.b64.part03 \
+            catalog-pipeline/pipeline.b64.part04 \
+            catalog-pipeline/pipeline.b64.part05 \
+            catalog-pipeline/pipeline.b64.part06 \
+            catalog-pipeline/pipeline.b64.part07 \
+            | base64 --decode | tar -xzf - -C /tmp/catalog
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: /tmp/catalog/requirements.txt
+
+      - name: Install catalog dependencies
+        run: python -m pip install --disable-pip-version-check -r /tmp/catalog/requirements.txt
+
+      - name: Collect public positively priced products and all discovered product photos
+        run: |
+          mkdir -p "crawl-output/shard_${{ matrix.shard }}"
+          python /tmp/catalog/catalog_pipeline.py crawl \
+            --input /tmp/catalog/supplier_master_500.csv.gz \
+            --output "crawl-output/shard_${{ matrix.shard }}" \
+            --shard "${{ matrix.shard }}" \
+            --shards 25
+
+      - name: Show shard coverage
+        if: always()
+        run: |
+          cat "crawl-output/shard_${{ matrix.shard }}/summary.json" || true
+          du -sh "crawl-output/shard_${{ matrix.shard }}" || true
+
+      - name: Upload shard products and images
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-full-v4-shard-${{ matrix.shard }}
+          path: crawl-output/shard_${{ matrix.shard }}
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6
+
+  merge-release:
+    name: Merge validate and publish catalog v4
+    needs: crawl
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Check out payload branch
+        uses: actions/checkout@v4
+        with:
+          ref: catalog/full-priced-products-photos-20260907-v1
+
+      - name: Reconstruct catalog pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/catalog
+          cat \
+            catalog-pipeline/pipeline.b64.part00a \
+            catalog-pipeline/pipeline.b64.part00b \
+            catalog-pipeline/pipeline.b64.part01 \
+            catalog-pipeline/pipeline.b64.part02 \
+            catalog-pipeline/pipeline.b64.part03 \
+            catalog-pipeline/pipeline.b64.part04 \
+            catalog-pipeline/pipeline.b64.part05 \
+            catalog-pipeline/pipeline.b64.part06 \
+            catalog-pipeline/pipeline.b64.part07 \
+            | base64 --decode | tar -xzf - -C /tmp/catalog
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: /tmp/catalog/requirements.txt
+
+      - name: Install packaging dependencies
+        run: python -m pip install --disable-pip-version-check -r /tmp/catalog/requirements.txt
+
+      - name: Download all crawl shards
+        uses: actions/download-artifact@v4
+        with:
+          pattern: phoenix-full-v4-shard-*
+          path: crawl-artifacts
+          merge-multiple: false
+
+      - name: Build and validate priced-only catalog package
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          python /tmp/catalog/catalog_pipeline.py merge \
+            --input-root crawl-artifacts \
+            --supplier-master /tmp/catalog/supplier_master_500.csv.gz \
+            --output release
+          cat release/VALIDATION.txt
+          test -s release/release_manifest.json
+
+      - name: Publish stable public GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="phoenix-full-priced-catalog-latest-v4"
+          gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --cleanup-tag -y || true
+          mapfile -d '' ASSETS < <(find release -maxdepth 1 -type f -print0 | sort -z)
+          if (( ${#ASSETS[@]} == 0 )); then
+            echo "No release files were generated" >&2
+            exit 1
+          fi
+          gh release create "$TAG" "${ASSETS[@]}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Phoenix Full Priced Building-Supply Catalog" \
+            --notes-file release/README.md
+          RELEASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
+          {
+            echo "## Shareable full catalog release"
+            echo
+            echo "$RELEASE_URL"
+            echo
+            cat release/release_manifest.json
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload merged release as workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-full-priced-catalog-v4-${{ github.run_id }}
+          path: release
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
