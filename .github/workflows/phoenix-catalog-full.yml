@@ -17,30 +17,31 @@ concurrency:
   group: phoenix-full-priced-catalog-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  PYTHONUNBUFFERED: "1"
+  CATALOG_SHARD_SECONDS: "19800"
+  CATALOG_SITE_SECONDS: "900"
+  CATALOG_PRIORITY_SITE_SECONDS: "1800"
+  CATALOG_MAX_PRODUCT_PAGES: "250000"
+  CATALOG_MAX_DISCOVERED_URLS: "1000000"
+  CATALOG_MAX_SITEMAPS: "3000"
+  CATALOG_PAGE_WORKERS: "1"
+  CATALOG_IMAGE_WORKERS: "1"
+  CATALOG_IMAGE_MAX_SIDE: "320"
+  CATALOG_IMAGE_QUALITY: "60"
+  CATALOG_REQUEST_GAP: "0.30"
+
 jobs:
   crawl:
-    name: Supplier group ${{ matrix.group }}
+    name: Crawl all 25 supplier shards on one hosted runner
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        group: [0, 1, 2]
-    env:
-      PYTHONUNBUFFERED: "1"
-      CATALOG_SHARD_SECONDS: "19800"
-      CATALOG_SITE_SECONDS: "900"
-      CATALOG_PRIORITY_SITE_SECONDS: "1800"
-      CATALOG_MAX_PRODUCT_PAGES: "100000"
-      CATALOG_PAGE_WORKERS: "3"
-      CATALOG_IMAGE_WORKERS: "4"
-      CATALOG_REQUEST_GAP: "0.25"
     steps:
       - name: Check out catalog branch
         uses: actions/checkout@v4
 
       - name: Reconstruct and verify catalog pipeline
+        shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/catalog
@@ -57,12 +58,11 @@ jobs:
             > /tmp/catalog-pipeline.tar.gz.b64
           base64 --decode /tmp/catalog-pipeline.tar.gz.b64 > /tmp/catalog-pipeline.tar.gz
           test -s /tmp/catalog-pipeline.tar.gz
-          sha256sum /tmp/catalog-pipeline.tar.gz
           tar -tzf /tmp/catalog-pipeline.tar.gz
           tar -xzf /tmp/catalog-pipeline.tar.gz -C /tmp/catalog
-          test -f /tmp/catalog/catalog_pipeline.py
-          test -f /tmp/catalog/requirements.txt
-          test -f /tmp/catalog/supplier_master_500.csv.gz
+          test -s /tmp/catalog/catalog_pipeline.py
+          test -s /tmp/catalog/requirements.txt
+          test -s /tmp/catalog/supplier_master_500.csv.gz
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -72,8 +72,10 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --disable-pip-version-check -r /tmp/catalog/requirements.txt
 
-      - name: Verify 500-company source list and pipeline syntax
+      - name: Verify all 500 company assignments and pipeline syntax
+        shell: bash
         run: |
+          set -euo pipefail
           python -m py_compile /tmp/catalog/catalog_pipeline.py
           python - <<'PY'
           import csv, gzip
@@ -81,16 +83,20 @@ jobs:
               rows = list(csv.DictReader(handle))
           assert len(rows) == 500, len(rows)
           assert len({row['Supplier_ID'] for row in rows}) == 500
-          print('Verified 500 unique supplier records')
+          assignments = {i: sum(1 for n in range(len(rows)) if n % 25 == i) for i in range(25)}
+          assert sum(assignments.values()) == 500
+          assert set(assignments.values()) == {20}, assignments
+          print('Verified 500 unique suppliers and 20 suppliers in each of 25 shards')
           PY
 
-      - name: Collect all public positively priced products and all discovered photos
+      - name: Collect every publicly accessible positive-price product and its discovered images
+        shell: bash
         run: |
           set -euo pipefail
-          GROUP="${{ matrix.group }}"
+          ulimit -n 65535 || true
           mkdir -p crawl-output
           pids=()
-          for SHARD in $(seq "$GROUP" 3 24); do
+          for SHARD in $(seq 0 24); do
             mkdir -p "crawl-output/shard_${SHARD}"
             (
               python /tmp/catalog/catalog_pipeline.py crawl \
@@ -108,21 +114,88 @@ jobs:
               failure=1
             fi
           done
-          find crawl-output -name summary.json -print -exec cat {} \;
+          find crawl-output -name summary.json -print -exec cat {} \; || true
           exit "$failure"
 
-      - name: Show group coverage
+      - name: Show crawl coverage
         if: always()
+        shell: bash
         run: |
           find crawl-output -name summary.json -print -exec cat {} \; || true
+          find crawl-output -name supplier_status.csv -print | wc -l
           du -sh crawl-output || true
 
-      - name: Upload group data and images
+      - name: Upload crawl batch 00-04
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phoenix-full-crawl-group-${{ matrix.group }}
-          path: crawl-output
+          name: phoenix-full-crawl-batch-00-04
+          path: |
+            crawl-output/shard_0
+            crawl-output/shard_1
+            crawl-output/shard_2
+            crawl-output/shard_3
+            crawl-output/shard_4
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
+
+      - name: Upload crawl batch 05-09
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-full-crawl-batch-05-09
+          path: |
+            crawl-output/shard_5
+            crawl-output/shard_6
+            crawl-output/shard_7
+            crawl-output/shard_8
+            crawl-output/shard_9
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
+
+      - name: Upload crawl batch 10-14
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-full-crawl-batch-10-14
+          path: |
+            crawl-output/shard_10
+            crawl-output/shard_11
+            crawl-output/shard_12
+            crawl-output/shard_13
+            crawl-output/shard_14
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
+
+      - name: Upload crawl batch 15-19
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-full-crawl-batch-15-19
+          path: |
+            crawl-output/shard_15
+            crawl-output/shard_16
+            crawl-output/shard_17
+            crawl-output/shard_18
+            crawl-output/shard_19
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
+
+      - name: Upload crawl batch 20-24
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-full-crawl-batch-20-24
+          path: |
+            crawl-output/shard_20
+            crawl-output/shard_21
+            crawl-output/shard_22
+            crawl-output/shard_23
+            crawl-output/shard_24
           if-no-files-found: warn
           retention-days: 7
           compression-level: 6
@@ -132,12 +205,13 @@ jobs:
     needs: crawl
     if: ${{ always() }}
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 240
     steps:
       - name: Check out catalog branch
         uses: actions/checkout@v4
 
       - name: Reconstruct and verify catalog pipeline
+        shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/catalog
@@ -154,12 +228,7 @@ jobs:
             > /tmp/catalog-pipeline.tar.gz.b64
           base64 --decode /tmp/catalog-pipeline.tar.gz.b64 > /tmp/catalog-pipeline.tar.gz
           test -s /tmp/catalog-pipeline.tar.gz
-          sha256sum /tmp/catalog-pipeline.tar.gz
-          tar -tzf /tmp/catalog-pipeline.tar.gz
           tar -xzf /tmp/catalog-pipeline.tar.gz -C /tmp/catalog
-          test -f /tmp/catalog/catalog_pipeline.py
-          test -f /tmp/catalog/requirements.txt
-          test -f /tmp/catalog/supplier_master_500.csv.gz
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -169,24 +238,28 @@ jobs:
       - name: Install packaging dependencies
         run: python -m pip install --disable-pip-version-check -r /tmp/catalog/requirements.txt
 
-      - name: Download all crawl groups
+      - name: Download all five crawl batches
         uses: actions/download-artifact@v4
         with:
-          pattern: phoenix-full-crawl-group-*
+          pattern: phoenix-full-crawl-batch-*
           path: crawl-artifacts
 
-      - name: Build and validate final catalog
+      - name: Build and validate final priced-only catalog
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p release
           python /tmp/catalog/catalog_pipeline.py merge \
             --input-root crawl-artifacts \
             --supplier-master /tmp/catalog/supplier_master_500.csv.gz \
             --output release
           cat release/VALIDATION.txt
+          cat release/release_manifest.json
 
       - name: Publish public GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
           set -euo pipefail
           TAG="phoenix-full-priced-catalog-${GITHUB_RUN_ID}"
