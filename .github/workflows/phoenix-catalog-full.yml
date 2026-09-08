@@ -44,8 +44,7 @@ jobs:
         run: |
           mkdir -p /tmp/catalog
           cat \
-            catalog-pipeline/pipeline.b64.part00a \
-            catalog-pipeline/pipeline.b64.part00b \
+            catalog-pipeline/pipeline.b64.part00 \
             catalog-pipeline/pipeline.b64.part01 \
             catalog-pipeline/pipeline.b64.part02 \
             catalog-pipeline/pipeline.b64.part03 \
@@ -55,6 +54,7 @@ jobs:
             catalog-pipeline/pipeline.b64.part07 \
             | base64 --decode > /tmp/catalog-pipeline.tar.gz
           echo "8429337f4469013cc975b1ad35b2af917707a607ed3b7241270b5fc0eb9f9a1c  /tmp/catalog-pipeline.tar.gz" | sha256sum -c -
+          tar -tzf /tmp/catalog-pipeline.tar.gz
           tar -xzf /tmp/catalog-pipeline.tar.gz -C /tmp/catalog
 
       - name: Set up Python
@@ -67,8 +67,9 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --disable-pip-version-check -r /tmp/catalog/requirements.txt
 
-      - name: Verify 500-company source list
+      - name: Verify 500-company source list and pipeline syntax
         run: |
+          python -m py_compile /tmp/catalog/catalog_pipeline.py
           python - <<'PY'
           import csv, gzip
           with gzip.open('/tmp/catalog/supplier_master_500.csv.gz', 'rt', encoding='utf-8-sig', newline='') as handle:
@@ -117,8 +118,7 @@ jobs:
         run: |
           mkdir -p /tmp/catalog
           cat \
-            catalog-pipeline/pipeline.b64.part00a \
-            catalog-pipeline/pipeline.b64.part00b \
+            catalog-pipeline/pipeline.b64.part00 \
             catalog-pipeline/pipeline.b64.part01 \
             catalog-pipeline/pipeline.b64.part02 \
             catalog-pipeline/pipeline.b64.part03 \
@@ -128,6 +128,7 @@ jobs:
             catalog-pipeline/pipeline.b64.part07 \
             | base64 --decode > /tmp/catalog-pipeline.tar.gz
           echo "8429337f4469013cc975b1ad35b2af917707a607ed3b7241270b5fc0eb9f9a1c  /tmp/catalog-pipeline.tar.gz" | sha256sum -c -
+          tar -tzf /tmp/catalog-pipeline.tar.gz
           tar -xzf /tmp/catalog-pipeline.tar.gz -C /tmp/catalog
 
       - name: Set up Python
