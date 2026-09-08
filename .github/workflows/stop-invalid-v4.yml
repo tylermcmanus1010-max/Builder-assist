@@ -1,0 +1,17 @@
+name: Stop invalid Phoenix catalog v4 crawl
+
+on:
+  push:
+    branches: [catalog/full-priced-products-photos-20260907-v3]
+    paths: [.github/workflows/stop-invalid-v4.yml]
+  workflow_dispatch:
+
+concurrency:
+  group: phoenix-full-catalog-v4-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "v4 superseded because quality audit found merchandise and non-product false positives."
