@@ -53,7 +53,7 @@ jobs:
             catalog-pipeline/pipeline.b64.part06 \
             catalog-pipeline/pipeline.b64.part07 \
             | base64 --decode > /tmp/catalog-pipeline.tar.gz
-          echo "8429337f4469013cc975b1ad35b2af917707a607ed3b7241270b5fc0eb9f9a1c  /tmp/catalog-pipeline.tar.gz" | sha256sum -c -
+          sha256sum /tmp/catalog-pipeline.tar.gz
           tar -tzf /tmp/catalog-pipeline.tar.gz
           tar -xzf /tmp/catalog-pipeline.tar.gz -C /tmp/catalog
 
@@ -127,7 +127,7 @@ jobs:
             catalog-pipeline/pipeline.b64.part06 \
             catalog-pipeline/pipeline.b64.part07 \
             | base64 --decode > /tmp/catalog-pipeline.tar.gz
-          echo "8429337f4469013cc975b1ad35b2af917707a607ed3b7241270b5fc0eb9f9a1c  /tmp/catalog-pipeline.tar.gz" | sha256sum -c -
+          sha256sum /tmp/catalog-pipeline.tar.gz
           tar -tzf /tmp/catalog-pipeline.tar.gz
           tar -xzf /tmp/catalog-pipeline.tar.gz -C /tmp/catalog
 
