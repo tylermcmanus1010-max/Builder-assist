@@ -67,8 +67,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
-          cache-dependency-path: /tmp/catalog/requirements.txt
 
       - name: Install dependencies
         run: python -m pip install --disable-pip-version-check -r /tmp/catalog/requirements.txt
@@ -146,8 +144,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
-          cache-dependency-path: /tmp/catalog/requirements.txt
 
       - name: Install dependencies
         run: python -m pip install --disable-pip-version-check -r /tmp/catalog/requirements.txt
