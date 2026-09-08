@@ -1,0 +1,1 @@
+Trigger the hardened Phoenix priced-catalog workflow after source, sharding, and checksum fixes.
