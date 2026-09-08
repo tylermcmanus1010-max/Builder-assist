@@ -1,0 +1,19 @@
+name: Stop superseded Phoenix catalog v3 run
+
+on:
+  push:
+    branches:
+      - catalog/full-priced-products-photos-20260908-v3
+    paths:
+      - ".github/workflows/stop-superseded-phoenix-v3.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: phoenix-full-priced-catalog-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Superseded by verified v6 collection with structured-price and building-product validation."
