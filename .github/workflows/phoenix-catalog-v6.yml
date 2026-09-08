@@ -1,0 +1,322 @@
+name: Phoenix 500-company verified priced products and photos v6
+
+on:
+  push:
+    branches:
+      - catalog/full-priced-products-photos-20260908-v6
+    paths:
+      - "catalog-pipeline/v6/**"
+      - ".github/workflows/phoenix-catalog-v6.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: phoenix-full-catalog-v6-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUNBUFFERED: "1"
+  CATALOG_SHARD_SECONDS: "19800"
+  CATALOG_SITE_SECONDS: "900"
+  CATALOG_PRIORITY_SITE_SECONDS: "1800"
+  CATALOG_MAX_PRODUCT_PAGES: "250000"
+  CATALOG_MAX_DISCOVERED_URLS: "1000000"
+  CATALOG_MAX_SITEMAPS: "3000"
+  CATALOG_PAGE_WORKERS: "8"
+  CATALOG_IMAGE_WORKERS: "12"
+  CATALOG_IMAGE_MAX_SIDE: "320"
+  CATALOG_IMAGE_QUALITY: "60"
+  CATALOG_REQUEST_GAP: "0.22"
+
+jobs:
+  validate:
+    name: Validate v6 collector and 500-supplier assignment
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reconstruct and patch v6 collector
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/catalog
+          base64 --decode catalog-pipeline/v6/Phoenix_Catalog_Collector_v6.tar.gz.b64 > /tmp/catalog-v6.tar.gz
+          echo "d45979fe07b58bf1a5a7cb64f3b2f58ed2be78df4ad1ec9663647bc3ee0b8f12  /tmp/catalog-v6.tar.gz" | sha256sum -c -
+          tar -tzf /tmp/catalog-v6.tar.gz
+          tar -xzf /tmp/catalog-v6.tar.gz -C /tmp/catalog
+          python catalog-pipeline/v6/runtime_quality_patch.py /tmp/catalog/catalog_pipeline.py
+          grep -q "structured price evidence only" /tmp/catalog/catalog_pipeline.py
+          grep -q "retailer_owners" /tmp/catalog/catalog_pipeline.py
+          grep -q "maps_complete" /tmp/catalog/catalog_pipeline.py
+          python -m py_compile /tmp/catalog/catalog_pipeline.py
+          python /tmp/catalog/test_v6.py
+
+      - name: Verify all 500 suppliers are uniquely assigned
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv, gzip
+          with gzip.open('/tmp/catalog/supplier_master_500.csv.gz', 'rt', encoding='utf-8-sig', newline='') as handle:
+              rows = list(csv.DictReader(handle))
+          assert len(rows) == 500, len(rows)
+          assert len({row['Supplier_ID'] for row in rows}) == 500
+          assignments = {i: sum(1 for n in range(500) if n % 25 == i) for i in range(25)}
+          assert sum(assignments.values()) == 500
+          assert set(assignments.values()) == {20}, assignments
+          print('PASS: 500 unique suppliers; 25 shards; 20 suppliers per shard')
+          PY
+
+  crawl:
+    name: Crawl verified supplier shard ${{ matrix.shard }}
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reconstruct and patch collector
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/catalog
+          base64 --decode catalog-pipeline/v6/Phoenix_Catalog_Collector_v6.tar.gz.b64 > /tmp/catalog-v6.tar.gz
+          echo "d45979fe07b58bf1a5a7cb64f3b2f58ed2be78df4ad1ec9663647bc3ee0b8f12  /tmp/catalog-v6.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/catalog-v6.tar.gz -C /tmp/catalog
+          python catalog-pipeline/v6/runtime_quality_patch.py /tmp/catalog/catalog_pipeline.py
+          python -m py_compile /tmp/catalog/catalog_pipeline.py
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check -r /tmp/catalog/requirements.txt
+
+      - name: Collect public construction products with structured positive prices and photos
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="crawl-output/shard_${{ matrix.shard }}"
+          mkdir -p "$OUT"
+          python /tmp/catalog/catalog_pipeline.py crawl \
+            --input /tmp/catalog/supplier_master_500.csv.gz \
+            --output "$OUT" \
+            --shard "${{ matrix.shard }}" \
+            --shards 25
+
+      - name: Show shard audit
+        if: always()
+        shell: bash
+        run: |
+          cat "crawl-output/shard_${{ matrix.shard }}/summary.json" || true
+          cat "crawl-output/shard_${{ matrix.shard }}/supplier_status.csv" || true
+          du -sh "crawl-output/shard_${{ matrix.shard }}" || true
+
+      - name: Upload first-pass shard data and compressed product photos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-full-v6-shard-${{ matrix.shard }}
+          path: crawl-output/shard_${{ matrix.shard }}
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6
+
+  retry:
+    name: Retry incomplete supplier shard ${{ matrix.shard }}
+    needs: crawl
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download first-pass shard
+        uses: actions/download-artifact@v4
+        with:
+          name: phoenix-full-v6-shard-${{ matrix.shard }}
+          path: pass1
+
+      - name: Reconstruct and patch collector
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/catalog
+          base64 --decode catalog-pipeline/v6/Phoenix_Catalog_Collector_v6.tar.gz.b64 > /tmp/catalog-v6.tar.gz
+          echo "d45979fe07b58bf1a5a7cb64f3b2f58ed2be78df4ad1ec9663647bc3ee0b8f12  /tmp/catalog-v6.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/catalog-v6.tar.gz -C /tmp/catalog
+          python catalog-pipeline/v6/runtime_quality_patch.py /tmp/catalog/catalog_pipeline.py
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check -r /tmp/catalog/requirements.txt
+
+      - name: Build retry list from incomplete or technical statuses
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATUS=$(find pass1 -name supplier_status.csv -print -quit)
+          test -n "$STATUS"
+          python - "$STATUS" <<'PY'
+          import csv, gzip, sys
+          from pathlib import Path
+          status_path = Path(sys.argv[1])
+          retry_statuses = {
+              'PARTIAL_PUBLIC_PRICED_SNAPSHOT',
+              'PARTIAL_NO_QUALIFYING_PRICED_ROWS',
+              'HOMEPAGE_UNAVAILABLE_OR_BLOCKED',
+              'NO_VERIFIED_DIRECT_WEBSITE',
+              'COLLECTOR_EXCEPTION',
+              'NOT_STARTED_SHARD_TIME_LIMIT',
+          }
+          with status_path.open('r', encoding='utf-8-sig', newline='') as handle:
+              retry_ids = {r['supplier_id'] for r in csv.DictReader(handle) if r.get('collection_status') in retry_statuses}
+          with gzip.open('/tmp/catalog/supplier_master_500.csv.gz', 'rt', encoding='utf-8-sig', newline='') as handle:
+              master = list(csv.DictReader(handle)); fields = list(master[0])
+          with gzip.open('retry_suppliers.csv.gz', 'wt', encoding='utf-8-sig', newline='') as handle:
+              writer = csv.DictWriter(handle, fieldnames=fields); writer.writeheader(); writer.writerows(r for r in master if r['Supplier_ID'] in retry_ids)
+          Path('retry_count.txt').write_text(str(len(retry_ids)))
+          print(f'Retry supplier count: {len(retry_ids)}')
+          PY
+
+      - name: Run second collection pass
+        shell: bash
+        run: |
+          set -euo pipefail
+          COUNT=$(cat retry_count.txt)
+          mkdir -p "retry-output/shard_${{ matrix.shard }}"
+          if [ "$COUNT" -gt 0 ]; then
+            export CATALOG_SITE_SECONDS=1200
+            export CATALOG_PRIORITY_SITE_SECONDS=2400
+            python /tmp/catalog/catalog_pipeline.py crawl \
+              --input retry_suppliers.csv.gz \
+              --output "retry-output/shard_${{ matrix.shard }}" \
+              --shard 0 \
+              --shards 1
+          else
+            echo "No incomplete suppliers to retry" > "retry-output/shard_${{ matrix.shard }}/NO_RETRY_NEEDED.txt"
+          fi
+
+      - name: Upload retry shard data and photos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-full-v6-retry-${{ matrix.shard }}
+          path: retry-output/shard_${{ matrix.shard }}
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
+
+  merge:
+    name: Merge all 500 suppliers, validate, and publish
+    needs: retry
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reconstruct and patch collector
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/catalog
+          base64 --decode catalog-pipeline/v6/Phoenix_Catalog_Collector_v6.tar.gz.b64 > /tmp/catalog-v6.tar.gz
+          echo "d45979fe07b58bf1a5a7cb64f3b2f58ed2be78df4ad1ec9663647bc3ee0b8f12  /tmp/catalog-v6.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/catalog-v6.tar.gz -C /tmp/catalog
+          python catalog-pipeline/v6/runtime_quality_patch.py /tmp/catalog/catalog_pipeline.py
+          python -m py_compile /tmp/catalog/catalog_pipeline.py
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install packaging dependencies
+        run: python -m pip install --disable-pip-version-check -r /tmp/catalog/requirements.txt
+
+      - name: Download first and retry passes
+        uses: actions/download-artifact@v4
+        with:
+          pattern: phoenix-full-v6-*
+          path: crawl-artifacts
+          merge-multiple: false
+
+      - name: Build final priced-only catalog package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          python /tmp/catalog/catalog_pipeline.py merge \
+            --input-root crawl-artifacts \
+            --supplier-master /tmp/catalog/supplier_master_500.csv.gz \
+            --output release
+          cat release/VALIDATION.txt
+          cat release/release_manifest.json
+
+      - name: Reject technical gaps or invalid product rows
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv, gzip, json
+          with open('release/supplier_status.csv', 'r', encoding='utf-8-sig', newline='') as handle:
+              status = list(csv.DictReader(handle))
+          assert len(status) == 500, len(status)
+          technical = {'MISSING_SHARD_STATUS', 'NOT_STARTED_SHARD_TIME_LIMIT', 'COLLECTOR_EXCEPTION'}
+          bad = [r for r in status if r.get('collection_status') in technical]
+          if bad:
+              print(json.dumps(bad[:50], indent=2))
+              raise SystemExit(f'Technical collection gaps remain for {len(bad)} suppliers')
+          with gzip.open('release/products_priced.csv.gz', 'rt', encoding='utf-8-sig', newline='') as handle:
+              products = list(csv.DictReader(handle))
+          forbidden = ('frequently asked questions','foam football','cardigan','hoodie','t-shirt','water bottle','tumbler','mug','sweepstakes','rate it win it')
+          false_rows = [r for r in products if any(x in r.get('product_name','').lower() for x in forbidden)]
+          assert not false_rows, false_rows[:20]
+          assert all(float(r['price']) > 0 for r in products)
+          assert all(r.get('building_product_match') == 'TRUE' for r in products)
+          print(f'PASS: {len(products):,} structured-price building-product rows; 500 supplier audit rows')
+          PY
+
+      - name: Publish stable public release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="phoenix-full-priced-catalog-v6"
+          gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --cleanup-tag -y || true
+          mapfile -d '' ASSETS < <(find release -maxdepth 1 -type f -print0 | sort -z)
+          (( ${#ASSETS[@]} > 0 ))
+          gh release create "$TAG" "${ASSETS[@]}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Phoenix 500-Company Verified Priced Building-Supply Catalog" \
+            --notes-file release/README.md
+          echo "https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload complete merged release
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-full-priced-catalog-v6-${{ github.run_id }}
+          path: release
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6
