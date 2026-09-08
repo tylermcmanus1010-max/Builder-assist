@@ -2,10 +2,8 @@ name: Phoenix full priced products and photos catalog v4
 
 on:
   push:
-    branches:
-      - catalog/full-priced-products-photos-20260907-v3
-    paths:
-      - ".github/workflows/phoenix-catalog-v4.yml"
+    branches: [catalog/full-priced-products-photos-20260907-v3]
+    paths: [catalog-pipeline/V4_TRIGGER.md]
   workflow_dispatch:
 
 permissions:
@@ -16,46 +14,29 @@ concurrency:
   group: phoenix-full-catalog-v4-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  PAYLOAD_BRANCH: catalog/full-priced-products-photos-20260907-v1
-
 jobs:
-  validate-pipeline:
+  validate:
     name: Validate catalog payload v4
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Check out payload branch
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: catalog/full-priced-products-photos-20260907-v1
-
-      - name: Reconstruct and validate pipeline
+      - name: Reconstruct and validate payload
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/catalog
-          cat \
-            catalog-pipeline/pipeline.b64.part00a \
-            catalog-pipeline/pipeline.b64.part00b \
-            catalog-pipeline/pipeline.b64.part01 \
-            catalog-pipeline/pipeline.b64.part02 \
-            catalog-pipeline/pipeline.b64.part03 \
-            catalog-pipeline/pipeline.b64.part04 \
-            catalog-pipeline/pipeline.b64.part05 \
-            catalog-pipeline/pipeline.b64.part06 \
-            catalog-pipeline/pipeline.b64.part07 \
-            | base64 --decode > /tmp/catalog-pipeline.tar.gz
-          sha256sum /tmp/catalog-pipeline.tar.gz
-          tar -tzf /tmp/catalog-pipeline.tar.gz
-          tar -xzf /tmp/catalog-pipeline.tar.gz -C /tmp/catalog
+          cat catalog-pipeline/pipeline.b64.part00{a,b} catalog-pipeline/pipeline.b64.part0{1..7} | base64 --decode > /tmp/catalog.tar.gz
+          tar -tzf /tmp/catalog.tar.gz
+          tar -xzf /tmp/catalog.tar.gz -C /tmp/catalog
           test -s /tmp/catalog/catalog_pipeline.py
           test -s /tmp/catalog/requirements.txt
           test -s /tmp/catalog/supplier_master_500.csv.gz
           python -m py_compile /tmp/catalog/catalog_pipeline.py
           python - <<'PY'
-          import csv
-          import gzip
+          import csv, gzip
           with gzip.open('/tmp/catalog/supplier_master_500.csv.gz', 'rt', encoding='utf-8-sig', newline='') as handle:
               rows = list(csv.DictReader(handle))
           assert len(rows) == 500, len(rows)
@@ -65,7 +46,7 @@ jobs:
 
   crawl:
     name: Crawl supplier shard ${{ matrix.shard }} v4
-    needs: validate-pipeline
+    needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 360
     strategy:
@@ -83,38 +64,17 @@ jobs:
       CATALOG_IMAGE_WORKERS: "12"
       CATALOG_REQUEST_GAP: "0.18"
     steps:
-      - name: Check out payload branch
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: catalog/full-priced-products-photos-20260907-v1
-
-      - name: Reconstruct catalog pipeline
-        shell: bash
+      - name: Reconstruct pipeline
         run: |
-          set -euo pipefail
           mkdir -p /tmp/catalog
-          cat \
-            catalog-pipeline/pipeline.b64.part00a \
-            catalog-pipeline/pipeline.b64.part00b \
-            catalog-pipeline/pipeline.b64.part01 \
-            catalog-pipeline/pipeline.b64.part02 \
-            catalog-pipeline/pipeline.b64.part03 \
-            catalog-pipeline/pipeline.b64.part04 \
-            catalog-pipeline/pipeline.b64.part05 \
-            catalog-pipeline/pipeline.b64.part06 \
-            catalog-pipeline/pipeline.b64.part07 \
-            | base64 --decode | tar -xzf - -C /tmp/catalog
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+          cat catalog-pipeline/pipeline.b64.part00{a,b} catalog-pipeline/pipeline.b64.part0{1..7} | base64 --decode | tar -xzf - -C /tmp/catalog
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
-          cache-dependency-path: /tmp/catalog/requirements.txt
-
-      - name: Install catalog dependencies
-        run: python -m pip install --disable-pip-version-check -r /tmp/catalog/requirements.txt
-
+      - run: python -m pip install --disable-pip-version-check -r /tmp/catalog/requirements.txt
       - name: Collect public positively priced products and all discovered product photos
         run: |
           mkdir -p "crawl-output/shard_${{ matrix.shard }}"
@@ -123,13 +83,11 @@ jobs:
             --output "crawl-output/shard_${{ matrix.shard }}" \
             --shard "${{ matrix.shard }}" \
             --shards 25
-
       - name: Show shard coverage
         if: always()
         run: |
           cat "crawl-output/shard_${{ matrix.shard }}/summary.json" || true
           du -sh "crawl-output/shard_${{ matrix.shard }}" || true
-
       - name: Upload shard products and images
         if: always()
         uses: actions/upload-artifact@v4
@@ -140,51 +98,28 @@ jobs:
           retention-days: 7
           compression-level: 6
 
-  merge-release:
+  merge:
     name: Merge validate and publish catalog v4
     needs: crawl
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
-      - name: Check out payload branch
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: catalog/full-priced-products-photos-20260907-v1
-
-      - name: Reconstruct catalog pipeline
-        shell: bash
+      - name: Reconstruct pipeline
         run: |
-          set -euo pipefail
           mkdir -p /tmp/catalog
-          cat \
-            catalog-pipeline/pipeline.b64.part00a \
-            catalog-pipeline/pipeline.b64.part00b \
-            catalog-pipeline/pipeline.b64.part01 \
-            catalog-pipeline/pipeline.b64.part02 \
-            catalog-pipeline/pipeline.b64.part03 \
-            catalog-pipeline/pipeline.b64.part04 \
-            catalog-pipeline/pipeline.b64.part05 \
-            catalog-pipeline/pipeline.b64.part06 \
-            catalog-pipeline/pipeline.b64.part07 \
-            | base64 --decode | tar -xzf - -C /tmp/catalog
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+          cat catalog-pipeline/pipeline.b64.part00{a,b} catalog-pipeline/pipeline.b64.part0{1..7} | base64 --decode | tar -xzf - -C /tmp/catalog
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
-          cache-dependency-path: /tmp/catalog/requirements.txt
-
-      - name: Install packaging dependencies
-        run: python -m pip install --disable-pip-version-check -r /tmp/catalog/requirements.txt
-
-      - name: Download all crawl shards
-        uses: actions/download-artifact@v4
+      - run: python -m pip install --disable-pip-version-check -r /tmp/catalog/requirements.txt
+      - uses: actions/download-artifact@v4
         with:
           pattern: phoenix-full-v4-shard-*
           path: crawl-artifacts
           merge-multiple: false
-
       - name: Build and validate priced-only catalog package
         run: |
           set -euo pipefail
@@ -195,35 +130,22 @@ jobs:
             --output release
           cat release/VALIDATION.txt
           test -s release/release_manifest.json
-
       - name: Publish stable public GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        shell: bash
         run: |
           set -euo pipefail
           TAG="phoenix-full-priced-catalog-latest-v4"
           gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --cleanup-tag -y || true
           mapfile -d '' ASSETS < <(find release -maxdepth 1 -type f -print0 | sort -z)
-          if (( ${#ASSETS[@]} == 0 )); then
-            echo "No release files were generated" >&2
-            exit 1
-          fi
+          (( ${#ASSETS[@]} > 0 ))
           gh release create "$TAG" "${ASSETS[@]}" \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "Phoenix Full Priced Building-Supply Catalog" \
             --notes-file release/README.md
-          RELEASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
-          {
-            echo "## Shareable full catalog release"
-            echo
-            echo "$RELEASE_URL"
-            echo
-            cat release/release_manifest.json
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload merged release as workflow artifact
+          echo "https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload merged release artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
