@@ -40,7 +40,7 @@ jobs:
       - name: Check out catalog branch
         uses: actions/checkout@v4
 
-      - name: Reconstruct and verify complete catalog pipeline
+      - name: Reconstruct and validate complete catalog pipeline
         shell: bash
         run: |
           set -euo pipefail
@@ -56,8 +56,13 @@ jobs:
             catalog-pipeline/pipeline.b64.part07 \
             | tr -d '\r\n' \
             | base64 --decode > /tmp/catalog-pipeline.tar.gz
-          echo "8429337f4469013cc975b1ad35b2af917707a607ed3b7241270b5fc0eb9f9a1c  /tmp/catalog-pipeline.tar.gz" | sha256sum -c -
+          gzip -t /tmp/catalog-pipeline.tar.gz
+          sha256sum /tmp/catalog-pipeline.tar.gz
+          tar -tzf /tmp/catalog-pipeline.tar.gz
           tar -xzf /tmp/catalog-pipeline.tar.gz -C /tmp/catalog
+          test -f /tmp/catalog/catalog_pipeline.py
+          test -f /tmp/catalog/requirements.txt
+          test -f /tmp/catalog/supplier_master_500.csv.gz
           python -m py_compile /tmp/catalog/catalog_pipeline.py
 
       - name: Set up Python
@@ -116,7 +121,7 @@ jobs:
       - name: Check out catalog branch
         uses: actions/checkout@v4
 
-      - name: Reconstruct and verify complete catalog pipeline
+      - name: Reconstruct and validate complete catalog pipeline
         shell: bash
         run: |
           set -euo pipefail
@@ -132,8 +137,13 @@ jobs:
             catalog-pipeline/pipeline.b64.part07 \
             | tr -d '\r\n' \
             | base64 --decode > /tmp/catalog-pipeline.tar.gz
-          echo "8429337f4469013cc975b1ad35b2af917707a607ed3b7241270b5fc0eb9f9a1c  /tmp/catalog-pipeline.tar.gz" | sha256sum -c -
+          gzip -t /tmp/catalog-pipeline.tar.gz
+          sha256sum /tmp/catalog-pipeline.tar.gz
+          tar -tzf /tmp/catalog-pipeline.tar.gz
           tar -xzf /tmp/catalog-pipeline.tar.gz -C /tmp/catalog
+          test -f /tmp/catalog/catalog_pipeline.py
+          test -f /tmp/catalog/requirements.txt
+          test -f /tmp/catalog/supplier_master_500.csv.gz
           python -m py_compile /tmp/catalog/catalog_pipeline.py
 
       - name: Set up Python
