@@ -3,7 +3,7 @@ name: Phoenix full priced building-supply catalog
 on:
   push:
     branches:
-      - catalog/full-priced-products-photos-20260907-v1
+      - catalog/full-priced-products-photos-20260908-v3
     paths:
       - "catalog-pipeline/**"
       - ".github/workflows/phoenix-catalog-full.yml"
@@ -42,9 +42,11 @@ jobs:
 
       - name: Reconstruct and verify catalog pipeline
         run: |
+          set -euo pipefail
           mkdir -p /tmp/catalog
           cat \
-            catalog-pipeline/pipeline.b64.part00 \
+            catalog-pipeline/pipeline.b64.part00a \
+            catalog-pipeline/pipeline.b64.part00b \
             catalog-pipeline/pipeline.b64.part01 \
             catalog-pipeline/pipeline.b64.part02 \
             catalog-pipeline/pipeline.b64.part03 \
@@ -52,10 +54,15 @@ jobs:
             catalog-pipeline/pipeline.b64.part05 \
             catalog-pipeline/pipeline.b64.part06 \
             catalog-pipeline/pipeline.b64.part07 \
-            | base64 --decode > /tmp/catalog-pipeline.tar.gz
+            > /tmp/catalog-pipeline.tar.gz.b64
+          base64 --decode /tmp/catalog-pipeline.tar.gz.b64 > /tmp/catalog-pipeline.tar.gz
+          test -s /tmp/catalog-pipeline.tar.gz
           sha256sum /tmp/catalog-pipeline.tar.gz
           tar -tzf /tmp/catalog-pipeline.tar.gz
           tar -xzf /tmp/catalog-pipeline.tar.gz -C /tmp/catalog
+          test -f /tmp/catalog/catalog_pipeline.py
+          test -f /tmp/catalog/requirements.txt
+          test -f /tmp/catalog/supplier_master_500.csv.gz
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -116,9 +123,11 @@ jobs:
 
       - name: Reconstruct and verify catalog pipeline
         run: |
+          set -euo pipefail
           mkdir -p /tmp/catalog
           cat \
-            catalog-pipeline/pipeline.b64.part00 \
+            catalog-pipeline/pipeline.b64.part00a \
+            catalog-pipeline/pipeline.b64.part00b \
             catalog-pipeline/pipeline.b64.part01 \
             catalog-pipeline/pipeline.b64.part02 \
             catalog-pipeline/pipeline.b64.part03 \
@@ -126,10 +135,15 @@ jobs:
             catalog-pipeline/pipeline.b64.part05 \
             catalog-pipeline/pipeline.b64.part06 \
             catalog-pipeline/pipeline.b64.part07 \
-            | base64 --decode > /tmp/catalog-pipeline.tar.gz
+            > /tmp/catalog-pipeline.tar.gz.b64
+          base64 --decode /tmp/catalog-pipeline.tar.gz.b64 > /tmp/catalog-pipeline.tar.gz
+          test -s /tmp/catalog-pipeline.tar.gz
           sha256sum /tmp/catalog-pipeline.tar.gz
           tar -tzf /tmp/catalog-pipeline.tar.gz
           tar -xzf /tmp/catalog-pipeline.tar.gz -C /tmp/catalog
+          test -f /tmp/catalog/catalog_pipeline.py
+          test -f /tmp/catalog/requirements.txt
+          test -f /tmp/catalog/supplier_master_500.csv.gz
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -160,24 +174,22 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           TAG="phoenix-full-priced-catalog-${GITHUB_RUN_ID}"
+          shopt -s nullglob
           ASSETS=(
-            release/Phoenix_Building_Supply_Full_Priced_Catalog_Metadata.zip
-            release/Phoenix_Building_Supply_Catalog.xlsx
-            release/Phoenix_Building_Supply_Catalog.sqlite
-            release/products_priced.csv.gz
-            release/product_images.csv.gz
-            release/supplier_status.csv
-            release/brand_summary.csv
-            release/VALIDATION.txt
-            release/SHA256SUMS.txt
-            release/release_manifest.json
+            release/*.zip
+            release/*.xlsx
+            release/*.sqlite
+            release/*.csv
+            release/*.gz
+            release/*.txt
+            release/*.json
           )
-          for part in release/Phoenix_All_Product_Images_Part_*.zip; do
-            if [[ -f "$part" ]]; then
-              ASSETS+=("$part")
-            fi
-          done
+          if (( ${#ASSETS[@]} == 0 )); then
+            echo "No release assets were generated." >&2
+            exit 1
+          fi
           gh release create "$TAG" "${ASSETS[@]}" \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
