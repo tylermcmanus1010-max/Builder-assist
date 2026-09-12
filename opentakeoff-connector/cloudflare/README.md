@@ -1,8 +1,9 @@
 # OpenTakeoff connector on Cloudflare
 
-Prepared deployment package; it has not been deployed. It runs the parent Node
-connector in one `lite` Container, fronted by an authenticated Worker. This is
-separate from the Builder Assist Sites application.
+The Cloudflare service and GitHub build integration are registered. The first
+connector deployment is pending validation. This package runs the parent Node
+connector in one `lite` Container, fronted by an authenticated Worker, separate
+from the Builder Assist Sites application.
 
 ## Request and session behavior
 
