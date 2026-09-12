@@ -1,9 +1,15 @@
 # OpenTakeoff connector on Cloudflare
 
-The Cloudflare service and GitHub build integration are registered. The first
-connector deployment is pending validation. This package runs the parent Node
-connector in one `lite` Container, fronted by an authenticated Worker, separate
-from the Builder Assist Sites application.
+The Cloudflare connector is deployed at
+`https://builder-assist-opentakeoff.buildscope-ai.workers.dev/mcp`. It runs the
+parent Node connector in one `lite` Container, fronted by an authenticated Worker,
+separate from the Builder Assist Sites application.
+
+A hosted check on 2026-09-12 UTC passed all 10 checks using Builder Assist's actual
+MCP client: authentication and origin rejection, 53-tool discovery, a tiny synthetic
+plan upload, native text/rendering, calibrated 200 SF / 60 LF measurement, report
+export/download, and session cleanup. Scale remains unconfirmed for human review.
+No real project plans or OpenAI calls were used.
 
 ## Request and session behavior
 
