@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "builder-assist-opentakeoff",
+  "account_id": "cd940fbd991c8d01260a88ef3840a019",
+  "main": "worker.ts",
+  "compatibility_date": "2026-09-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "secrets": { "required": ["CONNECTOR_TOKEN"] },
+  "containers": [{
+    "class_name": "OpenTakeoffContainer",
+    "image": "../Dockerfile",
+    "image_build_context": "..",
+    "instance_type": "lite",
+    "max_instances": 1
+  }],
+  "durable_objects": {
+    "bindings": [{ "name": "OPENTAKEOFF", "class_name": "OpenTakeoffContainer" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["OpenTakeoffContainer"] }],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "logs": { "enabled": true, "invocation_logs": false }
+  }
+}

@@ -1,0 +1,6 @@
+# Send only the runtime's build inputs to Docker, never local data or secrets.
+**
+!Dockerfile
+!package.json
+!package-lock.json
+!server.mjs
